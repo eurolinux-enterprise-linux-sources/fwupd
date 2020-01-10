@@ -1,0 +1,835 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>API Index: libdfu Reference Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="libdfu Reference Manual">
+<link rel="up" href="index.html" title="libdfu Reference Manual">
+<link rel="prev" href="libdfu-dfu-error.html" title="dfu-error">
+<link rel="next" href="deprecated-api-index.html" title="Index of deprecated API">
+<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts"><span id="nav_index"><a class="shortcut" href="#idxA">A</a>
+                     <span class="dim">|</span> 
+                  <a class="shortcut" href="#idxC">C</a>
+                     <span class="dim">|</span> 
+                  <a class="shortcut" href="#idxD">D</a>
+                     <span class="dim">|</span> 
+                  <a class="shortcut" href="#idxE">E</a>
+                     <span class="dim">|</span> 
+                  <a class="shortcut" href="#idxF">F</a>
+                     <span class="dim">|</span> 
+                  <a class="shortcut" href="#idxI">I</a>
+                     <span class="dim">|</span> 
+                  <a class="shortcut" href="#idxM">M</a>
+                     <span class="dim">|</span> 
+                  <a class="shortcut" href="#idxP">P</a>
+                     <span class="dim">|</span> 
+                  <a class="shortcut" href="#idxR">R</a>
+                     <span class="dim">|</span> 
+                  <a class="shortcut" href="#idxS">S</a>
+                     <span class="dim">|</span> 
+                  <a class="shortcut" href="#idxT">T</a>
+                     <span class="dim">|</span> 
+                  <a class="shortcut" href="#idxV">V</a></span></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><img src="up-insensitive.png" width="16" height="16" border="0"></td>
+<td><a accesskey="p" href="libdfu-dfu-error.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="deprecated-api-index.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="index">
+<div class="titlepage"><div><div><h1 class="title">
+<a name="api-index-full"></a>API Index</h1></div></div></div>
+<a name="idx"></a><a name="idxA"></a><h3 class="title">A</h3>
+<dt>
+<a class="link" href="libdfu-dfu-common.html#DfuAction" title="enum DfuAction">DfuAction</a>, enum in <a class="link" href="libdfu-dfu-common.html" title="dfu-common">dfu-common</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libdfu-dfu-common.html#dfu-action-to-string" title="dfu_action_to_string ()">dfu_action_to_string</a>, function in <a class="link" href="libdfu-dfu-common.html" title="dfu-common">dfu-common</a>
+</dt>
+<dd></dd>
+<a name="idxC"></a><h3 class="title">C</h3>
+<dt>
+<a class="link" href="libdfu-dfu-common.html#DfuCipherKind" title="enum DfuCipherKind">DfuCipherKind</a>, enum in <a class="link" href="libdfu-dfu-common.html" title="dfu-common">dfu-common</a>
+</dt>
+<dd></dd>
+<dt>
+dfu_cipher_decrypt_devo, function in dfu-cipher-devo
+</dt>
+<dd></dd>
+<dt>
+dfu_cipher_decrypt_xtea, function in dfu-cipher-xtea
+</dt>
+<dd></dd>
+<dt>
+dfu_cipher_encrypt_devo, function in dfu-cipher-devo
+</dt>
+<dd></dd>
+<dt>
+dfu_cipher_encrypt_xtea, function in dfu-cipher-xtea
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libdfu-dfu-common.html#dfu-cipher-kind-to-string" title="dfu_cipher_kind_to_string ()">dfu_cipher_kind_to_string</a>, function in <a class="link" href="libdfu-dfu-common.html" title="dfu-common">dfu-common</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuContext.html#DfuContext-struct" title="DfuContext">DfuContext</a>, struct in <a class="link" href="DfuContext.html" title="DfuContext">DfuContext</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuContext.html#DfuContext-device-added" title="The “device-added” signal">DfuContext::device-added</a>, object signal in <a class="link" href="DfuContext.html" title="DfuContext">DfuContext</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuContext.html#DfuContext-device-changed" title="The “device-changed” signal">DfuContext::device-changed</a>, object signal in <a class="link" href="DfuContext.html" title="DfuContext">DfuContext</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuContext.html#DfuContext-device-removed" title="The “device-removed” signal">DfuContext::device-removed</a>, object signal in <a class="link" href="DfuContext.html" title="DfuContext">DfuContext</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuContext.html#DfuContextClass" title="struct DfuContextClass">DfuContextClass</a>, struct in <a class="link" href="DfuContext.html" title="DfuContext">DfuContext</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuContext.html#dfu-context-enumerate" title="dfu_context_enumerate ()">dfu_context_enumerate</a>, function in <a class="link" href="DfuContext.html" title="DfuContext">DfuContext</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuContext.html#dfu-context-get-devices" title="dfu_context_get_devices ()">dfu_context_get_devices</a>, function in <a class="link" href="DfuContext.html" title="DfuContext">DfuContext</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuContext.html#dfu-context-get-device-by-platform-id" title="dfu_context_get_device_by_platform_id ()">dfu_context_get_device_by_platform_id</a>, function in <a class="link" href="DfuContext.html" title="DfuContext">DfuContext</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuContext.html#dfu-context-get-device-by-vid-pid" title="dfu_context_get_device_by_vid_pid ()">dfu_context_get_device_by_vid_pid</a>, function in <a class="link" href="DfuContext.html" title="DfuContext">DfuContext</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuContext.html#dfu-context-get-device-default" title="dfu_context_get_device_default ()">dfu_context_get_device_default</a>, function in <a class="link" href="DfuContext.html" title="DfuContext">DfuContext</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuContext.html#dfu-context-get-timeout" title="dfu_context_get_timeout ()">dfu_context_get_timeout</a>, function in <a class="link" href="DfuContext.html" title="DfuContext">DfuContext</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuContext.html#dfu-context-new" title="dfu_context_new ()">dfu_context_new</a>, function in <a class="link" href="DfuContext.html" title="DfuContext">DfuContext</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuContext.html#dfu-context-new-with-context" title="dfu_context_new_with_context ()">dfu_context_new_with_context</a>, function in <a class="link" href="DfuContext.html" title="DfuContext">DfuContext</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuContext.html#dfu-context-set-timeout" title="dfu_context_set_timeout ()">dfu_context_set_timeout</a>, function in <a class="link" href="DfuContext.html" title="DfuContext">DfuContext</a>
+</dt>
+<dd></dd>
+<a name="idxD"></a><h3 class="title">D</h3>
+<dt>
+<a class="link" href="DfuDevice.html#DfuDevice-struct" title="DfuDevice">DfuDevice</a>, struct in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#DfuDevice-action-changed" title="The “action-changed” signal">DfuDevice::action-changed</a>, object signal in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#DfuDevice-percentage-changed" title="The “percentage-changed” signal">DfuDevice::percentage-changed</a>, object signal in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#DfuDevice-state-changed" title="The “state-changed” signal">DfuDevice::state-changed</a>, object signal in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#DfuDevice-status-changed" title="The “status-changed” signal">DfuDevice::status-changed</a>, object signal in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#DfuDeviceAttributes" title="enum DfuDeviceAttributes">DfuDeviceAttributes</a>, enum in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#DfuDeviceClass" title="struct DfuDeviceClass">DfuDeviceClass</a>, struct in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#DfuDeviceOpenFlags" title="enum DfuDeviceOpenFlags">DfuDeviceOpenFlags</a>, enum in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#DfuDeviceQuirks" title="enum DfuDeviceQuirks">DfuDeviceQuirks</a>, enum in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-abort" title="dfu_device_abort ()">dfu_device_abort</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-attach" title="dfu_device_attach ()">dfu_device_attach</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-can-download" title="dfu_device_can_download ()">dfu_device_can_download</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-can-upload" title="dfu_device_can_upload ()">dfu_device_can_upload</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-clear-status" title="dfu_device_clear_status ()">dfu_device_clear_status</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-close" title="dfu_device_close ()">dfu_device_close</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-detach" title="dfu_device_detach ()">dfu_device_detach</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-download" title="dfu_device_download ()">dfu_device_download</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-get-display-name" title="dfu_device_get_display_name ()">dfu_device_get_display_name</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-get-interface" title="dfu_device_get_interface ()">dfu_device_get_interface</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-get-mode" title="dfu_device_get_mode ()">dfu_device_get_mode</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-get-platform-id" title="dfu_device_get_platform_id ()">dfu_device_get_platform_id</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-get-runtime-pid" title="dfu_device_get_runtime_pid ()">dfu_device_get_runtime_pid</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-get-runtime-release" title="dfu_device_get_runtime_release ()">dfu_device_get_runtime_release</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-get-runtime-vid" title="dfu_device_get_runtime_vid ()">dfu_device_get_runtime_vid</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-get-serial-number" title="dfu_device_get_serial_number ()">dfu_device_get_serial_number</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-get-state" title="dfu_device_get_state ()">dfu_device_get_state</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-get-status" title="dfu_device_get_status ()">dfu_device_get_status</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-get-targets" title="dfu_device_get_targets ()">dfu_device_get_targets</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-get-target-by-alt-name" title="dfu_device_get_target_by_alt_name ()">dfu_device_get_target_by_alt_name</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-get-target-by-alt-setting" title="dfu_device_get_target_by_alt_setting ()">dfu_device_get_target_by_alt_setting</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-get-timeout" title="dfu_device_get_timeout ()">dfu_device_get_timeout</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-get-transfer-size" title="dfu_device_get_transfer_size ()">dfu_device_get_transfer_size</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-get-version" title="dfu_device_get_version ()">dfu_device_get_version</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-has-attribute" title="dfu_device_has_attribute ()">dfu_device_has_attribute</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-has-quirk" title="dfu_device_has_quirk ()">dfu_device_has_quirk</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-new" title="dfu_device_new ()">dfu_device_new</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-open" title="dfu_device_open ()">dfu_device_open</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-refresh" title="dfu_device_refresh ()">dfu_device_refresh</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-reset" title="dfu_device_reset ()">dfu_device_reset</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-set-timeout" title="dfu_device_set_timeout ()">dfu_device_set_timeout</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-set-transfer-size" title="dfu_device_set_transfer_size ()">dfu_device_set_transfer_size</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-upload" title="dfu_device_upload ()">dfu_device_upload</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#dfu-device-wait-for-replug" title="dfu_device_wait_for_replug ()">dfu_device_wait_for_replug</a>, function in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<a name="idxE"></a><h3 class="title">E</h3>
+<dt>
+<a class="link" href="DfuElement.html#DfuElement-struct" title="DfuElement">DfuElement</a>, struct in <a class="link" href="DfuElement.html" title="DfuElement">DfuElement</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuElement.html#DfuElementClass" title="struct DfuElementClass">DfuElementClass</a>, struct in <a class="link" href="DfuElement.html" title="DfuElement">DfuElement</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuElement.html#dfu-element-get-address" title="dfu_element_get_address ()">dfu_element_get_address</a>, function in <a class="link" href="DfuElement.html" title="DfuElement">DfuElement</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuElement.html#dfu-element-get-contents" title="dfu_element_get_contents ()">dfu_element_get_contents</a>, function in <a class="link" href="DfuElement.html" title="DfuElement">DfuElement</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuElement.html#dfu-element-new" title="dfu_element_new ()">dfu_element_new</a>, function in <a class="link" href="DfuElement.html" title="DfuElement">DfuElement</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuElement.html#dfu-element-set-address" title="dfu_element_set_address ()">dfu_element_set_address</a>, function in <a class="link" href="DfuElement.html" title="DfuElement">DfuElement</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuElement.html#dfu-element-set-contents" title="dfu_element_set_contents ()">dfu_element_set_contents</a>, function in <a class="link" href="DfuElement.html" title="DfuElement">DfuElement</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuElement.html#dfu-element-set-padding-value" title="dfu_element_set_padding_value ()">dfu_element_set_padding_value</a>, function in <a class="link" href="DfuElement.html" title="DfuElement">DfuElement</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuElement.html#dfu-element-set-target-size" title="dfu_element_set_target_size ()">dfu_element_set_target_size</a>, function in <a class="link" href="DfuElement.html" title="DfuElement">DfuElement</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuElement.html#dfu-element-to-string" title="dfu_element_to_string ()">dfu_element_to_string</a>, function in <a class="link" href="DfuElement.html" title="DfuElement">DfuElement</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libdfu-dfu-error.html#DFU-ERROR:CAPS" title="DFU_ERROR">DFU_ERROR</a>, macro in <a class="link" href="libdfu-dfu-error.html" title="dfu-error">dfu-error</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libdfu-dfu-error.html#DfuError" title="enum DfuError">DfuError</a>, enum in <a class="link" href="libdfu-dfu-error.html" title="dfu-error">dfu-error</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libdfu-dfu-error.html#dfu-error-quark" title="dfu_error_quark ()">dfu_error_quark</a>, function in <a class="link" href="libdfu-dfu-error.html" title="dfu-error">dfu-error</a>
+</dt>
+<dd></dd>
+<a name="idxF"></a><h3 class="title">F</h3>
+<dt>
+<a class="link" href="DfuFirmware.html#DfuFirmware-struct" title="DfuFirmware">DfuFirmware</a>, struct in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#DfuFirmwareClass" title="struct DfuFirmwareClass">DfuFirmwareClass</a>, struct in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#DfuFirmwareFormat" title="enum DfuFirmwareFormat">DfuFirmwareFormat</a>, enum in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#DfuFirmwareParseFlags" title="enum DfuFirmwareParseFlags">DfuFirmwareParseFlags</a>, enum in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-add-image" title="dfu_firmware_add_image ()">dfu_firmware_add_image</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_add_symbol, function in dfu-firmware-private
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_detect_dfu, function in dfu-format-dfu
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_detect_dfuse, function in dfu-format-dfuse
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_detect_elf, function in dfu-format-elf
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_detect_ihex, function in dfu-format-ihex
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_detect_raw, function in dfu-format-raw
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-format-from-string" title="dfu_firmware_format_from_string ()">dfu_firmware_format_from_string</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-format-to-string" title="dfu_firmware_format_to_string ()">dfu_firmware_format_to_string</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_from_dfu, function in dfu-format-dfu
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_from_dfuse, function in dfu-format-dfuse
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_from_elf, function in dfu-format-elf
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_from_ihex, function in dfu-format-ihex
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_from_metadata, function in dfu-format-metadata
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_from_raw, function in dfu-format-raw
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-get-cipher-kind" title="dfu_firmware_get_cipher_kind ()">dfu_firmware_get_cipher_kind</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-get-format" title="dfu_firmware_get_format ()">dfu_firmware_get_format</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-get-image" title="dfu_firmware_get_image ()">dfu_firmware_get_image</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-get-images" title="dfu_firmware_get_images ()">dfu_firmware_get_images</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-get-image-by-name" title="dfu_firmware_get_image_by_name ()">dfu_firmware_get_image_by_name</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-get-image-default" title="dfu_firmware_get_image_default ()">dfu_firmware_get_image_default</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-get-metadata" title="dfu_firmware_get_metadata ()">dfu_firmware_get_metadata</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-get-metadata-table" title="dfu_firmware_get_metadata_table ()">dfu_firmware_get_metadata_table</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-get-pid" title="dfu_firmware_get_pid ()">dfu_firmware_get_pid</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-get-release" title="dfu_firmware_get_release ()">dfu_firmware_get_release</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-get-size" title="dfu_firmware_get_size ()">dfu_firmware_get_size</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_get_symbols, function in dfu-firmware-private
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-get-vid" title="dfu_firmware_get_vid ()">dfu_firmware_get_vid</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_lookup_symbol, function in dfu-firmware-private
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-new" title="dfu_firmware_new ()">dfu_firmware_new</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-parse-data" title="dfu_firmware_parse_data ()">dfu_firmware_parse_data</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-parse-file" title="dfu_firmware_parse_file ()">dfu_firmware_parse_file</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-remove-metadata" title="dfu_firmware_remove_metadata ()">dfu_firmware_remove_metadata</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-set-cipher-kind" title="dfu_firmware_set_cipher_kind ()">dfu_firmware_set_cipher_kind</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-set-format" title="dfu_firmware_set_format ()">dfu_firmware_set_format</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-set-metadata" title="dfu_firmware_set_metadata ()">dfu_firmware_set_metadata</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-set-pid" title="dfu_firmware_set_pid ()">dfu_firmware_set_pid</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-set-release" title="dfu_firmware_set_release ()">dfu_firmware_set_release</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-set-vid" title="dfu_firmware_set_vid ()">dfu_firmware_set_vid</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_to_dfu, function in dfu-format-dfu
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_to_dfuse, function in dfu-format-dfuse
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_to_elf, function in dfu-format-elf
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_to_ihex, function in dfu-format-ihex
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_to_metadata, function in dfu-format-metadata
+</dt>
+<dd></dd>
+<dt>
+dfu_firmware_to_raw, function in dfu-format-raw
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-to-string" title="dfu_firmware_to_string ()">dfu_firmware_to_string</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-write-data" title="dfu_firmware_write_data ()">dfu_firmware_write_data</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#dfu-firmware-write-file" title="dfu_firmware_write_file ()">dfu_firmware_write_file</a>, function in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<a name="idxI"></a><h3 class="title">I</h3>
+<dt>
+<a class="link" href="DfuImage.html#DfuImage-struct" title="DfuImage">DfuImage</a>, struct in <a class="link" href="DfuImage.html" title="DfuImage">DfuImage</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuImage.html#DfuImageClass" title="struct DfuImageClass">DfuImageClass</a>, struct in <a class="link" href="DfuImage.html" title="DfuImage">DfuImage</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuImage.html#dfu-image-add-element" title="dfu_image_add_element ()">dfu_image_add_element</a>, function in <a class="link" href="DfuImage.html" title="DfuImage">DfuImage</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuImage.html#dfu-image-get-alt-setting" title="dfu_image_get_alt_setting ()">dfu_image_get_alt_setting</a>, function in <a class="link" href="DfuImage.html" title="DfuImage">DfuImage</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuImage.html#dfu-image-get-element" title="dfu_image_get_element ()">dfu_image_get_element</a>, function in <a class="link" href="DfuImage.html" title="DfuImage">DfuImage</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuImage.html#dfu-image-get-elements" title="dfu_image_get_elements ()">dfu_image_get_elements</a>, function in <a class="link" href="DfuImage.html" title="DfuImage">DfuImage</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuImage.html#dfu-image-get-element-default" title="dfu_image_get_element_default ()">dfu_image_get_element_default</a>, function in <a class="link" href="DfuImage.html" title="DfuImage">DfuImage</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuImage.html#dfu-image-get-name" title="dfu_image_get_name ()">dfu_image_get_name</a>, function in <a class="link" href="DfuImage.html" title="DfuImage">DfuImage</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuImage.html#dfu-image-get-size" title="dfu_image_get_size ()">dfu_image_get_size</a>, function in <a class="link" href="DfuImage.html" title="DfuImage">DfuImage</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuImage.html#dfu-image-new" title="dfu_image_new ()">dfu_image_new</a>, function in <a class="link" href="DfuImage.html" title="DfuImage">DfuImage</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuImage.html#dfu-image-set-alt-setting" title="dfu_image_set_alt_setting ()">dfu_image_set_alt_setting</a>, function in <a class="link" href="DfuImage.html" title="DfuImage">DfuImage</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuImage.html#dfu-image-set-name" title="dfu_image_set_name ()">dfu_image_set_name</a>, function in <a class="link" href="DfuImage.html" title="DfuImage">DfuImage</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuImage.html#dfu-image-to-string" title="dfu_image_to_string ()">dfu_image_to_string</a>, function in <a class="link" href="DfuImage.html" title="DfuImage">DfuImage</a>
+</dt>
+<dd></dd>
+<a name="idxM"></a><h3 class="title">M</h3>
+<dt>
+<a class="link" href="libdfu-dfu-common.html#DFU-METADATA-KEY-CIPHER-KIND:CAPS" title="DFU_METADATA_KEY_CIPHER_KIND">DFU_METADATA_KEY_CIPHER_KIND</a>, macro in <a class="link" href="libdfu-dfu-common.html" title="dfu-common">dfu-common</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libdfu-dfu-common.html#DFU-METADATA-KEY-COPYRIGHT:CAPS" title="DFU_METADATA_KEY_COPYRIGHT">DFU_METADATA_KEY_COPYRIGHT</a>, macro in <a class="link" href="libdfu-dfu-common.html" title="dfu-common">dfu-common</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libdfu-dfu-common.html#DFU-METADATA-KEY-LICENSE:CAPS" title="DFU_METADATA_KEY_LICENSE">DFU_METADATA_KEY_LICENSE</a>, macro in <a class="link" href="libdfu-dfu-common.html" title="dfu-common">dfu-common</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libdfu-dfu-common.html#DfuMode" title="enum DfuMode">DfuMode</a>, enum in <a class="link" href="libdfu-dfu-common.html" title="dfu-common">dfu-common</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libdfu-dfu-common.html#dfu-mode-to-string" title="dfu_mode_to_string ()">dfu_mode_to_string</a>, function in <a class="link" href="libdfu-dfu-common.html" title="dfu-common">dfu-common</a>
+</dt>
+<dd></dd>
+<a name="idxP"></a><h3 class="title">P</h3>
+<dt>
+DfuProgressBar, struct in dfu-progress-bar
+</dt>
+<dd></dd>
+<dt>
+dfu_progress_bar_end, function in dfu-progress-bar
+</dt>
+<dd></dd>
+<dt>
+dfu_progress_bar_new, function in dfu-progress-bar
+</dt>
+<dd></dd>
+<dt>
+dfu_progress_bar_set_padding, function in dfu-progress-bar
+</dt>
+<dd></dd>
+<dt>
+dfu_progress_bar_set_percentage, function in dfu-progress-bar
+</dt>
+<dd></dd>
+<dt>
+dfu_progress_bar_set_size, function in dfu-progress-bar
+</dt>
+<dd></dd>
+<dt>
+dfu_progress_bar_start, function in dfu-progress-bar
+</dt>
+<dd></dd>
+<a name="idxR"></a><h3 class="title">R</h3>
+<dt>
+<a class="link" href="libdfu-dfu-common.html#DfuRequest" title="enum DfuRequest">DfuRequest</a>, enum in <a class="link" href="libdfu-dfu-common.html" title="dfu-common">dfu-common</a>
+</dt>
+<dd></dd>
+<a name="idxS"></a><h3 class="title">S</h3>
+<dt>
+<a class="link" href="DfuSector.html#DfuSector-struct" title="DfuSector">DfuSector</a>, struct in <a class="link" href="DfuSector.html" title="DfuSector">DfuSector</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuSector.html#DfuSectorCap" title="enum DfuSectorCap">DfuSectorCap</a>, enum in <a class="link" href="DfuSector.html" title="DfuSector">DfuSector</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuSector.html#DfuSectorClass" title="struct DfuSectorClass">DfuSectorClass</a>, struct in <a class="link" href="DfuSector.html" title="DfuSector">DfuSector</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuSector.html#dfu-sector-get-address" title="dfu_sector_get_address ()">dfu_sector_get_address</a>, function in <a class="link" href="DfuSector.html" title="DfuSector">DfuSector</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuSector.html#dfu-sector-get-id" title="dfu_sector_get_id ()">dfu_sector_get_id</a>, function in <a class="link" href="DfuSector.html" title="DfuSector">DfuSector</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuSector.html#dfu-sector-get-number" title="dfu_sector_get_number ()">dfu_sector_get_number</a>, function in <a class="link" href="DfuSector.html" title="DfuSector">DfuSector</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuSector.html#dfu-sector-get-size" title="dfu_sector_get_size ()">dfu_sector_get_size</a>, function in <a class="link" href="DfuSector.html" title="DfuSector">DfuSector</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuSector.html#dfu-sector-get-size-left" title="dfu_sector_get_size_left ()">dfu_sector_get_size_left</a>, function in <a class="link" href="DfuSector.html" title="DfuSector">DfuSector</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuSector.html#dfu-sector-get-zone" title="dfu_sector_get_zone ()">dfu_sector_get_zone</a>, function in <a class="link" href="DfuSector.html" title="DfuSector">DfuSector</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuSector.html#dfu-sector-has-cap" title="dfu_sector_has_cap ()">dfu_sector_has_cap</a>, function in <a class="link" href="DfuSector.html" title="DfuSector">DfuSector</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuSector.html#dfu-sector-to-string" title="dfu_sector_to_string ()">dfu_sector_to_string</a>, function in <a class="link" href="DfuSector.html" title="DfuSector">DfuSector</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libdfu-dfu-common.html#DfuState" title="enum DfuState">DfuState</a>, enum in <a class="link" href="libdfu-dfu-common.html" title="dfu-common">dfu-common</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libdfu-dfu-common.html#dfu-state-to-string" title="dfu_state_to_string ()">dfu_state_to_string</a>, function in <a class="link" href="libdfu-dfu-common.html" title="dfu-common">dfu-common</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libdfu-dfu-common.html#DfuStatus" title="enum DfuStatus">DfuStatus</a>, enum in <a class="link" href="libdfu-dfu-common.html" title="dfu-common">dfu-common</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libdfu-dfu-common.html#dfu-status-to-string" title="dfu_status_to_string ()">dfu_status_to_string</a>, function in <a class="link" href="libdfu-dfu-common.html" title="dfu-common">dfu-common</a>
+</dt>
+<dd></dd>
+<a name="idxT"></a><h3 class="title">T</h3>
+<dt>
+<a class="link" href="DfuTarget.html#DfuTarget-struct" title="DfuTarget">DfuTarget</a>, struct in <a class="link" href="DfuTarget.html" title="DfuTarget">DfuTarget</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuTarget.html#DfuTarget-action-changed" title="The “action-changed” signal">DfuTarget::action-changed</a>, object signal in <a class="link" href="DfuTarget.html" title="DfuTarget">DfuTarget</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuTarget.html#DfuTarget-percentage-changed" title="The “percentage-changed” signal">DfuTarget::percentage-changed</a>, object signal in <a class="link" href="DfuTarget.html" title="DfuTarget">DfuTarget</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuTarget.html#DfuTargetClass" title="struct DfuTargetClass">DfuTargetClass</a>, struct in <a class="link" href="DfuTarget.html" title="DfuTarget">DfuTarget</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuTarget.html#DfuTargetTransferFlags" title="enum DfuTargetTransferFlags">DfuTargetTransferFlags</a>, enum in <a class="link" href="DfuTarget.html" title="DfuTarget">DfuTarget</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuTarget.html#dfu-target-download" title="dfu_target_download ()">dfu_target_download</a>, function in <a class="link" href="DfuTarget.html" title="DfuTarget">DfuTarget</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuTarget.html#dfu-target-get-alt-name" title="dfu_target_get_alt_name ()">dfu_target_get_alt_name</a>, function in <a class="link" href="DfuTarget.html" title="DfuTarget">DfuTarget</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuTarget.html#dfu-target-get-alt-name-for-display" title="dfu_target_get_alt_name_for_display ()">dfu_target_get_alt_name_for_display</a>, function in <a class="link" href="DfuTarget.html" title="DfuTarget">DfuTarget</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuTarget.html#dfu-target-get-alt-setting" title="dfu_target_get_alt_setting ()">dfu_target_get_alt_setting</a>, function in <a class="link" href="DfuTarget.html" title="DfuTarget">DfuTarget</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuTarget.html#dfu-target-get-cipher-kind" title="dfu_target_get_cipher_kind ()">dfu_target_get_cipher_kind</a>, function in <a class="link" href="DfuTarget.html" title="DfuTarget">DfuTarget</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuTarget.html#dfu-target-get-sectors" title="dfu_target_get_sectors ()">dfu_target_get_sectors</a>, function in <a class="link" href="DfuTarget.html" title="DfuTarget">DfuTarget</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuTarget.html#dfu-target-upload" title="dfu_target_upload ()">dfu_target_upload</a>, function in <a class="link" href="DfuTarget.html" title="DfuTarget">DfuTarget</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuContext.html#DFU-TYPE-CONTEXT:CAPS" title="DFU_TYPE_CONTEXT">DFU_TYPE_CONTEXT</a>, macro in <a class="link" href="DfuContext.html" title="DfuContext">DfuContext</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuDevice.html#DFU-TYPE-DEVICE:CAPS" title="DFU_TYPE_DEVICE">DFU_TYPE_DEVICE</a>, macro in <a class="link" href="DfuDevice.html" title="DfuDevice">DfuDevice</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuElement.html#DFU-TYPE-ELEMENT:CAPS" title="DFU_TYPE_ELEMENT">DFU_TYPE_ELEMENT</a>, macro in <a class="link" href="DfuElement.html" title="DfuElement">DfuElement</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuFirmware.html#DFU-TYPE-FIRMWARE:CAPS" title="DFU_TYPE_FIRMWARE">DFU_TYPE_FIRMWARE</a>, macro in <a class="link" href="DfuFirmware.html" title="DfuFirmware">DfuFirmware</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuImage.html#DFU-TYPE-IMAGE:CAPS" title="DFU_TYPE_IMAGE">DFU_TYPE_IMAGE</a>, macro in <a class="link" href="DfuImage.html" title="DfuImage">DfuImage</a>
+</dt>
+<dd></dd>
+<dt>
+DFU_TYPE_PROGRESS_BAR, macro in dfu-progress-bar
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuSector.html#DFU-TYPE-SECTOR:CAPS" title="DFU_TYPE_SECTOR">DFU_TYPE_SECTOR</a>, macro in <a class="link" href="DfuSector.html" title="DfuSector">DfuSector</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="DfuTarget.html#DFU-TYPE-TARGET:CAPS" title="DFU_TYPE_TARGET">DFU_TYPE_TARGET</a>, macro in <a class="link" href="DfuTarget.html" title="DfuTarget">DfuTarget</a>
+</dt>
+<dd></dd>
+<a name="idxV"></a><h3 class="title">V</h3>
+<dt>
+<a class="link" href="libdfu-dfu-common.html#DfuVersion" title="enum DfuVersion">DfuVersion</a>, enum in <a class="link" href="libdfu-dfu-common.html" title="dfu-common">dfu-common</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libdfu-dfu-common.html#dfu-version-to-string" title="dfu_version_to_string ()">dfu_version_to_string</a>, function in <a class="link" href="libdfu-dfu-common.html" title="dfu-common">dfu-common</a>
+</dt>
+<dd></dd>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.25</div>
+</body>
+</html>

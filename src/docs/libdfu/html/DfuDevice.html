@@ -1,0 +1,1908 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>DfuDevice: libdfu Reference Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="libdfu Reference Manual">
+<link rel="up" href="libdfu.html" title="libdfu">
+<link rel="prev" href="DfuContext.html" title="DfuContext">
+<link rel="next" href="DfuFirmware.html" title="DfuFirmware">
+<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#DfuDevice.description" class="shortcut">Description</a></span><span id="nav_hierarchy">  <span class="dim">|</span> 
+                  <a href="#DfuDevice.object-hierarchy" class="shortcut">Object Hierarchy</a></span><span id="nav_signals">  <span class="dim">|</span> 
+                  <a href="#DfuDevice.signals" class="shortcut">Signals</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="libdfu.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="DfuContext.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="DfuFirmware.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="DfuDevice"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="DfuDevice.top_of_page"></a>DfuDevice</span></h2>
+<p>DfuDevice — Object representing a DFU-capable device</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="DfuDevice.functions"></a><h2>Functions</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="functions_return">
+<col class="functions_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="function_type">
+<a class="link" href="DfuDevice.html" title="DfuDevice"><span class="returnvalue">DfuDevice</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-new" title="dfu_device_new ()">dfu_device_new</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-open" title="dfu_device_open ()">dfu_device_open</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-close" title="dfu_device_close ()">dfu_device_close</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">const <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-get-platform-id" title="dfu_device_get_platform_id ()">dfu_device_get_platform_id</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Pointer-Arrays.html#GPtrArray"><span class="returnvalue">GPtrArray</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-get-targets" title="dfu_device_get_targets ()">dfu_device_get_targets</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="DfuTarget.html" title="DfuTarget"><span class="returnvalue">DfuTarget</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-get-target-by-alt-setting" title="dfu_device_get_target_by_alt_setting ()">dfu_device_get_target_by_alt_setting</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="DfuTarget.html" title="DfuTarget"><span class="returnvalue">DfuTarget</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-get-target-by-alt-name" title="dfu_device_get_target_by_alt_name ()">dfu_device_get_target_by_alt_name</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">const <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-get-display-name" title="dfu_device_get_display_name ()">dfu_device_get_display_name</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">const <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-get-serial-number" title="dfu_device_get_serial_number ()">dfu_device_get_serial_number</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint16"><span class="returnvalue">guint16</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-get-runtime-vid" title="dfu_device_get_runtime_vid ()">dfu_device_get_runtime_vid</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint16"><span class="returnvalue">guint16</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-get-runtime-pid" title="dfu_device_get_runtime_pid ()">dfu_device_get_runtime_pid</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint16"><span class="returnvalue">guint16</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-get-runtime-release" title="dfu_device_get_runtime_release ()">dfu_device_get_runtime_release</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-reset" title="dfu_device_reset ()">dfu_device_reset</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-attach" title="dfu_device_attach ()">dfu_device_attach</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-wait-for-replug" title="dfu_device_wait_for_replug ()">dfu_device_wait_for_replug</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="DfuFirmware.html" title="DfuFirmware"><span class="returnvalue">DfuFirmware</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-upload" title="dfu_device_upload ()">dfu_device_upload</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-download" title="dfu_device_download ()">dfu_device_download</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-refresh" title="dfu_device_refresh ()">dfu_device_refresh</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-detach" title="dfu_device_detach ()">dfu_device_detach</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-abort" title="dfu_device_abort ()">dfu_device_abort</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-clear-status" title="dfu_device_clear_status ()">dfu_device_clear_status</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint8"><span class="returnvalue">guint8</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-get-interface" title="dfu_device_get_interface ()">dfu_device_get_interface</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libdfu-dfu-common.html#DfuMode" title="enum DfuMode"><span class="returnvalue">DfuMode</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-get-mode" title="dfu_device_get_mode ()">dfu_device_get_mode</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libdfu-dfu-common.html#DfuState" title="enum DfuState"><span class="returnvalue">DfuState</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-get-state" title="dfu_device_get_state ()">dfu_device_get_state</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libdfu-dfu-common.html#DfuStatus" title="enum DfuStatus"><span class="returnvalue">DfuStatus</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-get-status" title="dfu_device_get_status ()">dfu_device_get_status</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint16"><span class="returnvalue">guint16</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-get-transfer-size" title="dfu_device_get_transfer_size ()">dfu_device_get_transfer_size</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint16"><span class="returnvalue">guint16</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-get-version" title="dfu_device_get_version ()">dfu_device_get_version</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint"><span class="returnvalue">guint</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-get-timeout" title="dfu_device_get_timeout ()">dfu_device_get_timeout</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-can-upload" title="dfu_device_can_upload ()">dfu_device_can_upload</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-can-download" title="dfu_device_can_download ()">dfu_device_can_download</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-has-attribute" title="dfu_device_has_attribute ()">dfu_device_has_attribute</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-has-quirk" title="dfu_device_has_quirk ()">dfu_device_has_quirk</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-set-transfer-size" title="dfu_device_set_transfer_size ()">dfu_device_set_transfer_size</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="DfuDevice.html#dfu-device-set-timeout" title="dfu_device_set_timeout ()">dfu_device_set_timeout</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="DfuDevice.signals"></a><h2>Signals</h2>
+<div class="informaltable"><table class="informaltable" border="0">
+<colgroup>
+<col width="150px" class="signals_return">
+<col width="300px" class="signals_name">
+<col width="200px" class="signals_flags">
+</colgroup>
+<tbody>
+<tr>
+<td class="signal_type"><span class="returnvalue">void</span></td>
+<td class="signal_name"><a class="link" href="DfuDevice.html#DfuDevice-action-changed" title="The “action-changed” signal">action-changed</a></td>
+<td class="signal_flags"><a href="/usr/share/gtk-doc/html/gobjectgobject-Signals.html#G-SIGNAL-RUN-LAST:CAPS">Run Last</a></td>
+</tr>
+<tr>
+<td class="signal_type"><span class="returnvalue">void</span></td>
+<td class="signal_name"><a class="link" href="DfuDevice.html#DfuDevice-percentage-changed" title="The “percentage-changed” signal">percentage-changed</a></td>
+<td class="signal_flags"><a href="/usr/share/gtk-doc/html/gobjectgobject-Signals.html#G-SIGNAL-RUN-LAST:CAPS">Run Last</a></td>
+</tr>
+<tr>
+<td class="signal_type"><span class="returnvalue">void</span></td>
+<td class="signal_name"><a class="link" href="DfuDevice.html#DfuDevice-state-changed" title="The “state-changed” signal">state-changed</a></td>
+<td class="signal_flags"><a href="/usr/share/gtk-doc/html/gobjectgobject-Signals.html#G-SIGNAL-RUN-LAST:CAPS">Run Last</a></td>
+</tr>
+<tr>
+<td class="signal_type"><span class="returnvalue">void</span></td>
+<td class="signal_name"><a class="link" href="DfuDevice.html#DfuDevice-status-changed" title="The “status-changed” signal">status-changed</a></td>
+<td class="signal_flags"><a href="/usr/share/gtk-doc/html/gobjectgobject-Signals.html#G-SIGNAL-RUN-LAST:CAPS">Run Last</a></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="DfuDevice.other"></a><h2>Types and Values</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="name">
+<col class="description">
+</colgroup>
+<tbody>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="DfuDevice.html#DFU-TYPE-DEVICE:CAPS" title="DFU_TYPE_DEVICE">DFU_TYPE_DEVICE</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="DfuDevice.html#DfuDeviceOpenFlags" title="enum DfuDeviceOpenFlags">DfuDeviceOpenFlags</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="DfuDevice.html#DfuDeviceQuirks" title="enum DfuDeviceQuirks">DfuDeviceQuirks</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="DfuDevice.html#DfuDeviceAttributes" title="enum DfuDeviceAttributes">DfuDeviceAttributes</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">struct</td>
+<td class="function_name"><a class="link" href="DfuDevice.html#DfuDeviceClass" title="struct DfuDeviceClass">DfuDeviceClass</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="DfuDevice.html#DfuDevice-struct" title="DfuDevice">DfuDevice</a></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="DfuDevice.object-hierarchy"></a><h2>Object Hierarchy</h2>
+<pre class="screen">    <a href="/usr/share/gtk-doc/html/gobjectgobject-The-Base-Object-Type.html#GObject-struct">GObject</a>
+    <span class="lineart">╰──</span> DfuDevice
+</pre>
+</div>
+<div class="refsect1">
+<a name="DfuDevice.description"></a><h2>Description</h2>
+<p>This object allows two things:</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>Downloading from the host to the device, optionally with
+verification using a DFU or DfuSe firmware file.</p></li>
+<li class="listitem"><p>Uploading from the device to the host to a DFU or DfuSe firmware
+file. The file format is chosen automatically, with DfuSe being
+chosen if the device contains more than one target.</p></li>
+</ul></div>
+<p>See also: <a class="link" href="DfuTarget.html" title="DfuTarget"><span class="type">DfuTarget</span></a>, <a class="link" href="DfuFirmware.html" title="DfuFirmware"><span class="type">DfuFirmware</span></a></p>
+</div>
+<div class="refsect1">
+<a name="DfuDevice.functions_details"></a><h2>Functions</h2>
+<div class="refsect2">
+<a name="dfu-device-new"></a><h3>dfu_device_new ()</h3>
+<pre class="programlisting"><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="returnvalue">DfuDevice</span></a> *
+dfu_device_new (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/gusbGUsbDevice.html#GUsbDevice-struct"><span class="type">GUsbDevice</span></a> *dev</code></em>);</pre>
+<p>Creates a new DFU device object.</p>
+<div class="refsect3">
+<a name="dfu-device-new.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>dev</p></td>
+<td class="parameter_description"><p>A <a href="/usr/share/gtk-doc/html/gusbGUsbDevice.html#GUsbDevice-struct"><span class="type">GUsbDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-new.returns"></a><h4>Returns</h4>
+<p> a new <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>dev</code></em>
+was not DFU-capable</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-open"></a><h3>dfu_device_open ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+dfu_device_open (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>,
+                 <em class="parameter"><code><a class="link" href="DfuDevice.html#DfuDeviceOpenFlags" title="enum DfuDeviceOpenFlags"><span class="type">DfuDeviceOpenFlags</span></a> flags</code></em>,
+                 <em class="parameter"><code><a href="/usr/share/gtk-doc/html/gioGCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a> *cancellable</code></em>,
+                 <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Opens a DFU-capable device.</p>
+<div class="refsect3">
+<a name="dfu-device-open.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>flags</p></td>
+<td class="parameter_description"><p><a class="link" href="DfuDevice.html#DfuDeviceOpenFlags" title="enum DfuDeviceOpenFlags"><span class="type">DfuDeviceOpenFlags</span></a>, e.g. <a class="link" href="DfuDevice.html#DFU-DEVICE-OPEN-FLAG-NONE:CAPS"><code class="literal">DFU_DEVICE_OPEN_FLAG_NONE</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>cancellable</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/gioGCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-open.returns"></a><h4>Returns</h4>
+<p> <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> for success</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-close"></a><h3>dfu_device_close ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+dfu_device_close (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>,
+                  <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Closes a DFU device.</p>
+<div class="refsect3">
+<a name="dfu-device-close.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-close.returns"></a><h4>Returns</h4>
+<p> <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> for success</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-get-platform-id"></a><h3>dfu_device_get_platform_id ()</h3>
+<pre class="programlisting">const <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+dfu_device_get_platform_id (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>);</pre>
+<p>Gets the platform ID which normally corresponds to the port in some way.</p>
+<div class="refsect3">
+<a name="dfu-device-get-platform-id.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-get-platform-id.returns"></a><h4>Returns</h4>
+<p> string or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-get-targets"></a><h3>dfu_device_get_targets ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Pointer-Arrays.html#GPtrArray"><span class="returnvalue">GPtrArray</span></a> *
+dfu_device_get_targets (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>);</pre>
+<p>Gets all the targets for this device.</p>
+<div class="refsect3">
+<a name="dfu-device-get-targets.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-get-targets.returns"></a><h4>Returns</h4>
+<p> <a class="link" href="DfuTarget.html" title="DfuTarget"><span class="type">DfuTarget</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> DfuTarget]</span></p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-get-target-by-alt-setting"></a><h3>dfu_device_get_target_by_alt_setting ()</h3>
+<pre class="programlisting"><a class="link" href="DfuTarget.html" title="DfuTarget"><span class="returnvalue">DfuTarget</span></a> *
+dfu_device_get_target_by_alt_setting (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>,
+                                      <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint8"><span class="type">guint8</span></a> alt_setting</code></em>,
+                                      <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Gets a target with a specific alternative setting.</p>
+<div class="refsect3">
+<a name="dfu-device-get-target-by-alt-setting.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>alt_setting</p></td>
+<td class="parameter_description"><p>the setting used to find</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-get-target-by-alt-setting.returns"></a><h4>Returns</h4>
+<p> a <a class="link" href="DfuTarget.html" title="DfuTarget"><span class="type">DfuTarget</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-get-target-by-alt-name"></a><h3>dfu_device_get_target_by_alt_name ()</h3>
+<pre class="programlisting"><a class="link" href="DfuTarget.html" title="DfuTarget"><span class="returnvalue">DfuTarget</span></a> *
+dfu_device_get_target_by_alt_name (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>,
+                                   <em class="parameter"><code>const <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *alt_name</code></em>,
+                                   <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Gets a target with a specific alternative name.</p>
+<div class="refsect3">
+<a name="dfu-device-get-target-by-alt-name.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>alt_name</p></td>
+<td class="parameter_description"><p>the name used to find</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-get-target-by-alt-name.returns"></a><h4>Returns</h4>
+<p> a <a class="link" href="DfuTarget.html" title="DfuTarget"><span class="type">DfuTarget</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-get-display-name"></a><h3>dfu_device_get_display_name ()</h3>
+<pre class="programlisting">const <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+dfu_device_get_display_name (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>);</pre>
+<p>Gets the display name to use for the device.</p>
+<div class="refsect3">
+<a name="dfu-device-get-display-name.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-get-display-name.returns"></a><h4>Returns</h4>
+<p> string or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> for unset</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-get-serial-number"></a><h3>dfu_device_get_serial_number ()</h3>
+<pre class="programlisting">const <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+dfu_device_get_serial_number (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>);</pre>
+<p>Gets the serial number for the device.</p>
+<div class="refsect3">
+<a name="dfu-device-get-serial-number.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-get-serial-number.returns"></a><h4>Returns</h4>
+<p> string or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> for unset</p>
+</div>
+<p class="since">Since: 0.7.3</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-get-runtime-vid"></a><h3>dfu_device_get_runtime_vid ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint16"><span class="returnvalue">guint16</span></a>
+dfu_device_get_runtime_vid (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>);</pre>
+<p>Gets the runtime vendor ID.</p>
+<div class="refsect3">
+<a name="dfu-device-get-runtime-vid.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-get-runtime-vid.returns"></a><h4>Returns</h4>
+<p> vendor ID, or 0xffff for unknown</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-get-runtime-pid"></a><h3>dfu_device_get_runtime_pid ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint16"><span class="returnvalue">guint16</span></a>
+dfu_device_get_runtime_pid (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>);</pre>
+<p>Gets the runtime product ID.</p>
+<div class="refsect3">
+<a name="dfu-device-get-runtime-pid.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-get-runtime-pid.returns"></a><h4>Returns</h4>
+<p> product ID, or 0xffff for unknown</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-get-runtime-release"></a><h3>dfu_device_get_runtime_release ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint16"><span class="returnvalue">guint16</span></a>
+dfu_device_get_runtime_release (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>);</pre>
+<p>Gets the runtime release number in BCD format.</p>
+<div class="refsect3">
+<a name="dfu-device-get-runtime-release.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-get-runtime-release.returns"></a><h4>Returns</h4>
+<p> release number, or 0xffff for unknown</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-reset"></a><h3>dfu_device_reset ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+dfu_device_reset (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>,
+                  <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Resets the USB device.</p>
+<div class="refsect3">
+<a name="dfu-device-reset.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-reset.returns"></a><h4>Returns</h4>
+<p> <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> for success</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-attach"></a><h3>dfu_device_attach ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+dfu_device_attach (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>,
+                   <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Move device from DFU mode to runtime.</p>
+<div class="refsect3">
+<a name="dfu-device-attach.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-attach.returns"></a><h4>Returns</h4>
+<p> <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> for success</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-wait-for-replug"></a><h3>dfu_device_wait_for_replug ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+dfu_device_wait_for_replug (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>,
+                            <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint"><span class="type">guint</span></a> timeout</code></em>,
+                            <em class="parameter"><code><a href="/usr/share/gtk-doc/html/gioGCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a> *cancellable</code></em>,
+                            <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Waits for a DFU device to disconnect and reconnect.
+This does rely on a <a class="link" href="DfuContext.html" title="DfuContext"><span class="type">DfuContext</span></a> being set up before this is called.</p>
+<div class="refsect3">
+<a name="dfu-device-wait-for-replug.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>timeout</p></td>
+<td class="parameter_description"><p>the maximum amount of time to wait</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>cancellable</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/gioGCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-wait-for-replug.returns"></a><h4>Returns</h4>
+<p> <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> for success</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-upload"></a><h3>dfu_device_upload ()</h3>
+<pre class="programlisting"><a class="link" href="DfuFirmware.html" title="DfuFirmware"><span class="returnvalue">DfuFirmware</span></a> *
+dfu_device_upload (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>,
+                   <em class="parameter"><code><a class="link" href="DfuTarget.html#DfuTargetTransferFlags" title="enum DfuTargetTransferFlags"><span class="type">DfuTargetTransferFlags</span></a> flags</code></em>,
+                   <em class="parameter"><code><a href="/usr/share/gtk-doc/html/gioGCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a> *cancellable</code></em>,
+                   <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Uploads firmware from the target to the host.</p>
+<div class="refsect3">
+<a name="dfu-device-upload.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>flags</p></td>
+<td class="parameter_description"><p>flags to use, e.g. <a class="link" href="DfuTarget.html#DFU-TARGET-TRANSFER-FLAG-VERIFY:CAPS"><code class="literal">DFU_TARGET_TRANSFER_FLAG_VERIFY</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>cancellable</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/gioGCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-upload.returns"></a><h4>Returns</h4>
+<p> the uploaded firmware, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> for error. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-download"></a><h3>dfu_device_download ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+dfu_device_download (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>,
+                     <em class="parameter"><code><a class="link" href="DfuFirmware.html" title="DfuFirmware"><span class="type">DfuFirmware</span></a> *firmware</code></em>,
+                     <em class="parameter"><code><a class="link" href="DfuTarget.html#DfuTargetTransferFlags" title="enum DfuTargetTransferFlags"><span class="type">DfuTargetTransferFlags</span></a> flags</code></em>,
+                     <em class="parameter"><code><a href="/usr/share/gtk-doc/html/gioGCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a> *cancellable</code></em>,
+                     <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Downloads firmware from the host to the target, optionally verifying
+the transfer.</p>
+<div class="refsect3">
+<a name="dfu-device-download.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>firmware</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuFirmware.html" title="DfuFirmware"><span class="type">DfuFirmware</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>flags</p></td>
+<td class="parameter_description"><p>flags to use, e.g. <a class="link" href="DfuTarget.html#DFU-TARGET-TRANSFER-FLAG-VERIFY:CAPS"><code class="literal">DFU_TARGET_TRANSFER_FLAG_VERIFY</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>cancellable</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/gioGCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-download.returns"></a><h4>Returns</h4>
+<p> <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> for success</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-refresh"></a><h3>dfu_device_refresh ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+dfu_device_refresh (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>,
+                    <em class="parameter"><code><a href="/usr/share/gtk-doc/html/gioGCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a> *cancellable</code></em>,
+                    <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Refreshes the cached properties on the DFU device.</p>
+<div class="refsect3">
+<a name="dfu-device-refresh.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>cancellable</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/gioGCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-refresh.returns"></a><h4>Returns</h4>
+<p> <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> for success</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-detach"></a><h3>dfu_device_detach ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+dfu_device_detach (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>,
+                   <em class="parameter"><code><a href="/usr/share/gtk-doc/html/gioGCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a> *cancellable</code></em>,
+                   <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Detaches the device putting it into DFU-mode.</p>
+<div class="refsect3">
+<a name="dfu-device-detach.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>cancellable</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/gioGCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-detach.returns"></a><h4>Returns</h4>
+<p> <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> for success</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-abort"></a><h3>dfu_device_abort ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+dfu_device_abort (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>,
+                  <em class="parameter"><code><a href="/usr/share/gtk-doc/html/gioGCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a> *cancellable</code></em>,
+                  <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Aborts any upload or download in progress.</p>
+<div class="refsect3">
+<a name="dfu-device-abort.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>cancellable</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/gioGCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-abort.returns"></a><h4>Returns</h4>
+<p> <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> for success</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-clear-status"></a><h3>dfu_device_clear_status ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+dfu_device_clear_status (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>,
+                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/gioGCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a> *cancellable</code></em>,
+                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Clears any error status on the DFU device.</p>
+<div class="refsect3">
+<a name="dfu-device-clear-status.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>cancellable</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/gioGCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/glibglib-Error-Reporting.html#GError"><span class="type">GError</span></a>, or <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-clear-status.returns"></a><h4>Returns</h4>
+<p> <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> for success</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-get-interface"></a><h3>dfu_device_get_interface ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint8"><span class="returnvalue">guint8</span></a>
+dfu_device_get_interface (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>);</pre>
+<p>Gets the interface number.</p>
+<div class="refsect3">
+<a name="dfu-device-get-interface.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-get-mode"></a><h3>dfu_device_get_mode ()</h3>
+<pre class="programlisting"><a class="link" href="libdfu-dfu-common.html#DfuMode" title="enum DfuMode"><span class="returnvalue">DfuMode</span></a>
+dfu_device_get_mode (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>);</pre>
+<p>Gets the device mode.</p>
+<div class="refsect3">
+<a name="dfu-device-get-mode.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/gusbGUsbDevice.html#GUsbDevice-struct"><span class="type">GUsbDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-get-mode.returns"></a><h4>Returns</h4>
+<p> enumerated mode, e.g. <a class="link" href="libdfu-dfu-common.html#DFU-MODE-RUNTIME:CAPS"><code class="literal">DFU_MODE_RUNTIME</code></a></p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-get-state"></a><h3>dfu_device_get_state ()</h3>
+<pre class="programlisting"><a class="link" href="libdfu-dfu-common.html#DfuState" title="enum DfuState"><span class="returnvalue">DfuState</span></a>
+dfu_device_get_state (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>);</pre>
+<p>Gets the device state.</p>
+<div class="refsect3">
+<a name="dfu-device-get-state.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/gusbGUsbDevice.html#GUsbDevice-struct"><span class="type">GUsbDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-get-state.returns"></a><h4>Returns</h4>
+<p> enumerated state, e.g. <a class="link" href="libdfu-dfu-common.html#DFU-STATE-DFU-UPLOAD-IDLE:CAPS"><code class="literal">DFU_STATE_DFU_UPLOAD_IDLE</code></a></p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-get-status"></a><h3>dfu_device_get_status ()</h3>
+<pre class="programlisting"><a class="link" href="libdfu-dfu-common.html#DfuStatus" title="enum DfuStatus"><span class="returnvalue">DfuStatus</span></a>
+dfu_device_get_status (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>);</pre>
+<p>Gets the device status.</p>
+<div class="refsect3">
+<a name="dfu-device-get-status.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/gusbGUsbDevice.html#GUsbDevice-struct"><span class="type">GUsbDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-get-status.returns"></a><h4>Returns</h4>
+<p> enumerated status, e.g. <a class="link" href="libdfu-dfu-common.html#DFU-STATUS-ERR-ADDRESS:CAPS"><code class="literal">DFU_STATUS_ERR_ADDRESS</code></a></p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-get-transfer-size"></a><h3>dfu_device_get_transfer_size ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint16"><span class="returnvalue">guint16</span></a>
+dfu_device_get_transfer_size (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>);</pre>
+<p>Gets the transfer size in bytes.</p>
+<div class="refsect3">
+<a name="dfu-device-get-transfer-size.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/gusbGUsbDevice.html#GUsbDevice-struct"><span class="type">GUsbDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-get-transfer-size.returns"></a><h4>Returns</h4>
+<p> packet size, or 0 for unknown</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-get-version"></a><h3>dfu_device_get_version ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint16"><span class="returnvalue">guint16</span></a>
+dfu_device_get_version (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>);</pre>
+<p>Gets the DFU specification version supported by the device.</p>
+<div class="refsect3">
+<a name="dfu-device-get-version.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/gusbGUsbDevice.html#GUsbDevice-struct"><span class="type">GUsbDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-get-version.returns"></a><h4>Returns</h4>
+<p> integer, or 0 for unknown, e.g. <a class="link" href="libdfu-dfu-common.html#DFU-VERSION-DFU-1-1:CAPS"><code class="literal">DFU_VERSION_DFU_1_1</code></a></p>
+</div>
+<p class="since">Since: 0.7.2</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-get-timeout"></a><h3>dfu_device_get_timeout ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint"><span class="returnvalue">guint</span></a>
+dfu_device_get_timeout (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>);</pre>
+<p>Gets the device timeout.</p>
+<div class="refsect3">
+<a name="dfu-device-get-timeout.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/gusbGUsbDevice.html#GUsbDevice-struct"><span class="type">GUsbDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-get-timeout.returns"></a><h4>Returns</h4>
+<p> enumerated timeout in ms</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-can-upload"></a><h3>dfu_device_can_upload ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+dfu_device_can_upload (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>);</pre>
+<p>Gets if the device can upload.</p>
+<div class="refsect3">
+<a name="dfu-device-can-upload.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/gusbGUsbDevice.html#GUsbDevice-struct"><span class="type">GUsbDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-can-upload.returns"></a><h4>Returns</h4>
+<p> <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the device can upload from device to host</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-can-download"></a><h3>dfu_device_can_download ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+dfu_device_can_download (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>);</pre>
+<p>Gets if the device can download.</p>
+<div class="refsect3">
+<a name="dfu-device-can-download.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/gusbGUsbDevice.html#GUsbDevice-struct"><span class="type">GUsbDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-can-download.returns"></a><h4>Returns</h4>
+<p> <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the device can download from host to device</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-has-attribute"></a><h3>dfu_device_has_attribute ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+dfu_device_has_attribute (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>,
+                          <em class="parameter"><code><a class="link" href="DfuDevice.html#DfuDeviceAttributes" title="enum DfuDeviceAttributes"><span class="type">DfuDeviceAttributes</span></a> attribute</code></em>);</pre>
+<p>Returns if an attribute set for the device.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="dfu-device-has-attribute.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>A <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>attribute</p></td>
+<td class="parameter_description"><p>A <a class="link" href="DfuDevice.html#DfuDeviceAttributes" title="enum DfuDeviceAttributes"><span class="type">DfuDeviceAttributes</span></a>, e.g. <a class="link" href="DfuDevice.html#DFU-DEVICE-ATTRIBUTE-CAN-DOWNLOAD:CAPS"><code class="literal">DFU_DEVICE_ATTRIBUTE_CAN_DOWNLOAD</code></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-has-attribute.returns"></a><h4>Returns</h4>
+<p> <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the attribute is set</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-has-quirk"></a><h3>dfu_device_has_quirk ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+dfu_device_has_quirk (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>,
+                      <em class="parameter"><code><a class="link" href="DfuDevice.html#DfuDeviceQuirks" title="enum DfuDeviceQuirks"><span class="type">DfuDeviceQuirks</span></a> quirk</code></em>);</pre>
+<p>Returns if a device has a specific quirk</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="dfu-device-has-quirk.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>A <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>quirk</p></td>
+<td class="parameter_description"><p>A <a class="link" href="DfuDevice.html#DfuDeviceQuirks" title="enum DfuDeviceQuirks"><span class="type">DfuDeviceQuirks</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="dfu-device-has-quirk.returns"></a><h4>Returns</h4>
+<p> <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the device has this quirk</p>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-set-transfer-size"></a><h3>dfu_device_set_transfer_size ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+dfu_device_set_transfer_size (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>,
+                              <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint16"><span class="type">guint16</span></a> transfer_size</code></em>);</pre>
+<p>Sets the transfer size in bytes.</p>
+<div class="refsect3">
+<a name="dfu-device-set-transfer-size.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a href="/usr/share/gtk-doc/html/gusbGUsbDevice.html#GUsbDevice-struct"><span class="type">GUsbDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>transfer_size</p></td>
+<td class="parameter_description"><p>maximum packet size</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="dfu-device-set-timeout"></a><h3>dfu_device_set_timeout ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+dfu_device_set_timeout (<em class="parameter"><code><a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device</code></em>,
+                        <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint"><span class="type">guint</span></a> timeout_ms</code></em>);</pre>
+<p>Sets the USB timeout to use when contacting the USB device.</p>
+<div class="refsect3">
+<a name="dfu-device-set-timeout.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>timeout_ms</p></td>
+<td class="parameter_description"><p>the timeout in ms</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: 0.5.4</p>
+</div>
+</div>
+<div class="refsect1">
+<a name="DfuDevice.other_details"></a><h2>Types and Values</h2>
+<div class="refsect2">
+<a name="DFU-TYPE-DEVICE:CAPS"></a><h3>DFU_TYPE_DEVICE</h3>
+<pre class="programlisting">#define DFU_TYPE_DEVICE (dfu_device_get_type ())
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="DfuDeviceOpenFlags"></a><h3>enum DfuDeviceOpenFlags</h3>
+<p>The optional flags used for opening the target.</p>
+<div class="refsect3">
+<a name="DfuDeviceOpenFlags.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-OPEN-FLAG-NONE:CAPS"></a>DFU_DEVICE_OPEN_FLAG_NONE</p></td>
+<td class="enum_member_description">
+<p>No flags set</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-OPEN-FLAG-NO-AUTO-REFRESH:CAPS"></a>DFU_DEVICE_OPEN_FLAG_NO_AUTO_REFRESH</p></td>
+<td class="enum_member_description">
+<p>Do not do the initial GET_STATUS</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="DfuDeviceQuirks"></a><h3>enum DfuDeviceQuirks</h3>
+<p>The workarounds for different devices.</p>
+<div class="refsect3">
+<a name="DfuDeviceQuirks.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-QUIRK-NONE:CAPS"></a>DFU_DEVICE_QUIRK_NONE</p></td>
+<td class="enum_member_description">
+<p>No device quirks</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-QUIRK-IGNORE-POLLTIMEOUT:CAPS"></a>DFU_DEVICE_QUIRK_IGNORE_POLLTIMEOUT</p></td>
+<td class="enum_member_description">
+<p>Ignore the device download timeout</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-QUIRK-FORCE-DFU-MODE:CAPS"></a>DFU_DEVICE_QUIRK_FORCE_DFU_MODE</p></td>
+<td class="enum_member_description">
+<p>Force DFU mode</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-QUIRK-IGNORE-INVALID-VERSION:CAPS"></a>DFU_DEVICE_QUIRK_IGNORE_INVALID_VERSION</p></td>
+<td class="enum_member_description">
+<p>Ignore invalid version numbers</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-QUIRK-USE-PROTOCOL-ZERO:CAPS"></a>DFU_DEVICE_QUIRK_USE_PROTOCOL_ZERO</p></td>
+<td class="enum_member_description">
+<p>Fix up the protocol number</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-QUIRK-NO-PID-CHANGE:CAPS"></a>DFU_DEVICE_QUIRK_NO_PID_CHANGE</p></td>
+<td class="enum_member_description">
+<p>Accept the same VID:PID when changing modes</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-QUIRK-NO-GET-STATUS-UPLOAD:CAPS"></a>DFU_DEVICE_QUIRK_NO_GET_STATUS_UPLOAD</p></td>
+<td class="enum_member_description">
+<p>Do not do GetStatus when uploading</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-QUIRK-NO-DFU-RUNTIME:CAPS"></a>DFU_DEVICE_QUIRK_NO_DFU_RUNTIME</p></td>
+<td class="enum_member_description">
+<p>No DFU runtime interface is provided</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-QUIRK-ATTACH-UPLOAD-DOWNLOAD:CAPS"></a>DFU_DEVICE_QUIRK_ATTACH_UPLOAD_DOWNLOAD</p></td>
+<td class="enum_member_description">
+<p>An upload or download is required for attach</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-QUIRK-IGNORE-RUNTIME:CAPS"></a>DFU_DEVICE_QUIRK_IGNORE_RUNTIME</p></td>
+<td class="enum_member_description">
+<p>Device has broken DFU runtime support</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="DfuDeviceAttributes"></a><h3>enum DfuDeviceAttributes</h3>
+<p>The device DFU attributes.</p>
+<div class="refsect3">
+<a name="DfuDeviceAttributes.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-ATTRIBUTE-NONE:CAPS"></a>DFU_DEVICE_ATTRIBUTE_NONE</p></td>
+<td class="enum_member_description">
+<p>No attributes set</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-ATTRIBUTE-CAN-DOWNLOAD:CAPS"></a>DFU_DEVICE_ATTRIBUTE_CAN_DOWNLOAD</p></td>
+<td class="enum_member_description">
+<p>Can download from host-&gt;device</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-ATTRIBUTE-CAN-UPLOAD:CAPS"></a>DFU_DEVICE_ATTRIBUTE_CAN_UPLOAD</p></td>
+<td class="enum_member_description">
+<p>Can upload from device-&gt;host</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-ATTRIBUTE-MANIFEST-TOL:CAPS"></a>DFU_DEVICE_ATTRIBUTE_MANIFEST_TOL</p></td>
+<td class="enum_member_description">
+<p>Can answer GetStatus in manifest</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-ATTRIBUTE-WILL-DETACH:CAPS"></a>DFU_DEVICE_ATTRIBUTE_WILL_DETACH</p></td>
+<td class="enum_member_description">
+<p>Will self-detach</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="DFU-DEVICE-ATTRIBUTE-CAN-ACCELERATE:CAPS"></a>DFU_DEVICE_ATTRIBUTE_CAN_ACCELERATE</p></td>
+<td class="enum_member_description">
+<p>Use a larger transfer size for speed</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="DfuDeviceClass"></a><h3>struct DfuDeviceClass</h3>
+<pre class="programlisting">struct DfuDeviceClass {
+	GObjectClass		 parent_class;
+	void			(*status_changed) (DfuDevice *device,
+							 DfuStatus	 status);
+	void			(*state_changed) (DfuDevice *device,
+							 DfuState	 state);
+	void			(*percentage_changed) (DfuDevice *device,
+							 guint		 percentage);
+	void			(*action_changed) (DfuDevice *device,
+							 DfuAction	 action);
+};
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="DfuDevice-struct"></a><h3>DfuDevice</h3>
+<pre class="programlisting">typedef struct _DfuDevice DfuDevice;</pre>
+</div>
+</div>
+<div class="refsect1">
+<a name="DfuDevice.signal-details"></a><h2>Signal Details</h2>
+<div class="refsect2">
+<a name="DfuDevice-action-changed"></a><h3>The <code class="literal">“action-changed”</code> signal</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+user_function (<a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device,
+               <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint"><span class="type">guint</span></a>      action,
+               <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>   user_data)</pre>
+<p>The ::action-changed signal is emitted when the high level action changes.</p>
+<div class="refsect3">
+<a name="DfuDevice-action-changed.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>the <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> instance that emitted the signal</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>action</p></td>
+<td class="parameter_description"><p>the new <a class="link" href="libdfu-dfu-common.html#DfuAction" title="enum DfuAction"><span class="type">DfuAction</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>user_data</p></td>
+<td class="parameter_description"><p>user data set when the signal handler was connected.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p>Flags: <a href="/usr/share/gtk-doc/html/gobjectgobject-Signals.html#G-SIGNAL-RUN-LAST:CAPS">Run Last</a></p>
+<p class="since">Since: 0.7.5</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="DfuDevice-percentage-changed"></a><h3>The <code class="literal">“percentage-changed”</code> signal</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+user_function (<a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device,
+               <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint"><span class="type">guint</span></a>      percentage,
+               <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>   user_data)</pre>
+<p>The ::percentage-changed signal is emitted when the percentage changes.</p>
+<div class="refsect3">
+<a name="DfuDevice-percentage-changed.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>the <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> instance that emitted the signal</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>percentage</p></td>
+<td class="parameter_description"><p>the new percentage</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>user_data</p></td>
+<td class="parameter_description"><p>user data set when the signal handler was connected.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p>Flags: <a href="/usr/share/gtk-doc/html/gobjectgobject-Signals.html#G-SIGNAL-RUN-LAST:CAPS">Run Last</a></p>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="DfuDevice-state-changed"></a><h3>The <code class="literal">“state-changed”</code> signal</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+user_function (<a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device,
+               <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint"><span class="type">guint</span></a>      state,
+               <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>   user_data)</pre>
+<p>The ::state-changed signal is emitted when the state changes.</p>
+<div class="refsect3">
+<a name="DfuDevice-state-changed.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>the <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> instance that emitted the signal</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>state</p></td>
+<td class="parameter_description"><p>the new <a class="link" href="libdfu-dfu-common.html#DfuState" title="enum DfuState"><span class="type">DfuState</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>user_data</p></td>
+<td class="parameter_description"><p>user data set when the signal handler was connected.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p>Flags: <a href="/usr/share/gtk-doc/html/gobjectgobject-Signals.html#G-SIGNAL-RUN-LAST:CAPS">Run Last</a></p>
+<p class="since">Since: 0.5.4</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="DfuDevice-status-changed"></a><h3>The <code class="literal">“status-changed”</code> signal</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+user_function (<a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> *device,
+               <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint"><span class="type">guint</span></a>      status,
+               <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>   user_data)</pre>
+<p>The ::status-changed signal is emitted when the status changes.</p>
+<div class="refsect3">
+<a name="DfuDevice-status-changed.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>the <a class="link" href="DfuDevice.html" title="DfuDevice"><span class="type">DfuDevice</span></a> instance that emitted the signal</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>status</p></td>
+<td class="parameter_description"><p>the new <a class="link" href="libdfu-dfu-common.html#DfuStatus" title="enum DfuStatus"><span class="type">DfuStatus</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>user_data</p></td>
+<td class="parameter_description"><p>user data set when the signal handler was connected.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p>Flags: <a href="/usr/share/gtk-doc/html/gobjectgobject-Signals.html#G-SIGNAL-RUN-LAST:CAPS">Run Last</a></p>
+<p class="since">Since: 0.5.4</p>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.25</div>
+</body>
+</html>

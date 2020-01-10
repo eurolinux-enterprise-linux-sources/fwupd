@@ -1,0 +1,12 @@
+diff -urNp fwupd-0.8.2.old/plugins/uefi/Makefile.in fwupd-0.8.2/plugins/uefi/Makefile.in
+--- fwupd-0.8.2.old/plugins/uefi/Makefile.in	2017-04-28 20:05:47.626535181 +0100
++++ fwupd-0.8.2/plugins/uefi/Makefile.in	2017-04-28 20:06:57.489137310 +0100
+@@ -453,7 +453,7 @@ libfu_plugin_uefi_la_SOURCES = \
+ 
+ libfu_plugin_uefi_la_LIBADD = $(GUSB_LIBS) $(UEFI_LIBS)
+ libfu_plugin_uefi_la_LDFLAGS = -module -avoid-version
+-libfu_plugin_uefi_la_CFLAGS = $(WARN_CFLAGS)	\
++libfu_plugin_uefi_la_CFLAGS = $(WARN_CFLAGS) $(UEFI_CFLAGS)	\
+ 	-DG_LOG_DOMAIN=\"FuPluginUefi\"
+ 
+ EXTRA_DIST = README.md

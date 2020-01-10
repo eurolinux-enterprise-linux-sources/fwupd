@@ -1,0 +1,33 @@
+From df5652ffb55974c3153fd0a66a2ac606bd46cfc5 Mon Sep 17 00:00:00 2001
+From: Richard Hughes <richard@hughsie.com>
+Date: Mon, 8 May 2017 19:06:08 +0100
+Subject: [PATCH] trivial: Return a sensible error if DownloadURI is
+ intentionaly left blank
+
+---
+ src/fu-util.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/src/fu-util.c b/src/fu-util.c
+index 677cc7a..d24e46e 100644
+--- a/src/fu-util.c
++++ b/src/fu-util.c
+@@ -697,6 +697,15 @@ fu_util_download_metadata (FuUtilPrivate *priv, GError **error)
+ 	data_uri = g_key_file_get_string (config, "fwupd", "DownloadURI", error);
+ 	if (data_uri == NULL)
+ 		return FALSE;
++	if (data_uri[0] == '\0') {
++		g_set_error (error,
++			     FWUPD_ERROR,
++			     FWUPD_ERROR_NOT_SUPPORTED,
++			     "Nothing set as DownloadURI in %s",
++			     config_fn);
++		return FALSE;
++
++	}
+ 	sig_uri = g_strdup_printf ("%s.asc", data_uri);
+ 	data_fn = g_build_filename (cache_dir, "firmware.xml.gz", NULL);
+ 	sig_fn = g_strdup_printf ("%s.asc", data_fn);
+-- 
+2.12.2
+

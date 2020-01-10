@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<book xmlns="http://www.devhelp.net/book" title="libfwupd Reference Manual" link="index.html" author="" name="libfwupd" version="2" language="c">
+  <chapters>
+    <sub name="About libfwupd" link="intro.html"/>
+    <sub name="Object Hierarchy" link="object-tree.html"/>
+    <sub name="libfwupd" link="libfwupd.html">
+      <sub name="FwupdClient" link="FwupdClient.html"/>
+      <sub name="fwupd-error" link="libfwupd-fwupd-error.html"/>
+      <sub name="fwupd-enums" link="libfwupd-fwupd-enums.html"/>
+      <sub name="FwupdResult" link="FwupdResult.html"/>
+      <sub name="fwupd-version" link="libfwupd-fwupd-version.html"/>
+    </sub>
+    <sub name="API Index" link="api-index-full.html"/>
+    <sub name="Index of deprecated API" link="deprecated-api-index.html"/>
+    <sub name="Annotation Glossary" link="annotation-glossary.html"/>
+  </chapters>
+  <functions>
+    <keyword type="function" name="fwupd_client_new ()" link="FwupdClient.html#fwupd-client-new" since="0.7.0"/>
+    <keyword type="function" name="fwupd_client_connect ()" link="FwupdClient.html#fwupd-client-connect" since="0.7.1"/>
+    <keyword type="function" name="fwupd_client_get_devices ()" link="FwupdClient.html#fwupd-client-get-devices" since="0.7.0"/>
+    <keyword type="function" name="fwupd_client_get_updates ()" link="FwupdClient.html#fwupd-client-get-updates" since="0.7.0"/>
+    <keyword type="function" name="fwupd_client_get_details_local ()" link="FwupdClient.html#fwupd-client-get-details-local" since="0.7.2"/>
+    <keyword type="function" name="fwupd_client_verify ()" link="FwupdClient.html#fwupd-client-verify" since="0.7.0"/>
+    <keyword type="function" name="fwupd_client_verify_update ()" link="FwupdClient.html#fwupd-client-verify-update" since="0.8.0"/>
+    <keyword type="function" name="fwupd_client_unlock ()" link="FwupdClient.html#fwupd-client-unlock" since="0.7.0"/>
+    <keyword type="function" name="fwupd_client_clear_results ()" link="FwupdClient.html#fwupd-client-clear-results" since="0.7.0"/>
+    <keyword type="function" name="fwupd_client_get_results ()" link="FwupdClient.html#fwupd-client-get-results" since="0.7.0"/>
+    <keyword type="function" name="fwupd_client_get_details ()" link="FwupdClient.html#fwupd-client-get-details" deprecated="" since="0.7.0"/>
+    <keyword type="function" name="fwupd_client_install ()" link="FwupdClient.html#fwupd-client-install" since="0.7.0"/>
+    <keyword type="function" name="fwupd_client_update_metadata ()" link="FwupdClient.html#fwupd-client-update-metadata" since="0.7.0"/>
+    <keyword type="function" name="fwupd_client_get_status ()" link="FwupdClient.html#fwupd-client-get-status" since="0.7.3"/>
+    <keyword type="function" name="fwupd_client_get_percentage ()" link="FwupdClient.html#fwupd-client-get-percentage" since="0.7.3"/>
+    <keyword type="macro" name="FWUPD_TYPE_CLIENT" link="FwupdClient.html#FWUPD-TYPE-CLIENT:CAPS"/>
+    <keyword type="struct" name="struct FwupdClientClass" link="FwupdClient.html#FwupdClientClass"/>
+    <keyword type="struct" name="FwupdClient" link="FwupdClient.html#FwupdClient-struct"/>
+    <keyword type="property" name="The “percentage” property" link="FwupdClient.html#FwupdClient--percentage"/>
+    <keyword type="property" name="The “status” property" link="FwupdClient.html#FwupdClient--status"/>
+    <keyword type="signal" name="The “changed” signal" link="FwupdClient.html#FwupdClient-changed"/>
+    <keyword type="signal" name="The “device-added” signal" link="FwupdClient.html#FwupdClient-device-added"/>
+    <keyword type="signal" name="The “device-changed” signal" link="FwupdClient.html#FwupdClient-device-changed"/>
+    <keyword type="signal" name="The “device-removed” signal" link="FwupdClient.html#FwupdClient-device-removed"/>
+    <keyword type="signal" name="The “status-changed” signal" link="FwupdClient.html#FwupdClient-status-changed"/>
+    <keyword type="function" name="fwupd_error_quark ()" link="libfwupd-fwupd-error.html#fwupd-error-quark" since="0.1.1"/>
+    <keyword type="function" name="fwupd_error_to_string ()" link="libfwupd-fwupd-error.html#fwupd-error-to-string" since="0.7.0"/>
+    <keyword type="function" name="fwupd_error_from_string ()" link="libfwupd-fwupd-error.html#fwupd-error-from-string" since="0.7.0"/>
+    <keyword type="macro" name="FWUPD_ERROR" link="libfwupd-fwupd-error.html#FWUPD-ERROR:CAPS"/>
+    <keyword type="enum" name="enum FwupdError" link="libfwupd-fwupd-error.html#FwupdError"/>
+    <keyword type="function" name="fwupd_status_to_string ()" link="libfwupd-fwupd-enums.html#fwupd-status-to-string" since="0.1.1"/>
+    <keyword type="function" name="fwupd_status_from_string ()" link="libfwupd-fwupd-enums.html#fwupd-status-from-string" since="0.1.1"/>
+    <keyword type="function" name="fwupd_device_flag_to_string ()" link="libfwupd-fwupd-enums.html#fwupd-device-flag-to-string" since="0.7.0"/>
+    <keyword type="function" name="fwupd_device_flag_from_string ()" link="libfwupd-fwupd-enums.html#fwupd-device-flag-from-string" since="0.7.0"/>
+    <keyword type="function" name="fwupd_update_state_to_string ()" link="libfwupd-fwupd-enums.html#fwupd-update-state-to-string" since="0.7.0"/>
+    <keyword type="function" name="fwupd_update_state_from_string ()" link="libfwupd-fwupd-enums.html#fwupd-update-state-from-string" since="0.7.0"/>
+    <keyword type="function" name="fwupd_trust_flag_to_string ()" link="libfwupd-fwupd-enums.html#fwupd-trust-flag-to-string" since="0.7.0"/>
+    <keyword type="function" name="fwupd_trust_flag_from_string ()" link="libfwupd-fwupd-enums.html#fwupd-trust-flag-from-string" since="0.7.0"/>
+    <keyword type="macro" name="FWUPD_DBUS_PATH" link="libfwupd-fwupd-enums.html#FWUPD-DBUS-PATH:CAPS"/>
+    <keyword type="macro" name="FWUPD_DBUS_SERVICE" link="libfwupd-fwupd-enums.html#FWUPD-DBUS-SERVICE:CAPS"/>
+    <keyword type="macro" name="FWUPD_DBUS_INTERFACE" link="libfwupd-fwupd-enums.html#FWUPD-DBUS-INTERFACE:CAPS"/>
+    <keyword type="macro" name="FWUPD_DEVICE_ID_ANY" link="libfwupd-fwupd-enums.html#FWUPD-DEVICE-ID-ANY:CAPS"/>
+    <keyword type="enum" name="enum FwupdStatus" link="libfwupd-fwupd-enums.html#FwupdStatus"/>
+    <keyword type="enum" name="enum FwupdTrustFlags" link="libfwupd-fwupd-enums.html#FwupdTrustFlags"/>
+    <keyword type="macro" name="FWUPD_DEVICE_FLAG_NONE" link="libfwupd-fwupd-enums.html#FWUPD-DEVICE-FLAG-NONE:CAPS"/>
+    <keyword type="macro" name="FWUPD_DEVICE_FLAG_INTERNAL" link="libfwupd-fwupd-enums.html#FWUPD-DEVICE-FLAG-INTERNAL:CAPS"/>
+    <keyword type="macro" name="FWUPD_DEVICE_FLAG_ALLOW_ONLINE" link="libfwupd-fwupd-enums.html#FWUPD-DEVICE-FLAG-ALLOW-ONLINE:CAPS"/>
+    <keyword type="macro" name="FWUPD_DEVICE_FLAG_ALLOW_OFFLINE" link="libfwupd-fwupd-enums.html#FWUPD-DEVICE-FLAG-ALLOW-OFFLINE:CAPS"/>
+    <keyword type="macro" name="FWUPD_DEVICE_FLAG_REQUIRE_AC" link="libfwupd-fwupd-enums.html#FWUPD-DEVICE-FLAG-REQUIRE-AC:CAPS"/>
+    <keyword type="macro" name="FWUPD_DEVICE_FLAG_LOCKED" link="libfwupd-fwupd-enums.html#FWUPD-DEVICE-FLAG-LOCKED:CAPS"/>
+    <keyword type="macro" name="FWUPD_DEVICE_FLAG_SUPPORTED" link="libfwupd-fwupd-enums.html#FWUPD-DEVICE-FLAG-SUPPORTED:CAPS"/>
+    <keyword type="macro" name="FWUPD_DEVICE_FLAG_NEEDS_BOOTLOADER" link="libfwupd-fwupd-enums.html#FWUPD-DEVICE-FLAG-NEEDS-BOOTLOADER:CAPS"/>
+    <keyword type="macro" name="FWUPD_DEVICE_FLAG_UNKNOWN" link="libfwupd-fwupd-enums.html#FWUPD-DEVICE-FLAG-UNKNOWN:CAPS"/>
+    <keyword type="typedef" name="FwupdDeviceFlags" link="libfwupd-fwupd-enums.html#FwupdDeviceFlags"/>
+    <keyword type="macro" name="FU_DEVICE_FLAG_NONE" link="libfwupd-fwupd-enums.html#FU-DEVICE-FLAG-NONE:CAPS"/>
+    <keyword type="macro" name="FU_DEVICE_FLAG_INTERNAL" link="libfwupd-fwupd-enums.html#FU-DEVICE-FLAG-INTERNAL:CAPS"/>
+    <keyword type="macro" name="FU_DEVICE_FLAG_ALLOW_ONLINE" link="libfwupd-fwupd-enums.html#FU-DEVICE-FLAG-ALLOW-ONLINE:CAPS"/>
+    <keyword type="macro" name="FU_DEVICE_FLAG_ALLOW_OFFLINE" link="libfwupd-fwupd-enums.html#FU-DEVICE-FLAG-ALLOW-OFFLINE:CAPS"/>
+    <keyword type="macro" name="FU_DEVICE_FLAG_REQUIRE_AC" link="libfwupd-fwupd-enums.html#FU-DEVICE-FLAG-REQUIRE-AC:CAPS"/>
+    <keyword type="macro" name="FU_DEVICE_FLAG_LOCKED" link="libfwupd-fwupd-enums.html#FU-DEVICE-FLAG-LOCKED:CAPS"/>
+    <keyword type="macro" name="FU_DEVICE_FLAG_SUPPORTED" link="libfwupd-fwupd-enums.html#FU-DEVICE-FLAG-SUPPORTED:CAPS"/>
+    <keyword type="macro" name="FU_DEVICE_FLAG_NEEDS_BOOTLOADER" link="libfwupd-fwupd-enums.html#FU-DEVICE-FLAG-NEEDS-BOOTLOADER:CAPS"/>
+    <keyword type="macro" name="FU_DEVICE_FLAG_UNKNOWN" link="libfwupd-fwupd-enums.html#FU-DEVICE-FLAG-UNKNOWN:CAPS"/>
+    <keyword type="enum" name="enum FwupdInstallFlags" link="libfwupd-fwupd-enums.html#FwupdInstallFlags"/>
+    <keyword type="enum" name="enum FwupdUpdateState" link="libfwupd-fwupd-enums.html#FwupdUpdateState"/>
+    <keyword type="function" name="fwupd_result_new ()" link="FwupdResult.html#fwupd-result-new" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_new_from_data ()" link="FwupdResult.html#fwupd-result-new-from-data" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_add_guid ()" link="FwupdResult.html#fwupd-result-add-guid" since="0.7.2"/>
+    <keyword type="function" name="fwupd_result_has_guid ()" link="FwupdResult.html#fwupd-result-has-guid" since="0.7.2"/>
+    <keyword type="function" name="fwupd_result_get_guids ()" link="FwupdResult.html#fwupd-result-get-guids" since="0.7.2"/>
+    <keyword type="function" name="fwupd_result_get_guid_default ()" link="FwupdResult.html#fwupd-result-get-guid-default" since="0.7.2"/>
+    <keyword type="function" name="fwupd_result_get_unique_id ()" link="FwupdResult.html#fwupd-result-get-unique-id" since="0.7.3"/>
+    <keyword type="function" name="fwupd_result_set_unique_id ()" link="FwupdResult.html#fwupd-result-set-unique-id" since="0.7.3"/>
+    <keyword type="function" name="fwupd_result_get_device_id ()" link="FwupdResult.html#fwupd-result-get-device-id" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_device_id ()" link="FwupdResult.html#fwupd-result-set-device-id" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_device_name ()" link="FwupdResult.html#fwupd-result-get-device-name" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_device_name ()" link="FwupdResult.html#fwupd-result-set-device-name" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_device_description ()" link="FwupdResult.html#fwupd-result-get-device-description" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_device_description ()" link="FwupdResult.html#fwupd-result-set-device-description" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_device_version ()" link="FwupdResult.html#fwupd-result-get-device-version" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_device_version ()" link="FwupdResult.html#fwupd-result-set-device-version" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_device_version_lowest ()" link="FwupdResult.html#fwupd-result-get-device-version-lowest" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_device_version_lowest ()" link="FwupdResult.html#fwupd-result-set-device-version-lowest" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_device_version_bootloader ()" link="FwupdResult.html#fwupd-result-get-device-version-bootloader" since="0.8.0"/>
+    <keyword type="function" name="fwupd_result_set_device_version_bootloader ()" link="FwupdResult.html#fwupd-result-set-device-version-bootloader" since="0.8.0"/>
+    <keyword type="function" name="fwupd_result_get_device_flashes_left ()" link="FwupdResult.html#fwupd-result-get-device-flashes-left"/>
+    <keyword type="function" name="fwupd_result_set_device_flashes_left ()" link="FwupdResult.html#fwupd-result-set-device-flashes-left"/>
+    <keyword type="function" name="fwupd_result_get_device_flags ()" link="FwupdResult.html#fwupd-result-get-device-flags" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_device_flags ()" link="FwupdResult.html#fwupd-result-set-device-flags" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_add_device_flag ()" link="FwupdResult.html#fwupd-result-add-device-flag" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_remove_device_flag ()" link="FwupdResult.html#fwupd-result-remove-device-flag" since="0.7.3"/>
+    <keyword type="function" name="fwupd_result_has_device_flag ()" link="FwupdResult.html#fwupd-result-has-device-flag" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_device_created ()" link="FwupdResult.html#fwupd-result-get-device-created" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_device_created ()" link="FwupdResult.html#fwupd-result-set-device-created" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_device_modified ()" link="FwupdResult.html#fwupd-result-get-device-modified" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_device_modified ()" link="FwupdResult.html#fwupd-result-set-device-modified" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_device_checksum ()" link="FwupdResult.html#fwupd-result-get-device-checksum" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_device_checksum ()" link="FwupdResult.html#fwupd-result-set-device-checksum" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_device_checksum_kind ()" link="FwupdResult.html#fwupd-result-get-device-checksum-kind" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_device_checksum_kind ()" link="FwupdResult.html#fwupd-result-set-device-checksum-kind" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_device_provider ()" link="FwupdResult.html#fwupd-result-get-device-provider" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_device_provider ()" link="FwupdResult.html#fwupd-result-set-device-provider" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_device_vendor ()" link="FwupdResult.html#fwupd-result-get-device-vendor" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_device_vendor ()" link="FwupdResult.html#fwupd-result-set-device-vendor" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_update_size ()" link="FwupdResult.html#fwupd-result-get-update-size" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_update_size ()" link="FwupdResult.html#fwupd-result-set-update-size" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_update_version ()" link="FwupdResult.html#fwupd-result-get-update-version" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_update_version ()" link="FwupdResult.html#fwupd-result-set-update-version" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_update_filename ()" link="FwupdResult.html#fwupd-result-get-update-filename" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_update_filename ()" link="FwupdResult.html#fwupd-result-set-update-filename" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_update_state ()" link="FwupdResult.html#fwupd-result-get-update-state" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_update_state ()" link="FwupdResult.html#fwupd-result-set-update-state" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_update_checksum ()" link="FwupdResult.html#fwupd-result-get-update-checksum" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_update_checksum ()" link="FwupdResult.html#fwupd-result-set-update-checksum" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_update_checksum_kind ()" link="FwupdResult.html#fwupd-result-get-update-checksum-kind" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_update_checksum_kind ()" link="FwupdResult.html#fwupd-result-set-update-checksum-kind" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_update_uri ()" link="FwupdResult.html#fwupd-result-get-update-uri" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_update_uri ()" link="FwupdResult.html#fwupd-result-set-update-uri" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_update_homepage ()" link="FwupdResult.html#fwupd-result-get-update-homepage" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_update_homepage ()" link="FwupdResult.html#fwupd-result-set-update-homepage" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_update_id ()" link="FwupdResult.html#fwupd-result-get-update-id" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_update_id ()" link="FwupdResult.html#fwupd-result-set-update-id" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_update_description ()" link="FwupdResult.html#fwupd-result-get-update-description" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_update_description ()" link="FwupdResult.html#fwupd-result-set-update-description" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_update_vendor ()" link="FwupdResult.html#fwupd-result-get-update-vendor" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_update_vendor ()" link="FwupdResult.html#fwupd-result-set-update-vendor" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_update_summary ()" link="FwupdResult.html#fwupd-result-get-update-summary" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_update_summary ()" link="FwupdResult.html#fwupd-result-set-update-summary" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_update_error ()" link="FwupdResult.html#fwupd-result-get-update-error" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_update_error ()" link="FwupdResult.html#fwupd-result-set-update-error" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_update_trust_flags ()" link="FwupdResult.html#fwupd-result-get-update-trust-flags" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_update_trust_flags ()" link="FwupdResult.html#fwupd-result-set-update-trust-flags" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_update_license ()" link="FwupdResult.html#fwupd-result-get-update-license" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_update_license ()" link="FwupdResult.html#fwupd-result-set-update-license" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_update_name ()" link="FwupdResult.html#fwupd-result-get-update-name" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_update_name ()" link="FwupdResult.html#fwupd-result-set-update-name" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_to_data ()" link="FwupdResult.html#fwupd-result-to-data" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_to_string ()" link="FwupdResult.html#fwupd-result-to-string" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_get_guid ()" link="FwupdResult.html#fwupd-result-get-guid" deprecated="" since="0.7.0"/>
+    <keyword type="function" name="fwupd_result_set_guid ()" link="FwupdResult.html#fwupd-result-set-guid" deprecated="" since="0.7.0"/>
+    <keyword type="macro" name="FWUPD_TYPE_RESULT" link="FwupdResult.html#FWUPD-TYPE-RESULT:CAPS"/>
+    <keyword type="struct" name="struct FwupdResultClass" link="FwupdResult.html#FwupdResultClass"/>
+    <keyword type="struct" name="FwupdResult" link="FwupdResult.html#FwupdResult-struct"/>
+    <keyword type="property" name="The “device-id” property" link="FwupdResult.html#FwupdResult--device-id"/>
+    <keyword type="macro" name="FWUPD_CHECK_VERSION()" link="libfwupd-fwupd-version.html#FWUPD-CHECK-VERSION:CAPS"/>
+    <keyword type="macro" name="FWUPD_MAJOR_VERSION" link="libfwupd-fwupd-version.html#FWUPD-MAJOR-VERSION:CAPS"/>
+    <keyword type="macro" name="FWUPD_MINOR_VERSION" link="libfwupd-fwupd-version.html#FWUPD-MINOR-VERSION:CAPS"/>
+    <keyword type="macro" name="FWUPD_MICRO_VERSION" link="libfwupd-fwupd-version.html#FWUPD-MICRO-VERSION:CAPS"/>
+    <keyword type="constant" name="FWUPD_ERROR_INTERNAL" link="libfwupd-fwupd-error.html#FWUPD-ERROR-INTERNAL:CAPS"/>
+    <keyword type="constant" name="FWUPD_ERROR_VERSION_NEWER" link="libfwupd-fwupd-error.html#FWUPD-ERROR-VERSION-NEWER:CAPS"/>
+    <keyword type="constant" name="FWUPD_ERROR_VERSION_SAME" link="libfwupd-fwupd-error.html#FWUPD-ERROR-VERSION-SAME:CAPS"/>
+    <keyword type="constant" name="FWUPD_ERROR_ALREADY_PENDING" link="libfwupd-fwupd-error.html#FWUPD-ERROR-ALREADY-PENDING:CAPS"/>
+    <keyword type="constant" name="FWUPD_ERROR_AUTH_FAILED" link="libfwupd-fwupd-error.html#FWUPD-ERROR-AUTH-FAILED:CAPS"/>
+    <keyword type="constant" name="FWUPD_ERROR_READ" link="libfwupd-fwupd-error.html#FWUPD-ERROR-READ:CAPS"/>
+    <keyword type="constant" name="FWUPD_ERROR_WRITE" link="libfwupd-fwupd-error.html#FWUPD-ERROR-WRITE:CAPS"/>
+    <keyword type="constant" name="FWUPD_ERROR_INVALID_FILE" link="libfwupd-fwupd-error.html#FWUPD-ERROR-INVALID-FILE:CAPS"/>
+    <keyword type="constant" name="FWUPD_ERROR_NOT_FOUND" link="libfwupd-fwupd-error.html#FWUPD-ERROR-NOT-FOUND:CAPS"/>
+    <keyword type="constant" name="FWUPD_ERROR_NOTHING_TO_DO" link="libfwupd-fwupd-error.html#FWUPD-ERROR-NOTHING-TO-DO:CAPS"/>
+    <keyword type="constant" name="FWUPD_ERROR_NOT_SUPPORTED" link="libfwupd-fwupd-error.html#FWUPD-ERROR-NOT-SUPPORTED:CAPS"/>
+    <keyword type="constant" name="FWUPD_ERROR_SIGNATURE_INVALID" link="libfwupd-fwupd-error.html#FWUPD-ERROR-SIGNATURE-INVALID:CAPS"/>
+    <keyword type="constant" name="FWUPD_ERROR_AC_POWER_REQUIRED" link="libfwupd-fwupd-error.html#FWUPD-ERROR-AC-POWER-REQUIRED:CAPS"/>
+    <keyword type="constant" name="FWUPD_STATUS_UNKNOWN" link="libfwupd-fwupd-enums.html#FWUPD-STATUS-UNKNOWN:CAPS"/>
+    <keyword type="constant" name="FWUPD_STATUS_IDLE" link="libfwupd-fwupd-enums.html#FWUPD-STATUS-IDLE:CAPS"/>
+    <keyword type="constant" name="FWUPD_STATUS_LOADING" link="libfwupd-fwupd-enums.html#FWUPD-STATUS-LOADING:CAPS"/>
+    <keyword type="constant" name="FWUPD_STATUS_DECOMPRESSING" link="libfwupd-fwupd-enums.html#FWUPD-STATUS-DECOMPRESSING:CAPS"/>
+    <keyword type="constant" name="FWUPD_STATUS_DEVICE_RESTART" link="libfwupd-fwupd-enums.html#FWUPD-STATUS-DEVICE-RESTART:CAPS"/>
+    <keyword type="constant" name="FWUPD_STATUS_DEVICE_WRITE" link="libfwupd-fwupd-enums.html#FWUPD-STATUS-DEVICE-WRITE:CAPS"/>
+    <keyword type="constant" name="FWUPD_STATUS_DEVICE_VERIFY" link="libfwupd-fwupd-enums.html#FWUPD-STATUS-DEVICE-VERIFY:CAPS"/>
+    <keyword type="constant" name="FWUPD_STATUS_SCHEDULING" link="libfwupd-fwupd-enums.html#FWUPD-STATUS-SCHEDULING:CAPS"/>
+    <keyword type="constant" name="FWUPD_TRUST_FLAG_NONE" link="libfwupd-fwupd-enums.html#FWUPD-TRUST-FLAG-NONE:CAPS"/>
+    <keyword type="constant" name="FWUPD_TRUST_FLAG_PAYLOAD" link="libfwupd-fwupd-enums.html#FWUPD-TRUST-FLAG-PAYLOAD:CAPS"/>
+    <keyword type="constant" name="FWUPD_TRUST_FLAG_METADATA" link="libfwupd-fwupd-enums.html#FWUPD-TRUST-FLAG-METADATA:CAPS"/>
+    <keyword type="constant" name="FWUPD_INSTALL_FLAG_NONE" link="libfwupd-fwupd-enums.html#FWUPD-INSTALL-FLAG-NONE:CAPS"/>
+    <keyword type="constant" name="FWUPD_INSTALL_FLAG_OFFLINE" link="libfwupd-fwupd-enums.html#FWUPD-INSTALL-FLAG-OFFLINE:CAPS"/>
+    <keyword type="constant" name="FWUPD_INSTALL_FLAG_ALLOW_REINSTALL" link="libfwupd-fwupd-enums.html#FWUPD-INSTALL-FLAG-ALLOW-REINSTALL:CAPS"/>
+    <keyword type="constant" name="FWUPD_INSTALL_FLAG_ALLOW_OLDER" link="libfwupd-fwupd-enums.html#FWUPD-INSTALL-FLAG-ALLOW-OLDER:CAPS"/>
+    <keyword type="constant" name="FWUPD_INSTALL_FLAG_FORCE" link="libfwupd-fwupd-enums.html#FWUPD-INSTALL-FLAG-FORCE:CAPS"/>
+    <keyword type="constant" name="FWUPD_UPDATE_STATE_UNKNOWN" link="libfwupd-fwupd-enums.html#FWUPD-UPDATE-STATE-UNKNOWN:CAPS"/>
+    <keyword type="constant" name="FWUPD_UPDATE_STATE_PENDING" link="libfwupd-fwupd-enums.html#FWUPD-UPDATE-STATE-PENDING:CAPS"/>
+    <keyword type="constant" name="FWUPD_UPDATE_STATE_SUCCESS" link="libfwupd-fwupd-enums.html#FWUPD-UPDATE-STATE-SUCCESS:CAPS"/>
+    <keyword type="constant" name="FWUPD_UPDATE_STATE_FAILED" link="libfwupd-fwupd-enums.html#FWUPD-UPDATE-STATE-FAILED:CAPS"/>
+  </functions>
+</book>

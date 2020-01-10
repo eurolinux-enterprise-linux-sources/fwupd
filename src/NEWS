@@ -1,0 +1,396 @@
+Version 0.8.2
+~~~~~~~~~~~~~
+Released: 2017-04-20
+
+New Features:
+ - Add a config option to allow runtime disabling plugins by name (Richard Hughes)
+
+Bugfixes:
+ - Add DFU quirk for OpenPICC (Richard Hughes)
+ - Add DFU quirk for SIMtrace (Richard Hughes)
+ - Create directories in /var/cache as required (Richard Hughes)
+ - Fix the Requires lines in the dfu pkg-config file (Richard Hughes)
+ - Only try to mkdir the localstatedir if we have the right permissions (Shea Levy)
+ - Set the source origin when saving metadata (Richard Hughes)
+ - Support proxy servers in fwupdmgr (Richard Hughes)
+ - Use a 60 second timeout on all client downloads (Richard Hughes)
+
+Version 0.8.1
+~~~~~~~~~~~~~
+Released: 2017-02-27
+
+Bugfixes:
+ - Adjust systemd confinement restrictions (Mario Limonciello, Richard Hughes)
+ - Do not hardcode docbook2man path (Kai Krakow)
+ - Don't initialize libsmbios on unsupported systems (Mario Limonciello)
+ - Fix a crash when enumerating devices on a Dell WLD15 (Richard Hughes)
+ - Fix compiler warnings (Kai Krakow)
+ - Fix fwupdmgr timeout with missing pending database (Richard Hughes)
+
+Version 0.8.0
+~~~~~~~~~~~~~
+Released: 2017-02-08
+
+New Features:
+ - Add a set of vfuncs that are run before and after a device update (Richard Hughes)
+ - Add Dell-specific functionality to allow other plugins turn on TBT/GPIO (Mario Limonciello)
+ - Add support for Intel Thunderbolt devices (Richard Hughes, Mario Limonciello)
+ - Add support for Logitech Unifying devices (Richard Hughes)
+ - Add support for Synaptics MST cascades hubs (Mario Limonciello)
+ - Add support for the Altus-Metrum ChaosKey device (Richard Hughes)
+ - Add VerifyUpdate to update the device checksums server-side (Richard Hughes)
+ - Allow the metadata to match a version of fwupd and the existing fw version (Richard Hughes)
+
+Bugfixes:
+ - Add a new method for forcing a controller to flash mode (Mario Limonciello)
+ - Always make sure we're getting a C99 compiler (Richard Hughes)
+ - Close USB devices before error returns (Tsunghan Liu)
+ - Don't read data from some DfuSe targets (Richard Hughes)
+ - Include all debug messages when run with --verbose (Richard Hughes)
+ - Return the pending UEFI update when not on AC power (Richard Hughes)
+ - Use a heuristic for the start address if the firmware has no DfuSe footer (Richard Hughes)
+ - Use more restrictive settings when running under systemd (Richard Hughes, Mario Limonciello)
+
+Version 0.7.5
+~~~~~~~~~~~~~
+Released: 2016-10-19
+
+New Features:
+ - Add a 'replace-data' command to dfu-tool (Richard Hughes)
+ - Use an animated progress bar when performing DFU operations (Richard Hughes)
+
+Bugfixes:
+ - Add quirks for HydraBus as it does not have a DFU runtime (Richard Hughes)
+ - Don't create the UEFI dummy device if the unlock will happen on next boot (Richard Hughes)
+ - Enable hardening flags on more binaries (Mario Limonciello)
+ - Fix an assert when unlocking the dummy ESRT device (Richard Hughes)
+ - Fix writing firmware to devices using the ST reference bootloader (Richard Hughes)
+ - Match the Dell TB16 device (Mario Limonciello)
+ - Re-get the quirks when the DfuDevice gets a new GUsbDevice (Richard Hughes)
+ - Show the nicely formatted target name for DfuSe devices (Richard Hughes)
+ - Verify devices support updating in mode they are called (Mario Limonciello)
+
+Version 0.7.4
+~~~~~~~~~~~~~
+Released: 2016-09-19
+
+New Features:
+ - Add dfu_firmware_add_symbol() (Richard Hughes)
+ - Allow the argument to 'dfu-tool set-release' be major.minor (Richard Hughes)
+ - Load the Altos USB descriptor from ELF files (Richard Hughes)
+ - Support writing the IHEX symbol table (Richard Hughes)
+
+Bugfixes:
+ - Add a fallback for older appstream-glib releases (Richard Hughes)
+ - Fix a possible crash when uploading firmware files using libdfu (Richard Hughes)
+ - Fix libfwupd self tests when a host-provided fwupd is not available (Richard Hughes)
+ - Show the human-readable version in the 'dfu-tool dump' output (Richard Hughes)
+ - Write the ELF files with the correct section type (Richard Hughes)
+
+Version 0.7.3
+~~~~~~~~~~~~~
+Released: 2016-08-29
+
+New Features:
+ - Add a set-address and set-target-size commands to dfu-util (Richard Hughes)
+ - Add a small library for talking with 0bitdo hardware (Richard Hughes)
+ - Add Dell TPM and TB15/WD15 support via new Dell provider (Mario Limonciello)
+ - Add FU_DEVICE_FLAG_NEEDS_BOOTLOADER (Richard Hughes)
+ - Add fwupd_client_get_status() (Richard Hughes)
+ - Add fwupd_result_get_unique_id() (Richard Hughes)
+ - Add initial ELF reading and writing support to libdfu (Richard Hughes)
+ - Add support for installing multiple devices from a CAB file (Richard Hughes)
+ - Allow providers to export percentage completion (Richard Hughes)
+ - Show a progress notification when installing firmware (Richard Hughes)
+ - Show the vendor flashing instructions when installing (Richard Hughes)
+
+Bugfixes:
+ - Add XPS 9250 to Dell TPM modeswitch blacklist (Mario Limonciello)
+ - Allow blacklisting devices by their GUID (Richard Hughes)
+ - Conditionally enable all providers based upon installed (Mario Limonciello)
+ - Display flashes left in results output when it gets low (Mario Limonciello)
+ - Do not attempt to add DFU devices not in runtime mode (Richard Hughes)
+ - Do not use the deprecated GNOME_COMPILE_WARNINGS (Richard Hughes)
+ - Don't fail while checking versions or locked state (Richard Hughes)
+ - Embed fwupd version in generated documentation (Mario Limonciello)
+ - Ensure the ID is set when getting local firmware details (Richard Hughes)
+ - Fix gtk-doc build when srcdir != builddir (Ting-Wei Lan)
+ - Fix libdfu hang when parsing corrupt IHEX files (Richard Hughes)
+ - Ignore devices that do not add at least one GUID (Richard Hughes)
+ - In get-details output, display the blob filename (Mario Limonciello)
+ - Save the unique ID in the pending database (Richard Hughes)
+ - Support the 'DEVO' cipher kind in libdfu (Richard Hughes)
+ - Switch to the Amazon S3 CDN for firmware metadata (Richard Hughes)
+ - Update fwupdmgr manpage for new commands and arguments (Mario Limonciello)
+ - Use a private gnupg key store (Richard Hughes)
+ - Use the correct firmware when installing a composite device (Richard Hughes)
+ - Use the SHA1 hash of the local file data as the origin (Richard Hughes)
+
+Version 0.7.2
+~~~~~~~~~~~~~
+Released: 2016-06-13
+
+New Features:
+ - Add a GetDetailsLocal() method to eventually replace GetDetails() (Richard Hughes)
+ - Add fu_device_get_alternate() (Richard Hughes)
+ - Allow devices to have multiple assigned GUIDs (Richard Hughes)
+ - Allow metainfo files to match only specific revisions of devices (Richard Hughes)
+ - Show the DFU protocol version in 'dfu-tool list' (Richard Hughes)
+
+Bugfixes:
+ - Enforce allowing providers to take away flash abilities (Mario Limonciello)
+ - Only claim the DFU interface when required (Richard Hughes)
+ - Only return updatable devices from GetDevices() (Richard Hughes)
+
+Version 0.7.1
+~~~~~~~~~~~~~
+Released: 2016-05-13
+
+New Features:
+ - Add a --force flag to override provider warnings (Mario Limonciello)
+ - Add device-added, device-removed and device-changed signals (Richard Hughes)
+ - Add dfu_image_get_element_default() (Richard Hughes)
+ - Add for a new device field "Flashes Left" (Mario Limonciello)
+ - Add fwupd_client_connect() (Richard Hughes)
+ - Add the 'monitor' debugging command for fwupdmgr (Richard Hughes)
+ - Add the 'supported' flag to the FuDevice (Richard Hughes)
+
+Bugfixes:
+ - Add summary and name field for Rival SteelSeries (Mario Limonciello)
+ - Fix a critical warning when restarting the daemon (Richard Hughes)
+ - Fix BE issues when reading and writing DFU files (Mario Limonciello, Richard Hughes)
+ - Make the device display name nicer (Richard Hughes, Richard Hughes)
+ - Match the AppStream metadata after a device has been added (Richard Hughes)
+ - Remove non-interactive pinentry setting from fu-keyring (Mario Limonciello)
+ - Return all update descriptions newer than the installed version (Richard Hughes)
+ - Set the device description when parsing local firmware files (Richard Hughes)
+
+Version 0.7.0
+~~~~~~~~~~~~~
+Released: 2016-04-01
+
+New Features:
+ - Add a version plugin for SteelSeries hardware (Richard Hughes)
+ - Add FwupdClient and FwupdResult to libfwupd (Richard Hughes)
+ - Generate gtk-doc documentation for libfwupd (Richard Hughes)
+ - Return the device flags when getting firmware details (Richard Hughes)
+ - Support other checksum kinds (Richard Hughes)
+
+Bugfixes:
+ - Add Alienware to the version quirk table (Mario Limonciello)
+ - Allow the test suite to run in %check (Richard Hughes)
+ - Do not return updates that require AC when on battery (Richard Hughes)
+ - Do not use /tmp for downloaded files (Richard Hughes)
+ - Test that GPG key import actually was successful (Mario Limonciello)
+
+Version 0.6.3
+~~~~~~~~~~~~~
+Released: 2016-03-14
+
+New Features:
+ - Add an unlock method for devices (Richard Hughes)
+ - Add a simple plugin infrastructure (Richard Hughes)
+ - Add ESRT enable method into UEFI provider (Mario Limonciello)
+ - Install the hardcoded firmware AppStream file (Richard Hughes)
+
+Bugfixes:
+ - Correct the BCD version number for DFU 1.1 (Richard Hughes)
+ - Do not use deprecated API from libappstream-glib (Richard Hughes)
+ - Ignore the DFU runtime on the DW1820A (Richard Hughes)
+ - Only read PCI OptionROM firmware when devices are manually unlocked (Richard Hughes)
+ - Require AC power before scheduling some types of firmware update (Richard Hughes)
+ - Show ignored DFU devices in dfu-util, but not in fwupd (Richard Hughes)
+
+Version 0.6.2
+~~~~~~~~~~~~~
+Released: 2016-02-12
+
+New Features:
+ - Add 'Created' and 'Modified' properties on managed devices (Richard Hughes)
+
+Bugfixes:
+ - Fix get-results for UEFI provider (Mario Limonciello)
+ - Support vendor-specific UEFI version encodings (Richard Hughes)
+
+Version 0.6.1
+~~~~~~~~~~~~~
+Released: 2016-01-19
+
+Bugfixes:
+ - Always persist ColorHug devices after replug (Richard Hughes)
+ - Do not misdetect different ColorHug devices (Richard Hughes)
+ - Only dump the profiling data when run with --verbose (Richard Hughes)
+
+Version 0.6.0
+~~~~~~~~~~~~~
+Released: 2015-12-07
+
+Notes:
+ - This release adds a new GObject library called libdfu and a command line
+   client called dfu-tool. This is a low-level tool used to upgrade USB device
+   firmware and can either be shipped in the same package as fwupd or split off
+   as separate subpackages.
+
+New Features:
+ - Add support for automatically updating USB DFU-capable devices (Richard Hughes)
+
+Bugfixes:
+ - Emit the changed signal after doing an update (Richard Hughes)
+ - Export the AppStream ID when returning device results (Richard Hughes)
+ - Fix compile with --disable-shared (Richard Hughes)
+ - Use new API available in fwup 0.5 (Richard Hughes, Mario Limonciello)
+ - Use the same device identification string format as Microsoft (Richard Hughes)
+
+Version 0.5.3
+~~~~~~~~~~~~~
+Released: 2015-11-05
+
+Bugfixes:
+ - Avoid seeking when reading the file magic during refresh (Richard Hughes)
+ - Do not assume that the compressed XML data will be NUL terminated (Richard Hughes)
+ - Use the correct user agent string for fwupdmgr (Richard Hughes)
+
+Version 0.5.2
+~~~~~~~~~~~~~
+Released: 2015-10-28
+
+New Features:
+ - Add profiling data to debug slow startup times (Richard Hughes)
+ - Support cabinet archives files with more than one firmware (Richard Hughes)
+
+Bugfixes:
+ - Add the update description to the GetDetails results (Richard Hughes)
+ - Clear the in-memory firmware store only after parsing a valid XML file (Richard Hughes)
+ - Ensure D-Bus remote errors are registered at fwupdmgr startup (Richard Hughes)
+ - Fix verify-update to produce components with the correct provide values (Richard Hughes)
+ - Require appstream-glib 0.5.1 (Mirco Tischler)
+ - Show the dotted-decimal representation of the UEFI version number (Richard Hughes)
+ - When the version is from the 'FW' extension do not cache the device (Richard Hughes)
+
+Version 0.5.1
+~~~~~~~~~~~~~
+Released: 2015-09-21
+
+Bugfixes:
+ - Fix the error message when no devices can be updated (Richard Hughes)
+ - Fix reading symlink to prevent crash with some compilers (Kalev Lember)
+
+Version 0.5.0
+~~~~~~~~~~~~~
+Released: 2015-09-15
+
+New Features:
+ - Raise the dep on GLib to support and use g_autoptr() (Richard Hughes)
+
+Bugfixes:
+ - Do not merge existing firmware metadata (Richard Hughes)
+ - Do not reboot if racing with the PackageKit offline update mechanism (Richard Hughes)
+
+Version 0.1.6
+~~~~~~~~~~~~~
+Released: 2015-09-10
+
+New Features:
+ - Remove fwsignd, we have the LVFS now (Richard Hughes)
+
+Bugfixes:
+ - Add application metadata when getting the updates list (Richard Hughes)
+ - Depend on appstream-glib >= 0.5.0 (Richard Hughes)
+ - Don't apply firmware if something else is processing the update (Richard Hughes)
+ - Install fwupd into /usr/lib/$(triplet)/fwupd instead (Mario Limonciello)
+ - Simplify the version properties on devices to avoid complexity (Richard Hughes)
+ - Update the offline update service to invoke right command (Kalev Lember)
+ - Use the new secure metadata URI (Richard Hughes)
+
+Version 0.1.5
+~~~~~~~~~~~~~
+Released: 2015-08-12
+
+Notes:
+ - For the device verification code to work correctly you need at least
+   libappstream-glib 0.5.0 installed.
+
+New Features:
+ - Add a Raspberry Pi firmware provider (Richard Hughes)
+ - Add a simple config file to store the correct LVFS download URI (Richard Hughes)
+ - Make parsing the option ROM runtime optional (Richard Hughes)
+
+Bugfixes:
+ - Allow fwupd to be autostarted by systemd (Richard Hughes)
+ - Allow no arguments to 'fwupdmgr verify-update' and use sane defaults (Richard Hughes)
+ - Devices with option ROM are always internal (Richard Hughes)
+ - Do not pre-convert the update description from AppStream XML (Richard Hughes)
+ - Fix validation of written firmware (Richard Hughes)
+ - Move the verification and metadata matching phase to the daemon (Richard Hughes)
+ - Sign the test binary with the correct key (Richard Hughes)
+ - Use the AppStream 0.9 firmware specification by default (Richard Hughes)
+
+Version 0.1.4
+~~~~~~~~~~~~~
+Released: 2015-07-25
+
+Notes:
+ - In this release we've moved the LVFS website to the fwupd project and made
+   them work really well together. To update all the firmware on your system
+   is now just a case of "fwupdmgr refresh && fwupdmgr update"
+ - We've also added verification of BIOS and PCI ROM firmware, which may be
+   useful for forensics or to verify that system updates have been applied.
+
+New Features:
+ - Actually parse the complete PCI option ROM (Richard Hughes)
+ - Add a 'fwupdmgr update' command to update all devices to latest versions (Richard Hughes)
+ - Add a simple signing server that operates on .cab files (Richard Hughes)
+ - Add a 'verify' command that verifies the cryptographic hash of device firmware (Richard Hughes)
+ - Allow clients to add new firmware metadata to the system cache (Richard Hughes)
+ - Move GetUpdates to the daemon (Richard Hughes)
+ - Move the LVFS website to the fwupd project (Richard Hughes)
+
+Bugfixes:
+ - Accept multiple files at one time when using fwupdmgr dump-rom (Richard Hughes)
+ - Automatically download metadata using fwupdmgr if required (Richard Hughes)
+ - Do not return NULL as a gboolean (Thomas Hindoe Paaboel Andersen)
+ - Don't call efibootmgr after fwupdate (Mario Limonciello)
+ - Fallback to offline install when calling the update argument (Mario Limonciello)
+ - Fix Intel VBIOS detection on Dell hardware (Richard Hughes)
+ - Reload appstream data after refreshing (Mario Limonciello)
+ - Use the new LVFS GPG key (Richard Hughes)
+ - Fix build: libgusb is required even without colorhug support (Jussi Kukkonen)
+
+Version 0.1.3
+~~~~~~~~~~~~~
+Released: 2015-05-28
+
+New Features:
+ - Get the firmware version from the device descriptors (Richard Hughes)
+ - Run the offline actions using systemd when required (Richard Hughes)
+ - Support OpenHardware devices using the fwupd vendor extensions (Richard Hughes)
+
+Bugfixes:
+ - Add an UNKNOWN status so we can return meaningful enum values (Richard Hughes)
+ - Coldplug the devices before acquiring the well known name (Richard Hughes)
+
+Version 0.1.2
+~~~~~~~~~~~~~
+Released: 2015-04-22
+ - Add some guidelines for vendors to README (Richard Hughes)
+ - Only allow signed firmware to be upgraded without a password (Richard Hughes)
+
+Version 0.1.1
+~~~~~~~~~~~~~
+Released: 2015-03-23
+
+New Features:
+ - Add a 'get-updates' command to fwupdmgr (Richard Hughes)
+ - Add and document the offline-update lifecycle (Richard Hughes)
+ - Create a libfwupd shared library (Richard Hughes)
+
+Bugfixes:
+ - Create runtime directories if they do not exist (Richard Hughes)
+ - Do not crash when there are no devices to return (Richard Hughes)
+
+Version 0.1.0
+~~~~~~~~~~~~~
+Released: 2015-03-16
+
+Notes:
+ - fwupd is a simple daemon to allow session software to update firmware.

@@ -1,0 +1,26 @@
+From 58369cde7db9e086a5dd0be4a5c49703d686a02f Mon Sep 17 00:00:00 2001
+From: Richard Hughes <richard@hughsie.com>
+Date: Mon, 8 May 2017 19:10:57 +0100
+Subject: [PATCH] Do not use the LVFS
+
+---
+ data/fwupd.conf | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/data/fwupd.conf b/data/fwupd.conf
+index 158f112..45a4412 100644
+--- a/data/fwupd.conf
++++ b/data/fwupd.conf
+@@ -4,7 +4,8 @@
+ #
+ # If you want to use testing firmware then change this value to:
+ #    https://s3.amazonaws.com/lvfsbucket/downloads/firmware-testing.xml.gz
+-DownloadURI=https://s3.amazonaws.com/lvfsbucket/downloads/firmware.xml.gz
++#DownloadURI=https://s3.amazonaws.com/lvfsbucket/downloads/firmware.xml.gz
++DownloadURI=
+ 
+ # If we should verify option ROM images
+ EnableOptionROM=true
+-- 
+2.12.2
+
