@@ -24,11 +24,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "fwupd-common-private.h"
+
 #include "fu-rom.h"
 
 static gboolean
 fu_fuzzer_rom_parse (const gchar *fn, GError **error)
 {
+	GPtrArray *checksums;
 	g_autoptr(FuRom) rom = NULL;
 	g_autoptr(GFile) file = NULL;
 
@@ -40,7 +43,13 @@ fu_fuzzer_rom_parse (const gchar *fn, GError **error)
 	g_print ("filename:%s\n", fn);
 	g_print ("kind:%s\n", fu_rom_kind_to_string (fu_rom_get_kind (rom)));
 	g_print ("version:%s\n", fu_rom_get_version (rom));
-	g_print ("checksum:%s\n", fu_rom_get_checksum (rom));
+	checksums = fu_rom_get_checksums (rom);
+	for (guint i = 0; i < checksums->len; i++) {
+		const gchar *checksum = g_ptr_array_index (checksums, i);
+		g_autofree gchar *checksum_display = NULL;
+		checksum_display = fwupd_checksum_format_for_display (checksum);
+		g_print ("checksum:%s\n", checksum_display);
+	}
 	g_print ("guid:%s\n", fu_rom_get_guid (rom));
 	g_print ("vendor:%u\n", fu_rom_get_vendor (rom));
 	g_print ("model:%u\n\n", fu_rom_get_model (rom));
@@ -50,12 +59,10 @@ fu_fuzzer_rom_parse (const gchar *fn, GError **error)
 static gboolean
 fu_fuzzer_write_files (GHashTable *hash, GError **error)
 {
-	GList *l;
 	GString *str;
 	g_autoptr(GList) keys = g_hash_table_get_keys (hash);
 
-	for (l = keys; l != NULL; l = l->next) {
-		g_autoptr(FuRom) rom = fu_rom_new ();
+	for (GList *l = keys; l != NULL; l = l->next) {
 		g_autofree gchar *filename = NULL;
 		const gchar *fn = l->data;
 		filename = g_build_filename ("fuzzing", fn, NULL);
@@ -156,7 +163,6 @@ fu_fuzzer_rom_create (GError **error)
 int
 main (int argc, char *argv[])
 {
-	guint i;
 	gboolean verbose = FALSE;
 	g_autoptr(GError) error_parse = NULL;
 	g_autoptr(GOptionContext) context = NULL;
@@ -182,7 +188,7 @@ main (int argc, char *argv[])
 		g_setenv ("G_MESSAGES_DEBUG", "all", TRUE);
 	if (g_strcmp0 (argv[1], "rom") == 0) {
 		gboolean all_successful = TRUE;
-		for (i = 2; i < (guint) argc; i++) {
+		for (guint i = 2; i < (guint) argc; i++) {
 			g_autoptr(GError) error = NULL;
 			if (!fu_fuzzer_rom_parse (argv[i], &error)) {
 				g_print ("Failed to parse %s: %s\n",

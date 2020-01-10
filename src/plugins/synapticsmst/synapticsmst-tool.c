@@ -31,7 +31,6 @@
 #include <glib-unix.h>
 #include <libintl.h>
 #include <locale.h>
-#include "fu-dell-common.h"
 
 typedef struct {
 	GCancellable		*cancellable;
@@ -39,13 +38,6 @@ typedef struct {
 	gboolean		 force;
 	GPtrArray		*device_array;
 } SynapticsMSTToolPrivate;
-
-/* GUID isn't in use by the -tool, this lets it get by */
-#ifndef fu_dell_get_dock_type
-const gchar *fu_dell_get_dock_type (guint8 type) {
-	return NULL;
-}
-#endif
 
 static void
 synapticsmst_tool_private_free (SynapticsMSTToolPrivate *priv)
@@ -95,9 +87,7 @@ synapticsmst_tool_add (GPtrArray *array,
 		       const gchar *description,
 		       FuUtilPrivateCb callback)
 {
-	guint i;
-	FuUtilItem *item;
-	g_auto (GStrv) names = NULL;
+	g_auto(GStrv) names = NULL;
 
 	g_return_if_fail (name != NULL);
 	g_return_if_fail (description != NULL);
@@ -105,8 +95,8 @@ synapticsmst_tool_add (GPtrArray *array,
 
 	/* add each one */
 	names = g_strsplit (name, ",", -1);
-	for (i = 0; names[i] != NULL; i++) {
-		item = g_new0 (FuUtilItem, 1);
+	for (guint i = 0; names[i] != NULL; i++) {
+		FuUtilItem *item = g_new0 (FuUtilItem, 1);
 		item->name = g_strdup (names[i]);
 		if (i == 0) {
 			item->description = g_strdup (description);
@@ -124,44 +114,41 @@ synapticsmst_tool_add (GPtrArray *array,
 static gchar *
 synapticsmst_tool_get_descriptions (GPtrArray *array)
 {
-	guint i;
-	gsize j;
 	gsize len;
 	const gsize max_len = 31;
-	FuUtilItem *item;
-	GString *string;
+	GString *str;
 
 	/* print each command */
-	string = g_string_new ("");
-	for (i = 0; i < array->len; i++) {
-		item = g_ptr_array_index (array, i);
-		g_string_append (string, "  ");
-		g_string_append (string, item->name);
+	str = g_string_new ("");
+	for (guint i = 0; i < array->len; i++) {
+		FuUtilItem *item = g_ptr_array_index (array, i);
+		g_string_append (str, "  ");
+		g_string_append (str, item->name);
 		len = strlen (item->name) + 2;
 		if (item->arguments != NULL) {
-			g_string_append (string, " ");
-			g_string_append (string, item->arguments);
+			g_string_append (str, " ");
+			g_string_append (str, item->arguments);
 			len += strlen (item->arguments) + 1;
 		}
 		if (len < max_len) {
-			for (j = len; j < max_len + 1; j++)
-				g_string_append_c (string, ' ');
-			g_string_append (string, item->description);
-			g_string_append_c (string, '\n');
+			for (gsize j = len; j < max_len + 1; j++)
+				g_string_append_c (str, ' ');
+			g_string_append (str, item->description);
+			g_string_append_c (str, '\n');
 		} else {
-			g_string_append_c (string, '\n');
-			for (j = 0; j < max_len + 1; j++)
-				g_string_append_c (string, ' ');
-			g_string_append (string, item->description);
-			g_string_append_c (string, '\n');
+			g_string_append_c (str, '\n');
+			for (gsize j = 0; j < max_len + 1; j++)
+				g_string_append_c (str, ' ');
+			g_string_append (str, item->description);
+			g_string_append_c (str, '\n');
 		}
 	}
 
 	/* remove trailing newline */
-	if (string->len > 0)
-		g_string_set_size (string, string->len - 1);
+	if (str->len > 0)
+		g_string_set_size (str, str->len - 1);
 
-	return g_string_free (string, FALSE);
+	return g_string_free (str, FALSE);
 }
 
 static gboolean
@@ -258,7 +245,8 @@ synapticsmst_tool_enumerate (SynapticsMSTToolPrivate *priv,
 		const gchar *board_id = NULL;
 		device = g_ptr_array_index (priv->device_array, i);
 		g_print ("[Device %1d]\n", i+1);
-		if (!synapticsmst_device_enumerate_device (device, error))
+		if (!synapticsmst_device_enumerate_device (device, NULL, NULL,
+							   error))
 			return FALSE;
 
 		board_id = synapticsmst_device_board_id_to_string (synapticsmst_device_get_board_id (device));
@@ -304,7 +292,7 @@ synapticsmst_tool_flash (SynapticsMSTToolPrivate *priv,
 		return FALSE;
 
 	device = g_ptr_array_index (priv->device_array, (device_index - 1));
-	if (!synapticsmst_device_enumerate_device (device, error))
+	if (!synapticsmst_device_enumerate_device (device, NULL, NULL, error))
 		return FALSE;
 
 	if (synapticsmst_device_board_id_to_string (synapticsmst_device_get_board_id (device)) == NULL) {
@@ -344,12 +332,9 @@ synapticsmst_tool_run (SynapticsMSTToolPrivate *priv,
 		       guint8 device_index,
 		       GError **error)
 {
-	guint i;
-	FuUtilItem *item;
-
 	/* find command */
-	for (i = 0; i < priv->cmd_array->len; i++) {
-		item = g_ptr_array_index (priv->cmd_array, i);
+	for (guint i = 0; i < priv->cmd_array->len; i++) {
+		FuUtilItem *item = g_ptr_array_index (priv->cmd_array, i);
 		if (g_strcmp0 (item->name, command) == 0)
 			return item->callback (priv, values, device_index, error);
 	}

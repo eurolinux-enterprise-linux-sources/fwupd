@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2016 Richard Hughes <richard@hughsie.com>
+ * Copyright (C) 2016-2017 Richard Hughes <richard@hughsie.com>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -31,8 +31,18 @@
 #include <valgrind.h>
 #endif /* HAVE_VALGRIND */
 
+#include "fu-device-private.h"
 #include "fu-plugin-private.h"
 #include "fu-pending.h"
+
+/**
+ * SECTION:fu-plugin
+ * @short_description: a daemon plugin
+ *
+ * An object that represents a plugin run by the daemon.
+ *
+ * See also: #FuDevice
+ */
 
 #define	FU_PLUGIN_COLDPLUG_DELAY_MAXIMUM	3000u	/* ms */
 
@@ -42,7 +52,13 @@ typedef struct {
 	GModule			*module;
 	GUsbContext		*usb_ctx;
 	gboolean		 enabled;
+	guint			 order;
+	GPtrArray		*rules[FU_PLUGIN_RULE_LAST];
 	gchar			*name;
+	FuHwids			*hwids;
+	FuQuirks		*quirks;
+	GPtrArray		*supported_guids;
+	FuSmbios		*smbios;
 	GHashTable		*devices;	/* platform_id:GObject */
 	GHashTable		*devices_delay;	/* FuDevice:FuPluginHelper */
 	FuPluginData		*data;
@@ -51,6 +67,7 @@ typedef struct {
 enum {
 	SIGNAL_DEVICE_ADDED,
 	SIGNAL_DEVICE_REMOVED,
+	SIGNAL_DEVICE_REGISTER,
 	SIGNAL_STATUS_CHANGED,
 	SIGNAL_PERCENTAGE_CHANGED,
 	SIGNAL_RECOLDPLUG,
@@ -67,6 +84,8 @@ typedef const gchar	*(*FuPluginGetNameFunc)		(void);
 typedef void		 (*FuPluginInitFunc)		(FuPlugin	*plugin);
 typedef gboolean	 (*FuPluginStartupFunc)		(FuPlugin	*plugin,
 							 GError		**error);
+typedef void		 (*FuPluginDeviceRegisterFunc)	(FuPlugin	*plugin,
+							 FuDevice	*device);
 typedef gboolean	 (*FuPluginDeviceFunc)		(FuPlugin	*plugin,
 							 FuDevice	*device,
 							 GError		**error);
@@ -159,9 +178,10 @@ fu_plugin_cache_remove (FuPlugin *plugin, const gchar *id)
  * fu_plugin_get_data:
  * @plugin: A #FuPlugin
  *
- * Gets the per-plugin allocated private data.
+ * Gets the per-plugin allocated private data. This will return %NULL unless
+ * fu_plugin_alloc_data() has been called by the plugin.
  *
- * Returns: (transfer full): a pointer to a structure, or %NULL for unset.
+ * Returns: (transfer none): a pointer to a structure, or %NULL for unset.
  *
  * Since: 0.8.0
  **/
@@ -226,7 +246,8 @@ fu_plugin_set_usb_context (FuPlugin *plugin, GUsbContext *usb_ctx)
  * fu_plugin_get_enabled:
  * @plugin: A #FuPlugin
  *
- * Returns if the plugin is enabled.
+ * Returns if the plugin is enabled. Plugins may self-disable using
+ * fu_plugin_set_enabled() or can be disabled by the daemon.
  *
  * Returns: %TRUE if the plugin is currently enabled.
  *
@@ -320,6 +341,32 @@ fu_plugin_device_add (FuPlugin *plugin, FuDevice *device)
 	g_signal_emit (plugin, signals[SIGNAL_DEVICE_ADDED], 0, device);
 }
 
+/**
+ * fu_plugin_device_register:
+ * @plugin: A #FuPlugin
+ * @device: A #FuDevice
+ *
+ * Registers the device with other plugins so they can set metadata.
+ *
+ * Plugins do not have to call this manually as this is done automatically
+ * when using fu_plugin_device_add(). They may wish to use this manually
+ * if for intance the coldplug should be ignored based on the metadata
+ * set from other plugins.
+ *
+ * Since: 0.9.7
+ **/
+void
+fu_plugin_device_register (FuPlugin *plugin, FuDevice *device)
+{
+	g_return_if_fail (FU_IS_PLUGIN (plugin));
+	g_return_if_fail (FU_IS_DEVICE (device));
+
+	g_debug ("emit device-register from %s: %s",
+		 fu_plugin_get_name (plugin),
+		 fu_device_get_id (device));
+	g_signal_emit (plugin, signals[SIGNAL_DEVICE_REGISTER], 0, device);
+}
+
 typedef struct {
 	FuPlugin	*plugin;
 	FuDevice	*device;
@@ -340,8 +387,8 @@ static gboolean
 fu_plugin_device_add_delay_cb (gpointer user_data)
 {
 	FuPluginHelper *helper = (FuPluginHelper *) user_data;
-	g_hash_table_remove (helper->devices, helper->device);
 	fu_plugin_device_add (helper->plugin, helper->device);
+	g_hash_table_remove (helper->devices, helper->device);
 	fu_plugin_helper_free (helper);
 	return FALSE;
 }
@@ -384,8 +431,8 @@ fu_plugin_device_add_delay (FuPlugin *plugin, FuDevice *device)
 	/* already waiting for add */
 	helper = g_hash_table_lookup (priv->devices_delay, device);
 	if (helper != NULL) {
-		g_warning ("ignoring add-delay as device %s already pending",
-			   fu_device_get_id (device));
+		g_debug ("ignoring add-delay as device %s already pending",
+			 fu_device_get_id (device));
 		return;
 	}
 
@@ -400,7 +447,7 @@ fu_plugin_device_add_delay (FuPlugin *plugin, FuDevice *device)
 }
 
 /**
- * fu_plugin_device_add:
+ * fu_plugin_device_remove:
  * @plugin: A #FuPlugin
  * @device: A #FuDevice
  *
@@ -482,6 +529,229 @@ fu_plugin_recoldplug (FuPlugin *plugin)
 {
 	g_return_if_fail (FU_IS_PLUGIN (plugin));
 	g_signal_emit (plugin, signals[SIGNAL_RECOLDPLUG], 0);
+}
+
+/**
+ * fu_plugin_check_hwid:
+ * @plugin: A #FuPlugin
+ * @hwid: A Hardware ID GUID, e.g. `6de5d951-d755-576b-bd09-c5cf66b27234`
+ *
+ * Checks to see if a specific GUID exists. All hardware IDs on a
+ * specific system can be shown using the `fwupdmgr hwids` command.
+ *
+ * Returns: %TRUE if the HwId is found on the system.
+ *
+ * Since: 0.9.1
+ **/
+gboolean
+fu_plugin_check_hwid (FuPlugin *plugin, const gchar *hwid)
+{
+	FuPluginPrivate *priv = GET_PRIVATE (plugin);
+	if (priv->hwids == NULL)
+		return FALSE;
+	return fu_hwids_has_guid (priv->hwids, hwid);
+}
+
+/**
+ * fu_plugin_check_supported:
+ * @plugin: A #FuPlugin
+ * @guid: A Hardware ID GUID, e.g. `6de5d951-d755-576b-bd09-c5cf66b27234`
+ *
+ * Checks to see if a specific device GUID is supported, i.e. available in the
+ * AppStream metadata.
+ *
+ * Returns: %TRUE if the device is supported.
+ *
+ * Since: 1.0.0
+ **/
+gboolean
+fu_plugin_check_supported (FuPlugin *plugin, const gchar *guid)
+{
+	FuPluginPrivate *priv = GET_PRIVATE (plugin);
+	if (priv->supported_guids == NULL)
+		return FALSE;
+	for (guint i = 0; i < priv->supported_guids->len; i++) {
+		const gchar *guid_tmp = g_ptr_array_index (priv->supported_guids, i);
+		if (g_strcmp0 (guid, guid_tmp) == 0)
+			return TRUE;
+	}
+	return FALSE;
+}
+
+/**
+ * fu_plugin_get_dmi_value:
+ * @plugin: A #FuPlugin
+ * @dmi_id: A DMI ID, e.g. `BiosVersion`
+ *
+ * Gets a hardware DMI value.
+ *
+ * Returns: The string, or %NULL
+ *
+ * Since: 0.9.7
+ **/
+const gchar *
+fu_plugin_get_dmi_value (FuPlugin *plugin, const gchar *dmi_id)
+{
+	FuPluginPrivate *priv = GET_PRIVATE (plugin);
+	if (priv->hwids == NULL)
+		return NULL;
+	return fu_hwids_get_value (priv->hwids, dmi_id);
+}
+
+/**
+ * fu_plugin_get_smbios_string:
+ * @plugin: A #FuPlugin
+ * @structure_type: A SMBIOS structure type, e.g. %FU_SMBIOS_STRUCTURE_TYPE_BIOS
+ * @offset: A SMBIOS offset
+ *
+ * Gets a hardware SMBIOS string.
+ *
+ * The @type and @offset can be referenced from the DMTF SMBIOS specification:
+ * https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.1.1.pdf
+ *
+ * Returns: A string, or %NULL
+ *
+ * Since: 0.9.8
+ **/
+const gchar *
+fu_plugin_get_smbios_string (FuPlugin *plugin, guint8 structure_type, guint8 offset)
+{
+	FuPluginPrivate *priv = GET_PRIVATE (plugin);
+	if (priv->smbios == NULL)
+		return NULL;
+	return fu_smbios_get_string (priv->smbios, structure_type, offset, NULL);
+}
+
+/**
+ * fu_plugin_get_smbios_data:
+ * @plugin: A #FuPlugin
+ * @structure_type: A SMBIOS structure type, e.g. %FU_SMBIOS_STRUCTURE_TYPE_BIOS
+ *
+ * Gets a hardware SMBIOS data.
+ *
+ * Returns: (transfer none): A #GBytes, or %NULL
+ *
+ * Since: 0.9.8
+ **/
+GBytes *
+fu_plugin_get_smbios_data (FuPlugin *plugin, guint8 structure_type)
+{
+	FuPluginPrivate *priv = GET_PRIVATE (plugin);
+	if (priv->smbios == NULL)
+		return NULL;
+	return fu_smbios_get_data (priv->smbios, structure_type, NULL);
+}
+
+void
+fu_plugin_set_hwids (FuPlugin *plugin, FuHwids *hwids)
+{
+	FuPluginPrivate *priv = GET_PRIVATE (plugin);
+	g_set_object (&priv->hwids, hwids);
+}
+
+void
+fu_plugin_set_supported (FuPlugin *plugin, GPtrArray *supported_guids)
+{
+	FuPluginPrivate *priv = GET_PRIVATE (plugin);
+	if (priv->supported_guids != NULL)
+		g_ptr_array_unref (priv->supported_guids);
+	priv->supported_guids = g_ptr_array_ref (supported_guids);
+}
+
+void
+fu_plugin_set_quirks (FuPlugin *plugin, FuQuirks *quirks)
+{
+	FuPluginPrivate *priv = GET_PRIVATE (plugin);
+	g_set_object (&priv->quirks, quirks);
+}
+
+/**
+ * fu_plugin_get_quirks:
+ * @plugin: A #FuPlugin
+ *
+ * Returns the hardware database object. This can be used to discover device
+ * quirks or other device-specific settings.
+ *
+ * Returns: (transfer none): a #FuQuirks, or %NULL if not set
+ *
+ * Since: 1.0.1
+ **/
+FuQuirks *
+fu_plugin_get_quirks (FuPlugin *plugin)
+{
+	FuPluginPrivate *priv = GET_PRIVATE (plugin);
+	return priv->quirks;
+}
+
+/**
+ * fu_plugin_lookup_quirk_by_id:
+ * @plugin: A #FuPlugin
+ * @prefix: A string prefix that matches the quirks file basename, e.g. "dfu-quirks"
+ * @id: An ID to match the entry, e.g. "012345"
+ *
+ * Looks up an entry in the hardware database using a string value.
+ *
+ * Returns: (transfer none): values from the database, or %NULL if not found
+ *
+ * Since: 1.0.1
+ **/
+const gchar *
+fu_plugin_lookup_quirk_by_id (FuPlugin *plugin, const gchar *prefix, const gchar *id)
+{
+	FuPluginPrivate *priv = GET_PRIVATE (plugin);
+	g_return_val_if_fail (FU_IS_PLUGIN (plugin), NULL);
+
+	/* wildcard */
+	if (g_strstr_len (id, -1, "*") != NULL)
+		return fu_quirks_lookup_by_glob (priv->quirks, prefix, id);
+
+	/* exact ID */
+	return fu_quirks_lookup_by_id (priv->quirks, prefix, id);
+}
+
+/**
+ * fu_plugin_lookup_quirk_by_usb_device:
+ * @plugin: A #FuPlugin
+ * @prefix: A string prefix that matches the quirks file basename, e.g. "dfu-quirks"
+ * @dev: A #GUsbDevice
+ *
+ * Looks up an entry in the hardware database using various keys generated
+ * from @dev.
+ *
+ * Returns: (transfer none): values from the database, or %NULL if not found
+ *
+ * Since: 1.0.1
+ **/
+const gchar *
+fu_plugin_lookup_quirk_by_usb_device (FuPlugin *plugin, const gchar *prefix, GUsbDevice *dev)
+{
+	FuPluginPrivate *priv = GET_PRIVATE (plugin);
+	g_return_val_if_fail (FU_IS_PLUGIN (plugin), NULL);
+	return fu_quirks_lookup_by_usb_device (priv->quirks, prefix, dev);
+}
+
+/**
+ * fu_plugin_get_supported:
+ * @plugin: A #FuPlugin
+ *
+ * Gets all the device GUIDs supported by the daemon.
+ *
+ * Returns: (element-type utf8) (transfer none): GUIDs
+ *
+ * Since: 1.0.0
+ **/
+GPtrArray *
+fu_plugin_get_supported (FuPlugin *plugin)
+{
+	FuPluginPrivate *priv = GET_PRIVATE (plugin);
+	return priv->supported_guids;
+}
+
+void
+fu_plugin_set_smbios (FuPlugin *plugin, FuSmbios *smbios)
+{
+	FuPluginPrivate *priv = GET_PRIVATE (plugin);
+	g_set_object (&priv->smbios, smbios);
 }
 
 /**
@@ -697,6 +967,24 @@ fu_plugin_runner_update_cleanup (FuPlugin *plugin, FuDevice *device, GError **er
 	return TRUE;
 }
 
+void
+fu_plugin_runner_device_register (FuPlugin *plugin, FuDevice *device)
+{
+	FuPluginPrivate *priv = GET_PRIVATE (plugin);
+	FuPluginDeviceRegisterFunc func = NULL;
+
+	/* not enabled */
+	if (!priv->enabled)
+		return;
+
+	/* optional */
+	g_module_symbol (priv->module, "fu_plugin_device_registered", (gpointer *) &func);
+	if (func != NULL) {
+		g_debug ("performing device_added() on %s", priv->name);
+		func (plugin, device);
+	}
+}
+
 static gboolean
 fu_plugin_runner_schedule_update (FuPlugin *plugin,
 			     FuDevice *device,
@@ -706,7 +994,7 @@ fu_plugin_runner_schedule_update (FuPlugin *plugin,
 	gchar tmpname[] = {"XXXXXX.cap"};
 	g_autofree gchar *dirname = NULL;
 	g_autofree gchar *filename = NULL;
-	g_autoptr(FwupdResult) res_tmp = NULL;
+	g_autoptr(FuDevice) res_tmp = NULL;
 	g_autoptr(FuPending) pending = NULL;
 	g_autoptr(GFile) file = NULL;
 
@@ -746,10 +1034,10 @@ fu_plugin_runner_schedule_update (FuPlugin *plugin,
 	/* schedule for next boot */
 	g_debug ("schedule %s to be installed to %s on next boot",
 		 filename, fu_device_get_id (device));
-	fu_device_set_update_filename (device, filename);
+	fu_device_set_filename_pending (device, filename);
 
 	/* add to database */
-	if (!fu_pending_add_device (pending, FWUPD_RESULT (device), error))
+	if (!fu_pending_add_device (pending, device, error))
 		return FALSE;
 
 	/* next boot we run offline */
@@ -764,10 +1052,15 @@ fu_plugin_runner_verify (FuPlugin *plugin,
 {
 	FuPluginPrivate *priv = GET_PRIVATE (plugin);
 	FuPluginVerifyFunc func = NULL;
+	GPtrArray *checksums;
 
 	/* not enabled */
 	if (!priv->enabled)
 		return TRUE;
+
+	/* clear any existing verification checksums */
+	checksums = fu_device_get_checksums (device);
+	g_ptr_array_set_size (checksums, 0);
 
 	/* optional */
 	g_module_symbol (priv->module, "fu_plugin_verify", (gpointer *) &func);
@@ -822,36 +1115,39 @@ fu_plugin_runner_unlock (FuPlugin *plugin, FuDevice *device, GError **error)
 
 gboolean
 fu_plugin_runner_update (FuPlugin *plugin,
-		    FuDevice *device,
-		    GBytes *blob_cab,
-		    GBytes *blob_fw,
-		    FwupdInstallFlags flags,
-		    GError **error)
+			 FuDevice *device,
+			 GBytes *blob_cab,
+			 GBytes *blob_fw,
+			 FwupdInstallFlags flags,
+			 GError **error)
 {
 	FuPluginPrivate *priv = GET_PRIVATE (plugin);
-	FuPluginUpdateFunc func_online;
-	FuPluginUpdateFunc func_offline;
+	FuPluginUpdateFunc update_func;
 	g_autoptr(FuPending) pending = NULL;
-	g_autoptr(FwupdResult) res_pending = NULL;
+	g_autoptr(FuDevice) device_pending = NULL;
 	GError *error_update = NULL;
+	GPtrArray *checksums;
 
 	/* not enabled */
 	if (!priv->enabled)
 		return TRUE;
 
 	/* optional */
-	g_module_symbol (priv->module, "fu_plugin_update_online", (gpointer *) &func_online);
-	g_module_symbol (priv->module, "fu_plugin_update_offline", (gpointer *) &func_offline);
+	g_module_symbol (priv->module, "fu_plugin_update", (gpointer *) &update_func);
+	if (update_func == NULL) {
+		g_set_error_literal (error,
+				     FWUPD_ERROR,
+				     FWUPD_ERROR_NOT_SUPPORTED,
+				     "No update possible");
+		return FALSE;
+	}
 
-	/* schedule for next reboot, or handle in the plugin */
+	/* just schedule this for the next reboot  */
 	if (flags & FWUPD_INSTALL_FLAG_OFFLINE) {
-		if (func_offline == NULL) {
-			return fu_plugin_runner_schedule_update (plugin,
-								 device,
-								 blob_cab,
-								 error);
-		}
-		return func_offline (plugin, device, blob_fw, flags, error);
+		return fu_plugin_runner_schedule_update (plugin,
+							 device,
+							 blob_cab,
+							 error);
 	}
 
 	/* cancel the pending action */
@@ -859,35 +1155,32 @@ fu_plugin_runner_update (FuPlugin *plugin,
 		return FALSE;
 
 	/* online */
-	if (func_online == NULL) {
-		g_set_error_literal (error,
-				     FWUPD_ERROR,
-				     FWUPD_ERROR_NOT_SUPPORTED,
-				     "No online update possible");
-		return FALSE;
-	}
 	pending = fu_pending_new ();
-	res_pending = fu_pending_get_device (pending, fu_device_get_id (device), NULL);
-	if (!func_online (plugin, device, blob_fw, flags, &error_update)) {
+	device_pending = fu_pending_get_device (pending, fu_device_get_id (device), NULL);
+	if (!update_func (plugin, device, blob_fw, flags, &error_update)) {
 		/* save the error to the database */
-		if (res_pending != NULL) {
-			fu_pending_set_error_msg (pending, FWUPD_RESULT (device),
+		if (device_pending != NULL) {
+			fu_pending_set_error_msg (pending, device,
 						  error_update->message, NULL);
 		}
 		g_propagate_error (error, error_update);
 		return FALSE;
 	}
 
+	/* no longer valid */
+	checksums = fu_device_get_checksums (device);
+	g_ptr_array_set_size (checksums, 0);
+
 	/* cleanup */
-	if (res_pending != NULL) {
+	if (device_pending != NULL) {
 		const gchar *tmp;
 
 		/* update pending database */
-		fu_pending_set_state (pending, FWUPD_RESULT (device),
+		fu_pending_set_state (pending, device,
 				      FWUPD_UPDATE_STATE_SUCCESS, NULL);
 
 		/* delete cab file */
-		tmp = fwupd_result_get_update_filename (res_pending);
+		tmp = fu_device_get_filename_pending (device_pending);
 		if (tmp != NULL && g_str_has_prefix (tmp, LIBEXECDIR)) {
 			g_autoptr(GError) error_local = NULL;
 			g_autoptr(GFile) file = NULL;
@@ -911,7 +1204,7 @@ fu_plugin_runner_clear_results (FuPlugin *plugin, FuDevice *device, GError **err
 	FuPluginPrivate *priv = GET_PRIVATE (plugin);
 	FuPluginDeviceFunc func = NULL;
 	g_autoptr(GError) error_local = NULL;
-	g_autoptr(FwupdResult) res_pending = NULL;
+	g_autoptr(FuDevice) device_pending = NULL;
 	g_autoptr(FuPending) pending = NULL;
 
 	/* not enabled */
@@ -931,10 +1224,10 @@ fu_plugin_runner_clear_results (FuPlugin *plugin, FuDevice *device, GError **err
 
 	/* handled using the database */
 	pending = fu_pending_new ();
-	res_pending = fu_pending_get_device (pending,
+	device_pending = fu_pending_get_device (pending,
 					     fu_device_get_id (device),
 					     &error_local);
-	if (res_pending == NULL) {
+	if (device_pending == NULL) {
 		g_set_error (error,
 			     FWUPD_ERROR,
 			     FWUPD_ERROR_INVALID_FILE,
@@ -945,7 +1238,7 @@ fu_plugin_runner_clear_results (FuPlugin *plugin, FuDevice *device, GError **err
 	}
 
 	/* remove from pending database */
-	return fu_pending_remove_device (pending, FWUPD_RESULT (device), error);
+	return fu_pending_remove_device (pending, device, error);
 }
 
 gboolean
@@ -956,7 +1249,7 @@ fu_plugin_runner_get_results (FuPlugin *plugin, FuDevice *device, GError **error
 	FwupdUpdateState update_state;
 	const gchar *tmp;
 	g_autoptr(GError) error_local = NULL;
-	g_autoptr(FwupdResult) res_pending = NULL;
+	g_autoptr(FuDevice) device_pending = NULL;
 	g_autoptr(FuPending) pending = NULL;
 
 	/* not enabled */
@@ -976,10 +1269,10 @@ fu_plugin_runner_get_results (FuPlugin *plugin, FuDevice *device, GError **error
 
 	/* handled using the database */
 	pending = fu_pending_new ();
-	res_pending = fu_pending_get_device (pending,
+	device_pending = fu_pending_get_device (pending,
 					     fu_device_get_id (device),
 					     &error_local);
-	if (res_pending == NULL) {
+	if (device_pending == NULL) {
 		g_set_error (error,
 			     FWUPD_ERROR,
 			     FWUPD_ERROR_NOTHING_TO_DO,
@@ -990,7 +1283,7 @@ fu_plugin_runner_get_results (FuPlugin *plugin, FuDevice *device, GError **error
 	}
 
 	/* copy the important parts from the pending device to the real one */
-	update_state = fwupd_result_get_update_state (res_pending);
+	update_state = fu_device_get_update_state (device_pending);
 	if (update_state == FWUPD_UPDATE_STATE_UNKNOWN ||
 	    update_state == FWUPD_UPDATE_STATE_PENDING) {
 		g_set_error (error,
@@ -1003,16 +1296,83 @@ fu_plugin_runner_get_results (FuPlugin *plugin, FuDevice *device, GError **error
 
 	/* copy */
 	fu_device_set_update_state (device, update_state);
-	tmp = fwupd_result_get_update_error (res_pending);
+	tmp = fu_device_get_update_error (device_pending);
 	if (tmp != NULL)
 		fu_device_set_update_error (device, tmp);
-	tmp = fwupd_result_get_device_version (res_pending);
+	tmp = fu_device_get_version (device_pending);
 	if (tmp != NULL)
 		fu_device_set_version (device, tmp);
-	tmp = fwupd_result_get_update_version (res_pending);
+	tmp = fu_device_get_version_new (device_pending);
 	if (tmp != NULL)
-		fu_device_set_update_version (device, tmp);
+		fu_device_set_version_new (device, tmp);
 	return TRUE;
+}
+
+/**
+ * fu_plugin_get_order:
+ * @plugin: a #FuPlugin
+ *
+ * Gets the plugin order, where higher numbers are run after lower
+ * numbers.
+ *
+ * Returns: the integer value
+ **/
+guint
+fu_plugin_get_order (FuPlugin *plugin)
+{
+	FuPluginPrivate *priv = fu_plugin_get_instance_private (plugin);
+	return priv->order;
+}
+
+/**
+ * fu_plugin_set_order:
+ * @plugin: a #FuPlugin
+ * @order: a integer value
+ *
+ * Sets the plugin order, where higher numbers are run after lower
+ * numbers.
+ **/
+void
+fu_plugin_set_order (FuPlugin *plugin, guint order)
+{
+	FuPluginPrivate *priv = fu_plugin_get_instance_private (plugin);
+	priv->order = order;
+}
+
+/**
+ * fu_plugin_add_rule:
+ * @plugin: a #FuPlugin
+ * @rule: a #FuPluginRule, e.g. %FU_PLUGIN_RULE_CONFLICTS
+ * @name: a plugin name, e.g. `upower`
+ *
+ * If the plugin name is found, the rule will be used to sort the plugin list,
+ * for example the plugin specified by @name will be ordered after this plugin
+ * when %FU_PLUGIN_RULE_RUN_AFTER is used.
+ *
+ * NOTE: The depsolver is iterative and may not solve overly-complicated rules;
+ * If depsolving fails then fwupd will not start.
+ **/
+void
+fu_plugin_add_rule (FuPlugin *plugin, FuPluginRule rule, const gchar *name)
+{
+	FuPluginPrivate *priv = fu_plugin_get_instance_private (plugin);
+	g_ptr_array_add (priv->rules[rule], g_strdup (name));
+}
+
+/**
+ * fu_plugin_get_rules:
+ * @plugin: a #FuPlugin
+ * @rule: a #FuPluginRule, e.g. %FU_PLUGIN_RULE_CONFLICTS
+ *
+ * Gets the plugin IDs that should be run after this plugin.
+ *
+ * Returns: (element-type utf8) (transfer none): the list of plugin names, e.g. ['appstream']
+ **/
+GPtrArray *
+fu_plugin_get_rules (FuPlugin *plugin, FuPluginRule rule)
+{
+	FuPluginPrivate *priv = fu_plugin_get_instance_private (plugin);
+	return priv->rules[rule];
 }
 
 static void
@@ -1030,6 +1390,12 @@ fu_plugin_class_init (FuPluginClass *klass)
 		g_signal_new ("device-removed",
 			      G_TYPE_FROM_CLASS (object_class), G_SIGNAL_RUN_LAST,
 			      G_STRUCT_OFFSET (FuPluginClass, device_removed),
+			      NULL, NULL, g_cclosure_marshal_VOID__OBJECT,
+			      G_TYPE_NONE, 1, FU_TYPE_DEVICE);
+	signals[SIGNAL_DEVICE_REGISTER] =
+		g_signal_new ("device-register",
+			      G_TYPE_FROM_CLASS (object_class), G_SIGNAL_RUN_LAST,
+			      G_STRUCT_OFFSET (FuPluginClass, device_register),
 			      NULL, NULL, g_cclosure_marshal_VOID__OBJECT,
 			      G_TYPE_NONE, 1, FU_TYPE_DEVICE);
 	signals[SIGNAL_STATUS_CHANGED] =
@@ -1065,7 +1431,9 @@ fu_plugin_init (FuPlugin *plugin)
 	priv->enabled = TRUE;
 	priv->devices = g_hash_table_new_full (g_str_hash, g_str_equal,
 					       g_free, (GDestroyNotify) g_object_unref);
-	priv->devices_delay = g_hash_table_new (g_str_hash, g_str_equal);
+	priv->devices_delay = g_hash_table_new (g_direct_hash, g_direct_equal);
+	for (guint i = 0; i < FU_PLUGIN_RULE_LAST; i++)
+		priv->rules[i] = g_ptr_array_new_with_free_func (g_free);
 }
 
 static void
@@ -1084,8 +1452,19 @@ fu_plugin_finalize (GObject *object)
 		}
 	}
 
+	for (guint i = 0; i < FU_PLUGIN_RULE_LAST; i++)
+		g_ptr_array_unref (priv->rules[i]);
+
 	if (priv->usb_ctx != NULL)
 		g_object_unref (priv->usb_ctx);
+	if (priv->hwids != NULL)
+		g_object_unref (priv->hwids);
+	if (priv->quirks != NULL)
+		g_object_unref (priv->quirks);
+	if (priv->supported_guids != NULL)
+		g_ptr_array_unref (priv->supported_guids);
+	if (priv->smbios != NULL)
+		g_object_unref (priv->smbios);
 #ifndef RUNNING_ON_VALGRIND
 	if (priv->module != NULL)
 		g_module_close (priv->module);
@@ -1104,12 +1483,4 @@ fu_plugin_new (void)
 	FuPlugin *plugin;
 	plugin = g_object_new (FU_TYPE_PLUGIN, NULL);
 	return plugin;
-}
-
-GChecksumType
-fu_plugin_get_checksum_type (FuPluginVerifyFlags flags)
-{
-	if (flags & FU_PLUGIN_VERIFY_FLAG_USE_SHA256)
-		return G_CHECKSUM_SHA256;
-	return G_CHECKSUM_SHA1;
 }

@@ -53,7 +53,7 @@
           </doc:para>
         </doc:description>
       </doc:doc>
-      <arg type='a{sa{sv}}' name='devices' direction='out'>
+      <arg type='aa{sv}' name='devices' direction='out'>
         <doc:doc>
           <doc:summary>
             <doc:para>An array of devices, with any properties set on each.</doc:para>
@@ -63,18 +63,90 @@
     </method>
 
     <!--***********************************************************-->
-    <method name='GetUpdates'>
+    <method name='GetReleases'>
       <doc:doc>
         <doc:description>
           <doc:para>
-            Gets a list of all the devices that can be updated.
+            Gets a list of all the releases for a specific device.
           </doc:para>
         </doc:description>
       </doc:doc>
-      <arg type='a{sa{sv}}' name='devices' direction='out'>
+      <arg type='s' name='device_id' direction='in'>
         <doc:doc>
           <doc:summary>
-            <doc:para>An array of devices, with any properties set on each.</doc:para>
+            <doc:para>
+              A device ID.
+            </doc:para>
+          </doc:summary>
+        </doc:doc>
+      </arg>
+      <arg type='aa{sv}' name='releases' direction='out'>
+        <doc:doc>
+          <doc:summary>
+            <doc:para>
+              An array of releases (with the release number as the key),
+              with any properties set on each.
+            </doc:para>
+          </doc:summary>
+        </doc:doc>
+      </arg>
+    </method>
+
+    <!--***********************************************************-->
+    <method name='GetDowngrades'>
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Gets a list of all the downgrades possible for a specific device.
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+      <arg type='s' name='device_id' direction='in'>
+        <doc:doc>
+          <doc:summary>
+            <doc:para>
+              A device ID.
+            </doc:para>
+          </doc:summary>
+        </doc:doc>
+      </arg>
+      <arg type='aa{sv}' name='releases' direction='out'>
+        <doc:doc>
+          <doc:summary>
+            <doc:para>
+              An array of releases (with the release number as the key),
+              with any properties set on each.
+            </doc:para>
+          </doc:summary>
+        </doc:doc>
+      </arg>
+    </method>
+
+    <!--***********************************************************-->
+    <method name='GetUpgrades'>
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Gets a list of all the upgrades possible for a specific device.
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+      <arg type='s' name='device_id' direction='in'>
+        <doc:doc>
+          <doc:summary>
+            <doc:para>
+              A device ID.
+            </doc:para>
+          </doc:summary>
+        </doc:doc>
+      </arg>
+      <arg type='aa{sv}' name='releases' direction='out'>
+        <doc:doc>
+          <doc:summary>
+            <doc:para>
+              An array of releases (with the release number as the key),
+              with any properties set on each.
+            </doc:para>
           </doc:summary>
         </doc:doc>
       </arg>
@@ -82,37 +154,6 @@
 
     <!--***********************************************************-->
     <method name='GetDetails'>
-      <doc:doc>
-        <doc:description>
-          <doc:para>
-            Gets details about a firmware file.
-          </doc:para>
-        </doc:description>
-      </doc:doc>
-      <arg type='h' name='handle' direction='in'>
-        <doc:doc>
-          <doc:summary>
-            <doc:para>
-              An index into the array of file descriptors that may have
-              been sent with the DBus message.
-            </doc:para>
-          </doc:summary>
-        </doc:doc>
-      </arg>
-      <arg type='a{sv}' name='details' direction='out'>
-        <doc:doc>
-          <doc:summary>
-            <doc:para>
-              Properties about the firmware, e.g.
-              <doc:tt>DisplayName=ColorHug</doc:tt>.
-            </doc:para>
-          </doc:summary>
-        </doc:doc>
-      </arg>
-    </method>
-
-    <!--***********************************************************-->
-    <method name='GetDetailsLocal'>
       <doc:doc>
         <doc:description>
           <doc:para>
@@ -130,7 +171,7 @@
           </doc:summary>
         </doc:doc>
       </arg>
-      <arg type='a{sa{sv}}' name='results' direction='out'>
+      <arg type='aa{sv}' name='results' direction='out'>
         <doc:doc>
           <doc:summary>
             <doc:para>An array of results, with any properties set on each.</doc:para>
@@ -265,6 +306,24 @@
     </method>
 
     <!--***********************************************************-->
+    <method name='GetRemotes'>
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Gets the list of remotes.
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+      <arg type='aa{sv}' name='results' direction='out'>
+        <doc:doc>
+          <doc:summary>
+            <doc:para>The array remotes, with properties</doc:para>
+          </doc:summary>
+        </doc:doc>
+      </arg>
+    </method>
+
+    <!--***********************************************************-->
     <method name='ClearResults'>
       <doc:doc>
         <doc:description>
@@ -293,6 +352,15 @@
           </doc:para>
         </doc:description>
       </doc:doc>
+      <arg type='s' name='remote_id' direction='in'>
+        <doc:doc>
+          <doc:summary>
+            <doc:para>
+              Remote ID to tag the metadata objects with, e.g. 'lvfs-testing'.
+            </doc:para>
+          </doc:summary>
+        </doc:doc>
+      </arg>
       <arg type='h' name='data' direction='in'>
         <doc:doc>
           <doc:summary>
@@ -314,6 +382,44 @@
     </method>
 
     <!--***********************************************************-->
+    <method name='ModifyRemote'>
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Modifies a remote in some way.
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+      <arg type='s' name='remote_id' direction='in'>
+        <doc:doc>
+          <doc:summary>
+            <doc:para>
+              Remote ID, e.g. 'lvfs-testing'.
+            </doc:para>
+          </doc:summary>
+        </doc:doc>
+      </arg>
+      <arg type='s' name='key' direction='in'>
+        <doc:doc>
+          <doc:summary>
+            <doc:para>
+              The key, e.g. 'Enabled'.
+            </doc:para>
+          </doc:summary>
+        </doc:doc>
+      </arg>
+      <arg type='s' name='value' direction='in'>
+        <doc:doc>
+          <doc:summary>
+            <doc:para>
+              The value of the correct type, e.g. a URL.
+            </doc:para>
+          </doc:summary>
+        </doc:doc>
+      </arg>
+    </method>
+
+    <!--***********************************************************-->
     <signal name='Changed'>
       <doc:doc>
         <doc:description>
@@ -327,7 +433,7 @@
 
     <!--***********************************************************-->
     <signal name='DeviceAdded'>
-      <arg type='sa{sv}' name='device' direction='out'>
+      <arg type='a{sv}' name='device' direction='out'>
         <doc:doc>
           <doc:summary>
             <doc:para>A device structure.</doc:para>
@@ -345,7 +451,7 @@
 
     <!--***********************************************************-->
     <signal name='DeviceRemoved'>
-      <arg type='sa{sv}' name='device' direction='out'>
+      <arg type='a{sv}' name='device' direction='out'>
         <doc:doc>
           <doc:summary>
             <doc:para>A device structure.</doc:para>
@@ -363,7 +469,7 @@
 
     <!--***********************************************************-->
     <signal name='DeviceChanged'>
-      <arg type='sa{sv}' name='device' direction='out'>
+      <arg type='a{sv}' name='device' direction='out'>
         <doc:doc>
           <doc:summary>
             <doc:para>A device structure.</doc:para>

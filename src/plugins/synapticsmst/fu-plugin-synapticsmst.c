@@ -22,17 +22,23 @@
  */
 
 #include "config.h"
-#include <smbios_c/smbios.h>
 #include "synapticsmst-device.h"
 #include "synapticsmst-common.h"
-#include "fu-dell-common.h"
 #include "fu-plugin.h"
 #include "fu-plugin-vfuncs.h"
+#include "fu-device-metadata.h"
 
 #define SYNAPTICS_FLASH_MODE_DELAY 3
 
+#define HWID_DELL_INC	"85d38fda-fc0e-5c6f-808f-076984ae7978"
+
+struct FuPluginData {
+	const gchar	*dock_type;
+	const gchar	*system_type;
+};
+
 static gboolean
-synapticsmst_common_check_supported_system (GError **error)
+synapticsmst_common_check_supported_system (FuPlugin *plugin, GError **error)
 {
 
 	if (g_getenv ("FWUPD_SYNAPTICSMST_FW_DIR") != NULL) {
@@ -40,7 +46,10 @@ synapticsmst_common_check_supported_system (GError **error)
 		return TRUE;
 	}
 
-	if (!fu_dell_supported ()) {
+	/* tests for "Dell Inc." manufacturer string
+	 * this isn't strictly a complete tests due to OEM rebranded
+	 * systems being excluded, but should cover most cases */
+	if (!fu_plugin_check_hwid (plugin, HWID_DELL_INC)) {
 		g_set_error (error,
 			     G_IO_ERROR,
 			     G_IO_ERROR_INVALID_DATA,
@@ -62,6 +71,8 @@ fu_plugin_synaptics_add_device (FuPlugin *plugin,
 				SynapticsMSTDevice *device,
 				GError **error)
 {
+	FuPluginData *data = fu_plugin_get_data (plugin);
+
 	g_autoptr(FuDevice) dev = NULL;
 	const gchar *kind_str = NULL;
 	const gchar *board_str = NULL;
@@ -73,7 +84,10 @@ fu_plugin_synaptics_add_device (FuPlugin *plugin,
 	guint16 rad;
 
 	aux_node = synapticsmst_device_get_aux_node (device);
-	if (!synapticsmst_device_enumerate_device (device, error)) {
+	if (!synapticsmst_device_enumerate_device (device,
+						   data->dock_type,
+						   data->system_type,
+						   error)) {
 		g_debug ("error enumerating device at %s", aux_node);
 		return FALSE;
 	}
@@ -110,8 +124,11 @@ fu_plugin_synaptics_add_device (FuPlugin *plugin,
 	/* create the device */
 	dev = fu_device_new ();
 	fu_device_set_id (dev, dev_id_str);
-	fu_device_add_flag (dev, FWUPD_DEVICE_FLAG_ALLOW_ONLINE);
+	fu_device_add_flag (dev, FWUPD_DEVICE_FLAG_UPDATABLE);
 	fu_device_set_name (dev, name);
+	fu_device_set_vendor (dev, "Synaptics");
+	fu_device_set_summary (dev, "Multi-Stream Transport Device");
+	fu_device_add_icon (dev, "computer");
 	fu_device_set_version (dev, synapticsmst_device_get_version (device));
 	fu_device_add_guid (dev, guid_str);
 
@@ -129,9 +146,6 @@ fu_plugin_synaptics_scan_cascade (FuPlugin *plugin,
 	g_autofree gchar *dev_id_str = NULL;
 	FuDevice *fu_dev = NULL;
 	const gchar *aux_node;
-	guint8 layer = 0;
-	guint16 rad = 0;
-	guint8 j;
 
 	aux_node = synapticsmst_device_get_aux_node (device);
 	if (!synapticsmst_device_open (device, error)) {
@@ -141,9 +155,9 @@ fu_plugin_synaptics_scan_cascade (FuPlugin *plugin,
 		return FALSE;
 	}
 
-	for (j = 0; j < 2; j++) {
-		layer = synapticsmst_device_get_layer (device) + 1;
-		rad = synapticsmst_device_get_rad (device) | (j << (2 * (layer - 1)));
+	for (guint8 j = 0; j < 2; j++) {
+		guint8 layer = synapticsmst_device_get_layer (device) + 1;
+		guint16 rad = synapticsmst_device_get_rad (device) | (j << (2 * (layer - 1)));
 		dev_id_str = g_strdup_printf ("MST-REMOTE-%s-%u-%u",
 					      aux_node, layer, rad);
 		fu_dev = fu_plugin_cache_lookup (plugin, dev_id_str);
@@ -281,12 +295,13 @@ fu_synapticsmst_write_progress_cb (goffset current, goffset total, gpointer user
 }
 
 gboolean
-fu_plugin_update_online (FuPlugin *plugin,
-			 FuDevice *dev,
-			 GBytes *blob_fw,
-			 FwupdInstallFlags flags,
-			 GError **error)
+fu_plugin_update (FuPlugin *plugin,
+		  FuDevice *dev,
+		  GBytes *blob_fw,
+		  FwupdInstallFlags flags,
+		  GError **error)
 {
+	FuPluginData *data = fu_plugin_get_data (plugin);
 	g_autoptr(SynapticsMSTDevice) device = NULL;
 	const gchar *device_id;
 	SynapticsMSTDeviceKind kind;
@@ -307,11 +322,13 @@ fu_plugin_update_online (FuPlugin *plugin,
 	/* sleep to allow device wakeup to complete */
 	g_debug ("waiting %d seconds for MST hub wakeup",
 		 SYNAPTICS_FLASH_MODE_DELAY);
+	fu_plugin_set_status (plugin, FWUPD_STATUS_DEVICE_BUSY);
 	g_usleep (SYNAPTICS_FLASH_MODE_DELAY * 1000000);
 
 	device = synapticsmst_device_new (kind, aux_node, layer, rad);
 
-	if (!synapticsmst_device_enumerate_device (device, error))
+	if (!synapticsmst_device_enumerate_device (device, data->dock_type,
+						   data->system_type, error))
 		return FALSE;
 	if (synapticsmst_device_board_id_to_string (synapticsmst_device_get_board_id (device)) != NULL) {
 		fu_plugin_set_status (plugin, FWUPD_STATUS_DEVICE_WRITE);
@@ -332,7 +349,8 @@ fu_plugin_update_online (FuPlugin *plugin,
 
 	/* Re-run device enumeration to find the new device version */
 	fu_plugin_set_status (plugin, FWUPD_STATUS_DEVICE_RESTART);
-	if (!synapticsmst_device_enumerate_device (device, error)) {
+	if (!synapticsmst_device_enumerate_device (device, data->dock_type,
+						   data->system_type, error)) {
 		return FALSE;
 	}
 	fu_device_set_version (dev, synapticsmst_device_get_version (device));
@@ -340,49 +358,57 @@ fu_plugin_update_online (FuPlugin *plugin,
 	return TRUE;
 }
 
-static void
-fu_plugin_synapticsmst_redo_enumeration_cb (GUsbContext *ctx,
-					    GUsbDevice *usb_device,
-					    FuPlugin *plugin)
+void
+fu_plugin_device_registered (FuPlugin *plugin, FuDevice *device)
 {
-	guint16 pid;
-	guint16 vid;
+	FuPluginData *data = fu_plugin_get_data (plugin);
+	const gchar *tmp;
 
-	vid = g_usb_device_get_vid (usb_device);
-	pid = g_usb_device_get_pid (usb_device);
+	/* dell plugin */
+	if (g_strcmp0 (fu_device_get_plugin (device), "dell") == 0) {
+		/* only look at external devices from dell plugin */
+		if (fu_device_has_flag (device, FWUPD_DEVICE_FLAG_INTERNAL))
+			return;
 
-	/* Only look up if this was a dock connected */
-	if (vid != DOCK_NIC_VID || pid != DOCK_NIC_PID)
-		return;
+		tmp = fu_device_get_metadata (device,
+					      FU_DEVICE_METADATA_DELL_DOCK_TYPE);
 
-	/* Request daemon to redo coldplug, this wakes up Dell devices */
-	fu_plugin_recoldplug (plugin);
-}
-
-gboolean
-fu_plugin_startup (FuPlugin *plugin, GError **error)
-{
-	GUsbContext *usb_ctx = fu_plugin_get_usb_context (plugin);
-	if (usb_ctx != NULL) {
-		g_signal_connect (usb_ctx, "device-added",
-				  G_CALLBACK (fu_plugin_synapticsmst_redo_enumeration_cb),
-				  plugin);
-		g_signal_connect (usb_ctx, "device-removed",
-				  G_CALLBACK (fu_plugin_synapticsmst_redo_enumeration_cb),
-				  plugin);
+		if (tmp)
+			data->dock_type = g_strdup (tmp);
 	}
-	return TRUE;
 }
 
 gboolean
 fu_plugin_coldplug (FuPlugin *plugin, GError **error)
 {
 	/* verify that this is a supported system */
-	if (!synapticsmst_common_check_supported_system (error))
+	if (!synapticsmst_common_check_supported_system (plugin, error))
 		return FALSE;
 
 	/* look for host devices or already plugged in dock devices */
 	if (!fu_plugin_synapticsmst_enumerate (plugin, error))
 		g_debug ("error enumerating");
 	return TRUE;
+}
+
+void
+fu_plugin_destroy (FuPlugin *plugin)
+{
+	FuPluginData *data = fu_plugin_get_data (plugin);
+
+	g_free(data->dock_type);
+	g_free(data->system_type);
+}
+
+void
+fu_plugin_init (FuPlugin *plugin)
+{
+	FuPluginData *data = fu_plugin_alloc_data (plugin, sizeof (FuPluginData));
+
+	data->system_type =
+		g_strdup (fu_plugin_get_dmi_value (plugin,
+						   FU_HWIDS_KEY_PRODUCT_SKU));
+
+	/* make sure dell is already coldplugged */
+	fu_plugin_add_rule (plugin, FU_PLUGIN_RULE_RUN_AFTER, "dell");
 }

@@ -24,19 +24,20 @@
 
 #include <gusb.h>
 #include "fu-plugin.h"
-#include "fu-dell-common.h"
+#include "fu-dell-smi.h"
 
 struct FuPluginData {
-	GHashTable		*devices;	/* DeviceKey:FuPluginDockItem */
 	FuDellSmiObj		*smi_obj;
 	guint16			fake_vid;
 	guint16			fake_pid;
+	gboolean		can_switch_modes;
+	gboolean		capsule_supported;
 };
 
 void
 fu_plugin_dell_inject_fake_data (FuPlugin *plugin,
 				 guint32 *output, guint16 vid, guint16 pid,
-				 guint8 *buf);
+				 guint8 *buf, gboolean can_switch_modes);
 
 gboolean
 fu_plugin_dell_detect_tpm (FuPlugin *plugin, GError **error);

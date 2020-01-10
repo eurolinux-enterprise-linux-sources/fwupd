@@ -1,0 +1,49 @@
+fwupd Release Notes
+
+1. Write NEWS entries for fwupd in the same format as usual.
+
+git shortlog 1.0.0.. | grep -i -v trivial | grep -v Merge > NEWS.new
+
+Version 1.0.1
+~~~~~~~~~~~~~
+Released: 2017-xx-xx
+
+New Features:
+Bugfixes:
+
+Update translations:
+
+ninja-build fwupd-pot
+tx push --source
+tx pull --all --minimum-perc=5
+git add ../po/*.po
+
+2. Commit changes to git:
+
+# MAKE SURE THESE ARE CORRECT
+export release_ver="1.0.1"
+
+git commit -a -m "Release fwupd ${release_ver}"
+git tag -s -f -m "Release fwupd ${release_ver}" "${release_ver}"
+<wait>
+git push --tags
+git push
+
+3. Generate the tarball:
+
+ninja-build dist
+
+3a. Generate the additon verification metadata
+
+gpg -b -a meson-dist/fwupd-${release_ver}.tar.xz
+
+4. Upload tarball:
+
+scp meson-dist/fwupd-${release_ver}.tar.* hughsient@people.freedesktop.org:~/public_html/releases
+
+5. Do post release version bump in meson.build
+
+6. Commit changes:
+
+git commit -a -m "trivial: post release version bump"
+git push

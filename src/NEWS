@@ -1,16 +1,225 @@
-Version 0.8.2
+Version 1.0.1
 ~~~~~~~~~~~~~
-Released: 2017-04-20
+Released: 2017-11-09
+
+New Features:
+ - Add support for HWID requirements (Richard Hughes)
+ - Add support for programming various AVR32 and XMEGA parts using DFU (Richard Hughes)
+ - Add the various DFU quirks for the Jabra Speak devices (Richard Hughes)
+ - Allow specifying the output file type for 'dfu-tool read' (Richard Hughes)
+ - Move the database of supported devices out into runtime loaded files (Richard Hughes)
+ - Support the IHEX record type 0x05 (Richard Hughes)
+ - Use help2man to generate the man page at build time (Richard Hughes)
+ - Use the new quirk infrastructure for version numbers (Richard Hughes)
+
+Bugfixes:
+ - Catch invalid Dell dock component requests (Mario Limonciello)
+ - Correctly output Intel HEX files with > 16bit offset addresses (Richard Hughes)
+ - Do not try to verify the element write if upload is unsupported (Richard Hughes)
+ - Fix a double-unref when updating any 8Bitdo device (Richard Hughes)
+ - Fix crash when enumerating with Dell dock connected but with no UEFI (Mario Limonciello)
+ - Fix uploading large firmware files over DFU (Richard Hughes)
+ - Format the BCD USB revision numbers correctly (Richard Hughes)
+ - Guess the DFU transfer size if it is not specified (Richard Hughes)
+ - Include the reset timeout as wValue to fix some DFU bootloaders (Richard Hughes)
+ - Make the error message clearer when sans fonts are missing (Mario Limonciello)
+ - Support devices with truncated DFU interface data (Richard Hughes)
+ - Use the correct remote-specified username and passord when using fwupdmgr (Richard Hughes)
+ - Use the correct wDetachTimeOut when writing DFU firmware (Richard Hughes)
+ - Verify devices with legacy VIDs are actually 8Bitdo controllers (Richard Hughes)
+
+Version 1.0.0
+~~~~~~~~~~~~~
+Released: 2017-10-09
+
+Notes:
+ - This release breaks API and ABI to remove deprecated symbols
+ - libdfu is now not installed as a shared library
+
+New Features:
+ - Add a human-readable title for each remote (Richard Hughes)
+ - Add a method to return a list of upgrades for a specific device (Richard Hughes)
+ - Add an 'Summary' and 'Icons' properties to each device (Richard Hughes)
+ - Add FuDeviceLocker to simplify device open/close lifecycles (Richard Hughes)
+ - Add functionality to blacklist Dell HW with problems (Mario Limonciello)
+ - Add fu_plugin_check_supported() (Richard Hughes)
+ - Add fwupd_remote_get_checksum() to use in client programs (Richard Hughes)
+ - Add ModifyRemote as an easy way to enable and disable remotes (Richard Hughes)
+ - Add the plugin documentation to the main gtk-doc (Richard Hughes)
+ - Allow plugins to depend on each other (Richard Hughes)
+ - Disable the fallback USB plugin (Richard Hughes)
+ - Parse the SMBIOS v2 and v3 DMI tables directly (Richard Hughes)
+ - Support uploading the UEFI firmware splash image (Richard Hughes)
+ - Use the intel-wmi-thunderbolt kernel module to force power (Mario Limonciello)
+
+Bugfixes:
+ - Only run SMI to toggle host MST GPIO on Dell systems with host MST (Mario Limonciello)
+ - Disable unifying support if no CONFIG_HIDRAW support (Richard Hughes)
+ - Do not auto-open all USB devices at startup (Richard Hughes)
+ - Do not fail to load the daemon if cached metadata is invalid (Richard Hughes)
+ - Do not use system-specific infomation for UEFI PCI devices (Richard Hughes)
+ - Fix a crash when using fu_plugin_device_add_delay() (Richard Hughes)
+ - Fix the libdfu self test failure on s390 and ppc64 (Richard Hughes)
+ - Fix various printing issues with the progressbar (Richard Hughes)
+ - Generate the LD script from the GObject introspection data (Richard Hughes)
+ - Never fallback to an offline update from client code (Richard Hughes)
+ - Only set the Dell coldplug delay when we know we need it (Mario Limonciello)
+ - Prefer to use HWIDs to get DMI keys and DE table (Mario Limonciello)
+
+Version 0.9.7
+~~~~~~~~~~~~~
+Released: 2017-09-01
+
+New Features:
+ - Add a configure switch for the LVFS remotes (Richard Hughes)
+ - Add a FirmwareBaseURI parameter to the remote config (Richard Hughes)
+ - Add a firmware builder that uses bubblewrap (Richard Hughes)
+ - Add a python script to create fwupd compatible cab files from Microsoft .exe files (Max Ehrlich)
+ - Add a thunderbolt plugin for new kernel interface (Christian Kellner, Yehezkel Bernat)
+ - Allow plugins to get DMI data from the hardware in a safe way (Richard Hughes)
+ - Allow plugins to set metadata on devices created by other plugins (Richard Hughes, Mario Limonciello)
+ - Optionally install the LVFS PKCS7 root certificate (Richard Hughes)
+ - Optionally use GnuTLS to verify PKCS7 certificates (Richard Hughes)
+
+Bugfixes:
+ - Add back options for HAVE_SYNAPTICS and HAVE_THUNDERBOLT (Mario Limonciello)
+ - Allow configuring systemd and udev directories (Mario Limonciello)
+ - Enable C99 support in meson.build (Philip Withnall)
+ - Fix an incomplete cipher when using XTEA on data not in 4 byte chunks (Richard Hughes)
+ - Fix minor const-correctness issues (Philip Withnall)
+ - Implement thunderbolt image validation  (Yehezkel Bernat, Christian Kellner)
+ - Remove the confusing ALLOW_OFFLINE and ALLOW_ONLINE flags (Richard Hughes)
+ - Show a bouncing progress bar if the percentage remains at zero (Richard Hughes)
+ - Use a hwid to match supported systems for synapticsmst (Mario Limonciello)
+ - Use the new bootloader PIDs for Unifying pico receivers (Richard Hughes)
+ - When thunderbolt is in safe mode on a Dell recover using SMBIOS (Mario Limonciello)
+
+Version 0.9.6
+~~~~~~~~~~~~~
+Released: 2017-08-03
+
+New Features:
+ - Add DfuPatch to support forward-only firmware patching (Richard Hughes)
+ - Add --version option to fwupdmgr (Richard Hughes, Mario Limonciello)
+ - Display all errors recorded by efi_error tracing (Mario Limonciello)
+ - Make building introspection optional (Patrick Ohly)
+ - Support embedded devices with local firmware metadata (Richard Hughes)
+
+Bugfixes:
+ - Check all the device GUIDs against the blacklist when added (Richard Hughes)
+ - Correct a memory leak in Dell plugin (Mario Limonciello, Richard Hughes)
+ - Default to "en" for UEFI capsule graphics (Mario Limonciello)
+ - Don't log a warning when an unknown unifying report is parsed (Richard Hughes)
+ - Enable test suite via /etc/fwupd.conf (Mario Limonciello)
+ - Fix a hang on 32 bit computers (Richard Hughes)
+ - Fix compilation of the policy on a variety of configurations (Mario Limonciello)
+ - Fix UEFI crash when the product name is NULL (Richard Hughes)
+ - Make flashing ebitdo devices work with fu-ebitdo-tool (Chris Lee)
+ - Make messages from installing capsules useful (Mario Limonciello)
+ - Make sure the unifying percentage completion goes from 0% to 100% (Richard Hughes)
+ - Run the plugin coldplug methods in a predictable order (Richard Hughes)
+ - Test UEFI for kernel support during coldplug (Mario Limonciello)
+ - Use new GUsb functionality to fix flashing Unifying devices (Richard Hughes)
+
+Version 0.9.5
+~~~~~~~~~~~~~
+Released: 2017-07-04
+
+New Features:
+ - Add a get-remotes command to fwupdmgr (Richard Hughes)
+ - Add a plugin to get the version of the AMT ME interface (Richard Hughes)
+ - Add Arch Linux to CI (Bruno Pagani)
+ - Add some installed tests flashing actual hardware (Richard Hughes)
+ - Allow flashing Unifying devices in bootloader modes (Richard Hughes)
+ - Allow ordering the metadata remotes (Richard Hughes)
+
+Bugfixes:
+ - Do not check the runtime if the DFU device is in bootloader mode (Richard Hughes)
+ - Do not unlock devices when doing VerifyUpdate (Richard Hughes)
+ - Filter by Unifying SwId when making HID++2.0 requests (Richard Hughes)
+ - Fix downgrades when version_lowest is set (Richard Hughes)
+ - Fix the self tests when running on PPC64 big endian (Richard Hughes)
+ - Move the remotes parsing from the client to the server (Richard Hughes)
+ - Split up the Unifying HID++2.0 and HID++1.0 functionality (Richard Hughes)
+ - Store the metadata files rather than merging to one store (Richard Hughes)
+ - Use a longer timeout for some Unifying operations (Richard Hughes)
+ - Use the UFY DeviceID prefix for Unifying devides (Richard Hughes)
+
+Version 0.9.4
+~~~~~~~~~~~~~
+Released: 2017-06-15
+
+New Features:
+ - Add installed tests that use the daemon (Richard Hughes)
+ - Add the ability to restrict firmware to specific vendors (Richard Hughes)
+ - Enable Travis CI for Fedora and Debian (Richard Hughes, Mario Limonciello)
+ - Export some more API for dealing with checksums (Richard Hughes)
+ - Generate a images for status messages during system firmware update (Peter Jones)
+ - Show progress download when refreshing metadata (Richard Hughes)
+
+Bugfixes:
+ - Compile with newer versions of meson (Richard Hughes, Mario Limonciello)
+ - Ensure that firmware provides are legal GUIDs (Richard Hughes)
+ - Fix a common crash when refreshing metadata (Richard Hughes)
+ - Use the correct type signature in the D-Bus introspection file (Richard Hughes)
+
+Version 0.9.3
+~~~~~~~~~~~~~
+Released: 2017-06-07
+
+New Features:
+ - Add a 'downgrade' command to fwupdmgr (Richard Hughes)
+ - Add a 'get-releases' command to fwupdmgr (Richard Hughes)
+ - Add support for ConsoleKit2 (Eric Koegel)
+ - Add support for Microsoft HardwareIDs (Richard Hughes)
+ - Allow downloading metadata from more than just the LVFS (Richard Hughes)
+ - Allow multiple checksums on devices and releases (Richard Hughes)
+
+Bugfixes:
+ - Allow to specify bindir (Timo Gurr)
+ - Correctly open Unifying devices with original factory firmware (Richard Hughes)
+ - Deprecate some of the old FwupdResult API (Richard Hughes)
+ - Do not copy the origin from the new metadata file (Richard Hughes)
+ - Do not expect a Unifying reply when issuing a REBOOT command (Richard Hughes)
+ - Do not re-download firmware that exists in the cache (Richard Hughes)
+ - Fix a problem when testing for a Dell system (Mario Limonciello)
+ - Fix flashing new firmware to 8bitdo controllers (Richard Hughes)
+ - Increase minimum required AppStream-Glib version to 0.6.13 (Chris Mayo)
+ - Make documentation and man pages optional (Chris Mayo)
+ - Make systemd dependency at least version 231 (Mario Limonciello)
+ - Only decompress the firmware after the signature check (Richard Hughes)
+ - Remove 'lib' prefix when looking for libraries (Mirco Tischler)
+ - Return the remote ID when getting updates about hardware (Richard Hughes)
+ - Send the daemon the remote ID when sending firmware metadata (Richard Hughes)
+
+Version 0.9.2
+~~~~~~~~~~~~~
+Released: 2017-05-22
+
+New Features:
+ - Add support for Unifying DFU features (Richard Hughes)
+
+Bugfixes:
+ - Do not spew a critial warning when parsing an invalid URI (Richard Hughes)
+ - Ensure device is closed if did not complete setup (Richard Hughes)
+ - Ensure steelseries device is closed if it returns an invalid packet (Richard Hughes)
+ - Fix man page installation location (Mario Limonciello)
+ - Ignore spaces in the Unifying version prefix (Richard Hughes)
+ - Set HAVE_POLKIT_0_114 when polkit is newer than 0.114 (Moritz Kiefer)
+
+Version 0.9.1
+~~~~~~~~~~~~~
+Released: 2017-04-28
 
 New Features:
  - Add a config option to allow runtime disabling plugins by name (Richard Hughes)
+ - Add the Meson build system and remove autotools (Richard Hughes)
+ - Support signed Intel HEX files (Richard Hughes)
 
 Bugfixes:
- - Add DFU quirk for OpenPICC (Richard Hughes)
- - Add DFU quirk for SIMtrace (Richard Hughes)
+ - Add DFU quirk for OpenPICC and SIMtrace (Richard Hughes)
  - Create directories in /var/cache as required (Richard Hughes)
- - Fix the Requires lines in the dfu pkg-config file (Richard Hughes)
- - Only try to mkdir the localstatedir if we have the right permissions (Shea Levy)
+ - Refactor the unifying plugin now we know more about the hardware (Richard Hughes)
  - Set the source origin when saving metadata (Richard Hughes)
  - Support proxy servers in fwupdmgr (Richard Hughes)
  - Use a 60 second timeout on all client downloads (Richard Hughes)

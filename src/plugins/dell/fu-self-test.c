@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2015-2016 Richard Hughes <richard@hughsie.com>
+ * Copyright (C) 2015-2017 Richard Hughes <richard@hughsie.com>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -40,7 +40,7 @@ static void
 _plugin_device_added_cb (FuPlugin *plugin, FuDevice *device, gpointer user_data)
 {
 	FuDevice **dev = (FuDevice **) user_data;
-	*dev = g_object_ref (device);
+	g_set_object (dev, device);
 }
 
 static void
@@ -49,15 +49,16 @@ fu_plugin_dell_tpm_func (void)
 	gboolean ret;
 	guint cnt = 0;
 	struct tpm_status tpm_out;
-	FwupdDeviceFlags flags = 0;
 	FuDevice *device_alt = NULL;
 	g_autoptr(GError) error = NULL;
 	g_autoptr(FuDevice) device = NULL;
 	g_autoptr(FuPlugin) plugin = NULL;
 
+	memset (&tpm_out, 0x0, sizeof(tpm_out));
+
 	g_setenv ("FWUPD_DELL_FAKE_SMBIOS", "1", FALSE);
 	plugin = fu_plugin_new ();
-	ret = fu_plugin_open (plugin, ".libs/libfu_plugin_dell.so", &error);
+	ret = fu_plugin_open (plugin, PLUGINBUILDDIR "/libfu_plugin_dell.so", &error);
 	g_assert_no_error (error);
 	g_assert (ret);
 	ret = fu_plugin_runner_startup (plugin, &error);
@@ -76,7 +77,8 @@ fu_plugin_dell_tpm_func (void)
 	/* inject fake data (no TPM) */
 	tpm_out.ret = -2;
 	fu_plugin_dell_inject_fake_data (plugin,
-					   (guint32 *) &tpm_out, 0, 0, NULL);
+					 (guint32 *) &tpm_out, 0, 0,
+					 NULL, FALSE);
 	ret = fu_plugin_dell_detect_tpm (plugin, &error);
 	g_assert_no_error (error);
 	g_assert (!ret);
@@ -92,7 +94,8 @@ fu_plugin_dell_tpm_func (void)
 	tpm_out.status = TPM_EN_MASK | (TPM_1_2_MODE << 8);
 	tpm_out.flashes_left = 0;
 	fu_plugin_dell_inject_fake_data (plugin,
-					   (guint32 *) &tpm_out, 0, 0, NULL);
+					 (guint32 *) &tpm_out, 0, 0,
+					 NULL, TRUE);
 	ret = fu_plugin_dell_detect_tpm (plugin, &error);
 	device_alt = fu_device_get_alternate (device);
 	g_assert_no_error (error);
@@ -101,12 +104,10 @@ fu_plugin_dell_tpm_func (void)
 	g_assert (device_alt != NULL);
 
 	/* make sure 2.0 is locked */
-	flags = fu_device_get_flags (device);
-	g_assert_cmpint (flags & FWUPD_DEVICE_FLAG_LOCKED, >, 0);
+	g_assert_true (fu_device_has_flag (device, FWUPD_DEVICE_FLAG_LOCKED));
 
 	/* make sure not allowed to flash 1.2 */
-	flags = fu_device_get_flags (device_alt);
-	g_assert_cmpint (flags & FWUPD_DEVICE_FLAG_ALLOW_OFFLINE, !=, 1);
+	g_assert_false (fu_device_has_flag (device_alt, FWUPD_DEVICE_FLAG_UPDATABLE));
 
 	/* try to unlock 2.0 */
 	ret = fu_plugin_runner_unlock (plugin, device, &error);
@@ -117,6 +118,7 @@ fu_plugin_dell_tpm_func (void)
 	/* cleanup */
 	fu_plugin_device_remove (plugin, device_alt);
 	fu_plugin_device_remove (plugin, device);
+	g_clear_object (&device);
 
 	/* inject fake data:
 	 * - that hasflashes
@@ -127,7 +129,8 @@ fu_plugin_dell_tpm_func (void)
 	tpm_out.status = TPM_EN_MASK | TPM_OWN_MASK | (TPM_1_2_MODE << 8);
 	tpm_out.flashes_left = 125;
 	fu_plugin_dell_inject_fake_data (plugin,
-					   (guint32 *) &tpm_out, 0, 0, NULL);
+					 (guint32 *) &tpm_out, 0, 0,
+					 NULL, TRUE);
 	ret = fu_plugin_dell_detect_tpm (plugin, &error);
 	device_alt = fu_device_get_alternate (device);
 	g_assert_no_error (error);
@@ -136,8 +139,7 @@ fu_plugin_dell_tpm_func (void)
 	g_assert (device_alt != NULL);
 
 	/* make sure allowed to flash 1.2 */
-	flags = fu_device_get_flags (device_alt);
-	g_assert_cmpint(flags & FWUPD_DEVICE_FLAG_ALLOW_OFFLINE, >, 0);
+	g_assert_true (fu_device_has_flag (device_alt, FWUPD_DEVICE_FLAG_UPDATABLE));
 
 	/* try to unlock 2.0 */
 	ret = fu_plugin_runner_unlock (plugin, device, &error);
@@ -148,6 +150,7 @@ fu_plugin_dell_tpm_func (void)
 	/* cleanup */
 	fu_plugin_device_remove (plugin, device_alt);
 	fu_plugin_device_remove (plugin, device);
+	g_clear_object (&device);
 
 	/* inject fake data:
 	 * - that has flashes
@@ -158,7 +161,8 @@ fu_plugin_dell_tpm_func (void)
 	tpm_out.status = TPM_EN_MASK | (TPM_1_2_MODE << 8);
 	tpm_out.flashes_left = 125;
 	fu_plugin_dell_inject_fake_data (plugin,
-					   (guint32 *) &tpm_out, 0, 0, NULL);
+					 (guint32 *) &tpm_out, 0, 0,
+					 NULL, TRUE);
 	ret = fu_plugin_dell_detect_tpm (plugin, &error);
 	device_alt = fu_device_get_alternate (device);
 	g_assert_no_error (error);
@@ -167,10 +171,8 @@ fu_plugin_dell_tpm_func (void)
 	g_assert (device_alt != NULL);
 
 	/* make sure allowed to flash 1.2 but not 2.0 */
-	flags = fu_device_get_flags (device_alt);
-	g_assert_cmpint (flags & FWUPD_DEVICE_FLAG_ALLOW_OFFLINE, >, 0);
-	flags = fu_device_get_flags (device);
-	g_assert_cmpint (flags & FWUPD_DEVICE_FLAG_ALLOW_OFFLINE, ==, 0);
+	g_assert_true (fu_device_has_flag (device_alt, FWUPD_DEVICE_FLAG_UPDATABLE));
+	g_assert_false (fu_device_has_flag (device, FWUPD_DEVICE_FLAG_UPDATABLE));
 
 	/* try to unlock 2.0 */
 	ret = fu_plugin_runner_unlock (plugin, device, &error);
@@ -178,14 +180,13 @@ fu_plugin_dell_tpm_func (void)
 	g_assert (ret);
 
 	/* make sure no longer allowed to flash 1.2 but can flash 2.0 */
-	flags = fu_device_get_flags (device_alt);
-	g_assert_cmpint (flags & FWUPD_DEVICE_FLAG_ALLOW_OFFLINE, ==, 0);
-	flags = fu_device_get_flags (device);
-	g_assert_cmpint (flags & FWUPD_DEVICE_FLAG_ALLOW_OFFLINE, >, 0);
+	g_assert_false (fu_device_has_flag (device_alt, FWUPD_DEVICE_FLAG_UPDATABLE));
+	g_assert_true (fu_device_has_flag (device, FWUPD_DEVICE_FLAG_UPDATABLE));
 
 	/* cleanup */
 	fu_plugin_device_remove (plugin, device_alt);
 	fu_plugin_device_remove (plugin, device);
+	g_clear_object (&device);
 
 	/* inject fake data:
 	 * - that has 1 flash left
@@ -196,7 +197,8 @@ fu_plugin_dell_tpm_func (void)
 	tpm_out.status = TPM_EN_MASK | (TPM_2_0_MODE << 8);
 	tpm_out.flashes_left = 1;
 	fu_plugin_dell_inject_fake_data (plugin,
-					   (guint32 *) &tpm_out, 0, 0, NULL);
+					 (guint32 *) &tpm_out, 0, 0,
+					 NULL, TRUE);
 	ret = fu_plugin_dell_detect_tpm (plugin, &error);
 	device_alt = fu_device_get_alternate (device);
 	g_assert_no_error (error);
@@ -205,28 +207,26 @@ fu_plugin_dell_tpm_func (void)
 	g_assert (device_alt != NULL);
 
 	/* make sure allowed to flash 2.0 but not 1.2 */
-	flags = fu_device_get_flags (device_alt);
-	g_assert_cmpint (flags & FWUPD_DEVICE_FLAG_ALLOW_OFFLINE, >, 0);
-	flags = fu_device_get_flags (device);
-	g_assert_cmpint (flags & FWUPD_DEVICE_FLAG_ALLOW_OFFLINE, ==, 0);
+	g_assert_true (fu_device_has_flag (device_alt, FWUPD_DEVICE_FLAG_UPDATABLE));
+	g_assert_false (fu_device_has_flag (device, FWUPD_DEVICE_FLAG_UPDATABLE));
 
 	/* With one flash left we need an override */
 	ret = fu_plugin_runner_update (plugin, device_alt, NULL, NULL,
-				  FWUPD_INSTALL_FLAG_OFFLINE, &error);
+				  FWUPD_INSTALL_FLAG_NONE, &error);
 	g_assert (!ret);
 	g_assert_error (error, FWUPD_ERROR, FWUPD_ERROR_NOT_SUPPORTED);
 	g_clear_error (&error);
 
 	/* test override */
 	ret = fu_plugin_runner_update (plugin, device_alt, NULL, NULL,
-				  FWUPD_INSTALL_FLAG_FORCE |
-				  FWUPD_INSTALL_FLAG_OFFLINE, &error);
+				  FWUPD_INSTALL_FLAG_FORCE, &error);
 	g_assert (ret);
 	g_assert_no_error (error);
 
 	/* cleanup */
 	fu_plugin_device_remove (plugin, device_alt);
 	fu_plugin_device_remove (plugin, device);
+	g_clear_object (&device);
 }
 
 static void
@@ -234,7 +234,7 @@ fu_plugin_dell_dock_func (void)
 {
 	gboolean ret;
 	guint cnt = 0;
-	guint32 out[4];
+	guint32 out[4] = { 0x0, 0x0, 0x0, 0x0 };
 	DOCK_UNION buf;
 	DOCK_INFO *dock_info;
 	g_autoptr(GError) error = NULL;
@@ -243,7 +243,7 @@ fu_plugin_dell_dock_func (void)
 
 	g_setenv ("FWUPD_DELL_FAKE_SMBIOS", "1", FALSE);
 	plugin = fu_plugin_new ();
-	ret = fu_plugin_open (plugin, ".libs/libfu_plugin_dell.so", &error);
+	ret = fu_plugin_open (plugin, PLUGINBUILDDIR "/libfu_plugin_dell.so", &error);
 	g_assert_no_error (error);
 	g_assert (ret);
 	ret = fu_plugin_runner_startup (plugin, &error);
@@ -262,7 +262,7 @@ fu_plugin_dell_dock_func (void)
 	/* make sure bad device doesn't trigger this */
 	fu_plugin_dell_inject_fake_data (plugin,
 					   (guint32 *) &out,
-					   0x1234, 0x4321, NULL);
+					   0x1234, 0x4321, NULL, FALSE);
 	fu_plugin_dell_device_added_cb (NULL, NULL, plugin);
 	g_assert (device == NULL);
 
@@ -271,7 +271,8 @@ fu_plugin_dell_dock_func (void)
 	out[1] = 0;
 	fu_plugin_dell_inject_fake_data (plugin,
 					   (guint32 *) &out,
-					   DOCK_NIC_VID, DOCK_NIC_PID, NULL);
+					   DOCK_NIC_VID, DOCK_NIC_PID,
+					   NULL, FALSE);
 	fu_plugin_dell_device_added_cb (NULL, NULL, plugin);
 	g_assert (device == NULL);
 
@@ -303,11 +304,11 @@ fu_plugin_dell_dock_func (void)
 	fu_plugin_dell_inject_fake_data (plugin,
 					   (guint32 *) &out,
 					   DOCK_NIC_VID, DOCK_NIC_PID,
-					   buf.buf);
+					   buf.buf, FALSE);
 	fu_plugin_dell_device_added_cb (NULL, NULL,
 					  plugin);
 	g_assert (device != NULL);
-	device = NULL;
+	g_clear_object (&device);
 	g_free (buf.record);
 	fu_plugin_dell_device_removed_cb (NULL, NULL,
 					    plugin);
@@ -340,11 +341,11 @@ fu_plugin_dell_dock_func (void)
 	fu_plugin_dell_inject_fake_data (plugin,
 					   (guint32 *) &out,
 					   DOCK_NIC_VID, DOCK_NIC_PID,
-					   buf.buf);
+					   buf.buf, FALSE);
 	fu_plugin_dell_device_added_cb (NULL, NULL,
 					  plugin);
 	g_assert (device != NULL);
-	device = NULL;
+	g_clear_object (&device);
 	g_free (buf.record);
 	fu_plugin_dell_device_removed_cb (NULL, NULL,
 					    plugin);
@@ -375,11 +376,11 @@ fu_plugin_dell_dock_func (void)
 	fu_plugin_dell_inject_fake_data (plugin,
 					   (guint32 *) &out,
 					   DOCK_NIC_VID, DOCK_NIC_PID,
-					   buf.buf);
+					   buf.buf, FALSE);
 	fu_plugin_dell_device_added_cb (NULL, NULL,
 					  plugin);
 	g_assert (device != NULL);
-	device = NULL;
+	g_clear_object (&device);
 	g_free (buf.record);
 	fu_plugin_dell_device_removed_cb (NULL, NULL,
 					    plugin);
@@ -410,11 +411,11 @@ fu_plugin_dell_dock_func (void)
 	fu_plugin_dell_inject_fake_data (plugin,
 					 (guint32 *) &out,
 					 DOCK_NIC_VID, DOCK_NIC_PID,
-					 buf.buf);
+					 buf.buf, FALSE);
 	fu_plugin_dell_device_added_cb (NULL, NULL,
 					  plugin);
 	g_assert (device != NULL);
-	device = NULL;
+	g_clear_object (&device);
 	g_free (buf.record);
 	fu_plugin_dell_device_removed_cb (NULL, NULL,
 					    plugin);
@@ -438,7 +439,7 @@ fu_plugin_dell_dock_func (void)
 	fu_plugin_dell_inject_fake_data (plugin,
 					 (guint32 *) &out,
 					 DOCK_NIC_VID, DOCK_NIC_PID,
-					 buf.buf);
+					 buf.buf, FALSE);
 	fu_plugin_dell_device_added_cb (NULL, NULL,
 					  plugin);
 	g_assert (device == NULL);

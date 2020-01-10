@@ -1,0 +1,268 @@
+%global glib2_version 2.45.8
+%global libappstream_version 0.6.13
+%global libgusb_version 0.2.11
+%global libsoup_version 2.51.92
+%global colord_version 1.2.12
+%global systemd_version 231
+
+%define alphatag                #ALPHATAG#
+
+%global enable_tests 1
+%global enable_dummy 1
+
+# fwupdate is only available on these arches
+%ifarch x86_64 aarch64
+%global have_uefi 1
+%endif
+
+# libsmbios is only available on x86, and fwupdate is available on just x86_64
+%ifarch x86_64
+%global have_dell 1
+%endif
+
+Summary:   Firmware update daemon
+Name:      fwupd
+Version:   #VERSION#
+Release:   0.#BUILD#%{?alphatag}%{?dist}
+License:   GPLv2+
+URL:       https://github.com/hughsie/fwupd
+Source0:   http://people.freedesktop.org/~hughsient/releases/%{name}-%{version}.tar.xz
+
+BuildRequires: docbook-utils
+BuildRequires: gettext
+BuildRequires: glib2-devel >= %{glib2_version}
+BuildRequires: libappstream-glib-devel >= %{libappstream_version}
+BuildRequires: libgudev1-devel
+BuildRequires: libgusb-devel >= %{libgusb_version}
+BuildRequires: libsoup-devel >= %{libsoup_version}
+BuildRequires: colord-devel >= %{colord_version}
+BuildRequires: polkit-devel >= 0.103
+BuildRequires: sqlite-devel
+BuildRequires: gpgme-devel
+BuildRequires: systemd >= %{systemd_version}
+BuildRequires: libarchive-devel
+BuildRequires: gobject-introspection-devel
+BuildRequires: gcab
+BuildRequires: valgrind
+BuildRequires: valgrind-devel
+BuildRequires: elfutils-libelf-devel
+BuildRequires: gtk-doc
+BuildRequires: libuuid-devel
+BuildRequires: gnutls-devel
+BuildRequires: gnutls-utils
+BuildRequires: meson
+BuildRequires: help2man
+
+%if 0%{?have_uefi}
+BuildRequires: python3 python3-cairo python3-gobject python3-pillow
+BuildRequires: pango-devel
+BuildRequires: cairo-devel cairo-gobject-devel
+BuildRequires: freetype
+BuildRequires: fontconfig
+BuildRequires: dejavu-sans-fonts
+BuildRequires: adobe-source-han-sans-cn-fonts
+%endif
+
+%if 0%{?have_dell}
+BuildRequires: efivar-devel
+BuildRequires: libsmbios-devel >= 2.3.0
+%endif
+
+%if 0%{?have_uefi}
+BuildRequires: fwupdate-devel >= 7
+%endif
+
+Requires(post): systemd
+Requires(preun): systemd
+Requires(postun): systemd
+
+Requires: glib2%{?_isa} >= %{glib2_version}
+Requires: libappstream-glib%{?_isa} >= %{libappstream_version}
+Requires: libgusb%{?_isa} >= %{libgusb_version}
+Requires: libsoup%{?_isa} >= %{libsoup_version}
+Requires: fwupd-labels = %{version}-%{release}
+Requires: bubblewrap
+
+Recommends: python3
+
+Obsoletes: fwupd-sign < 0.1.6
+Obsoletes: libebitdo < 0.7.5-3
+Obsoletes: libdfu < 0.9.8-1
+
+%description
+fwupd is a daemon to allow session software to update device firmware.
+
+%package devel
+Summary: Development package for %{name}
+Requires: %{name}%{?_isa} = %{version}-%{release}
+Obsoletes: libebitdo-devel < 0.7.5-3
+Obsoletes: libdfu-devel < 0.9.8-1
+
+%description devel
+Files for development with %{name}.
+
+%package labels
+Summary: Rendered labels for display during system firmware updates.
+# BuildArch: noarch is disabled as we can get "different" .BMP files even when
+# running the build on the same architecture due to the randomness introduced
+# by the TTF files.
+
+%description labels
+Rendered labels for display during system firmware updates.
+
+%package tests
+Summary: Data files for installed tests
+BuildArch: noarch
+
+%description tests
+Data files for installed tests.
+
+%prep
+%setup -q
+
+%build
+
+%meson \
+    -Denable-doc=true \
+    -Denable-man=true \
+%if 0%{?enable_tests}
+    -Denable-tests=true \
+%else
+    -Denable-tests=false \
+%endif
+%if 0%{?enable_dummy}
+    -Denable-dummy=true \
+%else
+    -Denable-dummy=false \
+%endif
+    -Denable-thunderbolt=true \
+%if 0%{?have_uefi}
+    -Denable-uefi=true \
+    -Denable-uefi-labels=true \
+%else
+    -Denable-uefi=false \
+    -Denable-uefi-labels=false \
+%endif
+%if 0%{?have_dell}
+    -Denable-dell=true \
+    -Denable-synaptics=true \
+%else
+    -Denable-dell=false \
+    -Denable-synaptics=false \
+%endif
+    -Denable-colorhug=true
+
+%meson_build
+
+%if 0%{?enable_tests}
+%check
+%meson_test
+%endif
+
+%install
+%meson_install
+
+mkdir -p --mode=0700 $RPM_BUILD_ROOT%{_localstatedir}/lib/fwupd/gnupg
+
+%find_lang %{name}
+
+%post
+/sbin/ldconfig
+%systemd_post fwupd.service
+
+%preun
+%systemd_preun fwupd.service
+
+%postun
+/sbin/ldconfig
+%systemd_postun_with_restart fwupd.service
+
+%files -f %{name}.lang
+%doc README.md AUTHORS NEWS
+%license COPYING
+%config(noreplace)%{_sysconfdir}/fwupd/daemon.conf
+%dir %{_libexecdir}/fwupd
+%{_libexecdir}/fwupd/fwupd
+%{_bindir}/dfu-tool
+%{_bindir}/fwupdmgr
+%dir %{_sysconfdir}/fwupd
+%dir %{_sysconfdir}/fwupd/remotes.d
+%{_sysconfdir}/fwupd/remotes.d/fwupd.conf
+%{_sysconfdir}/fwupd/remotes.d/lvfs.conf
+%{_sysconfdir}/fwupd/remotes.d/lvfs-testing.conf
+%{_sysconfdir}/fwupd/remotes.d/vendor.conf
+%{_sysconfdir}/pki/fwupd
+%{_sysconfdir}/pki/fwupd-metadata
+%{_sysconfdir}/dbus-1/system.d/org.freedesktop.fwupd.conf
+%{_datadir}/fwupd/remotes.d/fwupd/metadata.xml
+%{_datadir}/fwupd/remotes.d/vendor/firmware/README.md
+%{_datadir}/dbus-1/interfaces/org.freedesktop.fwupd.xml
+%{_datadir}/polkit-1/actions/org.freedesktop.fwupd.policy
+%{_datadir}/polkit-1/rules.d/org.freedesktop.fwupd.rules
+%{_datadir}/dbus-1/system-services/org.freedesktop.fwupd.service
+%{_datadir}/man/man1/dfu-tool.1.gz
+%{_datadir}/man/man1/fwupdmgr.1.gz
+%{_datadir}/metainfo/org.freedesktop.fwupd.metainfo.xml
+%{_datadir}/fwupd/firmware-packager
+%{_unitdir}/fwupd-offline-update.service
+%{_unitdir}/fwupd.service
+%{_unitdir}/system-update.target.wants/
+%dir %{_localstatedir}/lib/fwupd
+%dir %{_datadir}/fwupd/quirks.d
+%{_datadir}/fwupd/quirks.d/*.quirk
+%{_localstatedir}/lib/fwupd/builder/README.md
+%{_libdir}/libfwupd*.so.*
+%{_libdir}/girepository-1.0/Fwupd-2.0.typelib
+/usr/lib/udev/rules.d/*.rules
+%dir %{_libdir}/fwupd-plugins-3
+%{_libdir}/fwupd-plugins-3/libfu_plugin_altos.so
+%{_libdir}/fwupd-plugins-3/libfu_plugin_amt.so
+%{_libdir}/fwupd-plugins-3/libfu_plugin_colorhug.so
+%if 0%{?have_dell}
+%{_libdir}/fwupd-plugins-3/libfu_plugin_dell.so
+%endif
+%{_libdir}/fwupd-plugins-3/libfu_plugin_dfu.so
+%{_libdir}/fwupd-plugins-3/libfu_plugin_ebitdo.so
+%{_libdir}/fwupd-plugins-3/libfu_plugin_raspberrypi.so
+%{_libdir}/fwupd-plugins-3/libfu_plugin_steelseries.so
+%if 0%{?have_dell}
+%{_libdir}/fwupd-plugins-3/libfu_plugin_synapticsmst.so
+%endif
+%if 0%{?enable_dummy}
+%{_libdir}/fwupd-plugins-3/libfu_plugin_test.so
+%endif
+%{_libdir}/fwupd-plugins-3/libfu_plugin_thunderbolt.so
+%{_libdir}/fwupd-plugins-3/libfu_plugin_thunderbolt_power.so
+%{_libdir}/fwupd-plugins-3/libfu_plugin_udev.so
+%if 0%{?have_uefi}
+%{_libdir}/fwupd-plugins-3/libfu_plugin_uefi.so
+%endif
+%{_libdir}/fwupd-plugins-3/libfu_plugin_unifying.so
+%{_libdir}/fwupd-plugins-3/libfu_plugin_upower.so
+%ghost %{_localstatedir}/lib/fwupd/gnupg
+
+%files devel
+%{_datadir}/gir-1.0/Fwupd-2.0.gir
+%{_datadir}/gtk-doc/html/libfwupd
+%{_includedir}/fwupd-1
+%{_libdir}/libfwupd*.so
+%{_libdir}/pkgconfig/fwupd.pc
+
+%files labels
+%if 0%{?have_uefi}
+%{_datadir}/locale/*/LC_IMAGES/fwupd*
+%endif
+
+%files tests
+%dir %{_datadir}/installed-tests/fwupd
+%{_datadir}/installed-tests/fwupd/firmware-example.xml.gz
+%{_datadir}/installed-tests/fwupd/firmware-example.xml.gz.asc
+%{_datadir}/installed-tests/fwupd/*.test
+%{_datadir}/installed-tests/fwupd/*.cab
+%{_datadir}/installed-tests/fwupd/*.sh
+%{_datadir}/installed-tests/fwupd/*.py*
+
+%changelog
+* #LONGDATE# Richard Hughes <richard@hughsie.com> #VERSION#-0.#BUILD##ALPHATAG#
+- Update from git
+
