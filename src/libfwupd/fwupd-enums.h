@@ -1,22 +1,8 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2015 Richard Hughes <richard@hughsie.com>
+ * Copyright (C) 2015-2018 Richard Hughes <richard@hughsie.com>
  *
- * Licensed under the GNU Lesser General Public License Version 2.1
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #ifndef __FWUPD_ENUMS_H
@@ -80,14 +66,19 @@ typedef enum {
  * FwupdDeviceFlags:
  * @FWUPD_DEVICE_FLAG_NONE:			No flags set
  * @FWUPD_DEVICE_FLAG_INTERNAL:			Device cannot be removed easily
- * @FWUPD_DEVICE_FLAG_UPDATABLE:		Device is updatable
+ * @FWUPD_DEVICE_FLAG_UPDATABLE:		Device is updatable in this or any other mode
  * @FWUPD_DEVICE_FLAG_ONLY_OFFLINE:		Update can only be done from offline mode
  * @FWUPD_DEVICE_FLAG_REQUIRE_AC:		Requires AC power
  * @FWUPD_DEVICE_FLAG_LOCKED:			Is locked and can be unlocked
  * @FWUPD_DEVICE_FLAG_SUPPORTED:		Is found in current metadata
- * @FWUPD_DEVICE_FLAG_NEEDS_BOOTLOADER:		Requires a bootloader mode
+ * @FWUPD_DEVICE_FLAG_NEEDS_BOOTLOADER:		Requires a bootloader mode to be manually enabled by the user
  * @FWUPD_DEVICE_FLAG_REGISTERED:		Has been registered with other plugins
  * @FWUPD_DEVICE_FLAG_NEEDS_REBOOT:		Requires a reboot to apply firmware or to reload hardware
+ * @FWUPD_DEVICE_FLAG_REPORTED:			Has been reported to a metadata server
+ * @FWUPD_DEVICE_FLAG_NOTIFIED:			User has been notified
+ * @FWUPD_DEVICE_FLAG_USE_RUNTIME_VERSION:	Always use the runtime version rather than the bootloader
+ * @FWUPD_DEVICE_FLAG_INSTALL_PARENT_FIRST:	Install composite firmware on the parent before the child
+ * @FWUPD_DEVICE_FLAG_IS_BOOTLOADER:		Is currently in bootloader mode
  *
  * The device flags.
  **/
@@ -101,6 +92,11 @@ typedef enum {
 #define FWUPD_DEVICE_FLAG_NEEDS_BOOTLOADER	(1u << 6)	/* Since: 0.7.3 */
 #define FWUPD_DEVICE_FLAG_REGISTERED		(1u << 7)	/* Since: 0.9.7 */
 #define FWUPD_DEVICE_FLAG_NEEDS_REBOOT		(1u << 8)	/* Since: 0.9.7 */
+#define FWUPD_DEVICE_FLAG_REPORTED		(1u << 9)	/* Since: 1.0.4 */
+#define FWUPD_DEVICE_FLAG_NOTIFIED		(1u << 10)	/* Since: 1.0.5 */
+#define FWUPD_DEVICE_FLAG_USE_RUNTIME_VERSION	(1u << 11)	/* Since: 1.0.6 */
+#define FWUPD_DEVICE_FLAG_INSTALL_PARENT_FIRST	(1u << 12)	/* Since: 1.0.8 */
+#define FWUPD_DEVICE_FLAG_IS_BOOTLOADER		(1u << 13)	/* Since: 1.0.8 */
 #define FWUPD_DEVICE_FLAG_UNKNOWN		G_MAXUINT64	/* Since: 0.7.3 */
 typedef guint64 FwupdDeviceFlags;
 
@@ -111,15 +107,17 @@ typedef guint64 FwupdDeviceFlags;
  * @FWUPD_INSTALL_FLAG_ALLOW_REINSTALL:		Allow reinstalling the same version
  * @FWUPD_INSTALL_FLAG_ALLOW_OLDER:		Allow downgrading firmware
  * @FWUPD_INSTALL_FLAG_FORCE:			Force the update even if not a good idea
+ * @FWUPD_INSTALL_FLAG_NO_HISTORY:		Do not write to the history database
  *
  * Flags to set when performing the firwmare update or install.
  **/
 typedef enum {
-	FWUPD_INSTALL_FLAG_NONE			= 0,	/* Since: 0.7.0 */
-	FWUPD_INSTALL_FLAG_OFFLINE		= 1,	/* Since: 0.7.0 */
-	FWUPD_INSTALL_FLAG_ALLOW_REINSTALL	= 2,	/* Since: 0.7.0 */
-	FWUPD_INSTALL_FLAG_ALLOW_OLDER		= 4,	/* Since: 0.7.0 */
-	FWUPD_INSTALL_FLAG_FORCE		= 8,	/* Since: 0.7.1 */
+	FWUPD_INSTALL_FLAG_NONE			= 0,		/* Since: 0.7.0 */
+	FWUPD_INSTALL_FLAG_OFFLINE		= 1 << 0,	/* Since: 0.7.0 */
+	FWUPD_INSTALL_FLAG_ALLOW_REINSTALL	= 1 << 1,	/* Since: 0.7.0 */
+	FWUPD_INSTALL_FLAG_ALLOW_OLDER		= 1 << 2,	/* Since: 0.7.0 */
+	FWUPD_INSTALL_FLAG_FORCE		= 1 << 3,	/* Since: 0.7.1 */
+	FWUPD_INSTALL_FLAG_NO_HISTORY		= 1 << 4,	/* Since: 1.0.8 */
 	/*< private >*/
 	FWUPD_INSTALL_FLAG_LAST
 } FwupdInstallFlags;
@@ -130,6 +128,7 @@ typedef enum {
  * @FWUPD_UPDATE_STATE_PENDING:			Update is pending
  * @FWUPD_UPDATE_STATE_SUCCESS:			Update was successfull
  * @FWUPD_UPDATE_STATE_FAILED:			Update failed
+ * @FWUPD_UPDATE_STATE_NEEDS_REBOOT:		Waiting for a reboot to apply
  *
  * The update state.
  **/
@@ -138,6 +137,7 @@ typedef enum {
 	FWUPD_UPDATE_STATE_PENDING,			/* Since: 0.7.0 */
 	FWUPD_UPDATE_STATE_SUCCESS,			/* Since: 0.7.0 */
 	FWUPD_UPDATE_STATE_FAILED,			/* Since: 0.7.0 */
+	FWUPD_UPDATE_STATE_NEEDS_REBOOT,		/* Since: 1.0.4 */
 	/*< private >*/
 	FWUPD_UPDATE_STATE_LAST
 } FwupdUpdateState;

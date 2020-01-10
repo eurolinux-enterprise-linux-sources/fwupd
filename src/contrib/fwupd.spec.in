@@ -1,12 +1,13 @@
 %global glib2_version 2.45.8
-%global libappstream_version 0.6.13
+%global libappstream_version 0.7.4
 %global libgusb_version 0.2.11
 %global libsoup_version 2.51.92
-%global colord_version 1.2.12
 %global systemd_version 231
+%global json_glib_version 1.1.1
 
 %define alphatag                #ALPHATAG#
 
+%global enable_ci 0
 %global enable_tests 1
 %global enable_dummy 1
 
@@ -28,14 +29,12 @@ License:   GPLv2+
 URL:       https://github.com/hughsie/fwupd
 Source0:   http://people.freedesktop.org/~hughsient/releases/%{name}-%{version}.tar.xz
 
-BuildRequires: docbook-utils
 BuildRequires: gettext
 BuildRequires: glib2-devel >= %{glib2_version}
 BuildRequires: libappstream-glib-devel >= %{libappstream_version}
 BuildRequires: libgudev1-devel
 BuildRequires: libgusb-devel >= %{libgusb_version}
 BuildRequires: libsoup-devel >= %{libsoup_version}
-BuildRequires: colord-devel >= %{colord_version}
 BuildRequires: polkit-devel >= 0.103
 BuildRequires: sqlite-devel
 BuildRequires: gpgme-devel
@@ -52,6 +51,8 @@ BuildRequires: gnutls-devel
 BuildRequires: gnutls-utils
 BuildRequires: meson
 BuildRequires: help2man
+BuildRequires: json-glib-devel >= %{json_glib_version}
+BuildRequires: vala
 
 %if 0%{?have_uefi}
 BuildRequires: python3 python3-cairo python3-gobject python3-pillow
@@ -123,34 +124,36 @@ Data files for installed tests.
 %build
 
 %meson \
-    -Denable-doc=true \
-    -Denable-man=true \
+%if 0%{?enable_ci}
+    --werror \
+%endif
+    -Dgtkdoc=true \
 %if 0%{?enable_tests}
-    -Denable-tests=true \
+    -Dtests=true \
 %else
-    -Denable-tests=false \
+    -Dtests=false \
 %endif
 %if 0%{?enable_dummy}
-    -Denable-dummy=true \
+    -Dplugin_dummy=true \
 %else
-    -Denable-dummy=false \
+    -Dplugin_dummy=false \
 %endif
-    -Denable-thunderbolt=true \
+    -Dplugin_thunderbolt=true \
 %if 0%{?have_uefi}
-    -Denable-uefi=true \
-    -Denable-uefi-labels=true \
+    -Dplugin_uefi=true \
+    -Dplugin_uefi_labels=true \
 %else
-    -Denable-uefi=false \
-    -Denable-uefi-labels=false \
+    -Dplugin_uefi=false \
+    -Dplugin_uefi_labels=false \
 %endif
 %if 0%{?have_dell}
-    -Denable-dell=true \
-    -Denable-synaptics=true \
+    -Dplugin_dell=true \
+    -Dplugin_synaptics=true \
 %else
-    -Denable-dell=false \
-    -Denable-synaptics=false \
+    -Dplugin_dell=false \
+    -Dplugin_synaptics=false \
 %endif
-    -Denable-colorhug=true
+    -Dman=true
 
 %meson_build
 
@@ -181,19 +184,26 @@ mkdir -p --mode=0700 $RPM_BUILD_ROOT%{_localstatedir}/lib/fwupd/gnupg
 %doc README.md AUTHORS NEWS
 %license COPYING
 %config(noreplace)%{_sysconfdir}/fwupd/daemon.conf
+%if 0%{?have_uefi}
+%config(noreplace)%{_sysconfdir}/fwupd/uefi.conf
+%endif
 %dir %{_libexecdir}/fwupd
 %{_libexecdir}/fwupd/fwupd
+%{_libexecdir}/fwupd/fwupdtool
 %{_bindir}/dfu-tool
 %{_bindir}/fwupdmgr
 %dir %{_sysconfdir}/fwupd
 %dir %{_sysconfdir}/fwupd/remotes.d
-%{_sysconfdir}/fwupd/remotes.d/fwupd.conf
-%{_sysconfdir}/fwupd/remotes.d/lvfs.conf
-%{_sysconfdir}/fwupd/remotes.d/lvfs-testing.conf
-%{_sysconfdir}/fwupd/remotes.d/vendor.conf
-%{_sysconfdir}/pki/fwupd
+%config(noreplace)%{_sysconfdir}/fwupd/remotes.d/fwupd.conf
+%config(noreplace)%{_sysconfdir}/fwupd/remotes.d/lvfs.conf
+%config(noreplace)%{_sysconfdir}/fwupd/remotes.d/lvfs-testing.conf
+%config(noreplace)%{_sysconfdir}/fwupd/remotes.d/vendor.conf
+%config(noreplace)%{_sysconfdir}/pki/fwupd
 %{_sysconfdir}/pki/fwupd-metadata
 %{_sysconfdir}/dbus-1/system.d/org.freedesktop.fwupd.conf
+%{_datadir}/bash-completion/completions/fwupdmgr
+%{_datadir}/bash-completion/completions/fwupdtool
+%{_datadir}/fwupd/metainfo/org.freedesktop.fwupd*.metainfo.xml
 %{_datadir}/fwupd/remotes.d/fwupd/metadata.xml
 %{_datadir}/fwupd/remotes.d/vendor/firmware/README.md
 %{_datadir}/dbus-1/interfaces/org.freedesktop.fwupd.xml
@@ -218,12 +228,13 @@ mkdir -p --mode=0700 $RPM_BUILD_ROOT%{_localstatedir}/lib/fwupd/gnupg
 %{_libdir}/fwupd-plugins-3/libfu_plugin_altos.so
 %{_libdir}/fwupd-plugins-3/libfu_plugin_amt.so
 %{_libdir}/fwupd-plugins-3/libfu_plugin_colorhug.so
+%{_libdir}/fwupd-plugins-3/libfu_plugin_csr.so
 %if 0%{?have_dell}
 %{_libdir}/fwupd-plugins-3/libfu_plugin_dell.so
 %endif
 %{_libdir}/fwupd-plugins-3/libfu_plugin_dfu.so
 %{_libdir}/fwupd-plugins-3/libfu_plugin_ebitdo.so
-%{_libdir}/fwupd-plugins-3/libfu_plugin_raspberrypi.so
+%{_libdir}/fwupd-plugins-3/libfu_plugin_nitrokey.so
 %{_libdir}/fwupd-plugins-3/libfu_plugin_steelseries.so
 %if 0%{?have_dell}
 %{_libdir}/fwupd-plugins-3/libfu_plugin_synapticsmst.so
@@ -239,11 +250,13 @@ mkdir -p --mode=0700 $RPM_BUILD_ROOT%{_localstatedir}/lib/fwupd/gnupg
 %endif
 %{_libdir}/fwupd-plugins-3/libfu_plugin_unifying.so
 %{_libdir}/fwupd-plugins-3/libfu_plugin_upower.so
+%{_libdir}/fwupd-plugins-3/libfu_plugin_wacomhid.so
 %ghost %{_localstatedir}/lib/fwupd/gnupg
 
 %files devel
 %{_datadir}/gir-1.0/Fwupd-2.0.gir
 %{_datadir}/gtk-doc/html/libfwupd
+%{_datadir}/vala/vapi
 %{_includedir}/fwupd-1
 %{_libdir}/libfwupd*.so
 %{_libdir}/pkgconfig/fwupd.pc

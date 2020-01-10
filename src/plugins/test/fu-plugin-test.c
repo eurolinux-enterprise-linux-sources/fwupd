@@ -2,21 +2,7 @@
  *
  * Copyright (C) 2016 Richard Hughes <richard@hughsie.com>
  *
- * Licensed under the GNU General Public License Version 2
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #include "config.h"
@@ -56,15 +42,17 @@ fu_plugin_coldplug (FuPlugin *plugin, GError **error)
 	fu_device_set_vendor (device, "ACME Corp.");
 	fu_device_set_vendor_id (device, "USB:0x046D");
 	fu_device_set_version_bootloader (device, "0.1.2");
-	fu_device_set_version (device, "1.2.3");
+	fu_device_set_version (device, "1.2.2");
 	fu_device_set_version_lowest (device, "1.2.0");
-	fu_plugin_device_register (plugin, device);
-	if (fu_device_get_metadata (device, "BestDevice") == NULL) {
-		g_set_error (error,
-			     FWUPD_ERROR,
-			     FWUPD_ERROR_NOT_FOUND,
-			     "Device not set by another plugin");
-		return FALSE;
+	if (g_strcmp0 (g_getenv ("FWUPD_PLUGIN_TEST"), "registration") == 0) {
+		fu_plugin_device_register (plugin, device);
+		if (fu_device_get_metadata (device, "BestDevice") == NULL) {
+			g_set_error (error,
+				     FWUPD_ERROR,
+				     FWUPD_ERROR_NOT_FOUND,
+				     "Device not set by another plugin");
+			return FALSE;
+		}
 	}
 	fu_plugin_device_add (plugin, device);
 	return TRUE;
@@ -106,27 +94,42 @@ fu_plugin_update (FuPlugin *plugin,
 		  FwupdInstallFlags flags,
 		  GError **error)
 {
-	fu_plugin_set_status (plugin, FWUPD_STATUS_DECOMPRESSING);
-	for (guint i = 1; i <= 100; i++) {
-		g_usleep (1000);
-		fu_plugin_set_percentage (plugin, i);
+	if (g_strcmp0 (g_getenv ("FWUPD_PLUGIN_TEST"), "fail") == 0) {
+		g_set_error_literal (error,
+				     FWUPD_ERROR,
+				     FWUPD_ERROR_NOT_SUPPORTED,
+				     "device was not in supported mode");
+		return FALSE;
 	}
-	fu_plugin_set_status (plugin, FWUPD_STATUS_DEVICE_WRITE);
+	fu_device_set_status (device, FWUPD_STATUS_DECOMPRESSING);
 	for (guint i = 1; i <= 100; i++) {
 		g_usleep (1000);
-		fu_plugin_set_percentage (plugin, i);
+		fu_device_set_progress (device, i);
 	}
-	fu_plugin_set_status (plugin, FWUPD_STATUS_DEVICE_VERIFY);
+	fu_device_set_status (device, FWUPD_STATUS_DEVICE_WRITE);
 	for (guint i = 1; i <= 100; i++) {
 		g_usleep (1000);
-		fu_plugin_set_percentage (plugin, i);
+		fu_device_set_progress (device, i);
+	}
+	fu_device_set_status (device, FWUPD_STATUS_DEVICE_VERIFY);
+	for (guint i = 1; i <= 100; i++) {
+		g_usleep (1000);
+		fu_device_set_progress (device, i);
 	}
 
 	/* upgrade, or downgrade */
-	if ((flags & FWUPD_INSTALL_FLAG_ALLOW_OLDER) == 0) {
-		fu_device_set_version (device, "1.2.4");
+	if (flags & FWUPD_INSTALL_FLAG_ALLOW_OLDER) {
+		fu_device_set_version (device, "1.2.2");
 	} else {
 		fu_device_set_version (device, "1.2.3");
 	}
+	return TRUE;
+}
+
+gboolean
+fu_plugin_get_results (FuPlugin *plugin, FuDevice *device, GError **error)
+{
+	fu_device_set_update_state (device, FWUPD_UPDATE_STATE_SUCCESS);
+	fu_device_set_update_error (device, NULL);
 	return TRUE;
 }

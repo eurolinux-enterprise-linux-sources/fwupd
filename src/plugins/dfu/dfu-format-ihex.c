@@ -2,26 +2,14 @@
  *
  * Copyright (C) 2015-2016 Richard Hughes <richard@hughsie.com>
  *
- * Licensed under the GNU Lesser General Public License Version 2.1
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #include "config.h"
 
 #include <string.h>
+
+#include "fu-common.h"
 
 #include "dfu-element.h"
 #include "dfu-firmware.h"
@@ -53,6 +41,8 @@ dfu_firmware_detect_ihex (GBytes *bytes)
 
 #define	DFU_INHX32_RECORD_TYPE_DATA		0x00
 #define	DFU_INHX32_RECORD_TYPE_EOF		0x01
+#define	DFU_INHX32_RECORD_TYPE_EXTENDED_SEGMENT	0x02
+#define	DFU_INHX32_RECORD_TYPE_START_SEGMENT	0x03
 #define	DFU_INHX32_RECORD_TYPE_EXTENDED		0x04
 #define	DFU_INHX32_RECORD_TYPE_ADDR32		0x05
 #define	DFU_INHX32_RECORD_TYPE_SIGNATURE	0xfd
@@ -190,6 +180,14 @@ dfu_firmware_from_ihex (DfuFirmware *firmware,
 			for (guint i = offset + 9; i < end; i += 2) {
 				/* any holes in the hex record */
 				guint32 len_hole = addr32 - addr32_last;
+				if (addr32_last > 0 && len_hole > 0x100000) {
+					g_set_error (error,
+						     FWUPD_ERROR,
+						     FWUPD_ERROR_INVALID_FILE,
+						     "hole of 0x%x bytes too large to fill",
+						     (guint) len_hole);
+					return FALSE;
+				}
 				if (addr32_last > 0x0 && len_hole > 1) {
 					for (guint j = 1; j < len_hole; j++) {
 						g_debug ("filling address 0x%08x",
@@ -221,6 +219,14 @@ dfu_firmware_from_ihex (DfuFirmware *firmware,
 			addr32 = ((guint32) addr_high << 16) + addr_low;
 			break;
 		case DFU_INHX32_RECORD_TYPE_ADDR32:
+			addr32 = dfu_utils_buffer_parse_uint32 (in_buffer + offset + 9);
+			break;
+		case DFU_INHX32_RECORD_TYPE_EXTENDED_SEGMENT:
+			/* segment base address, so ~1Mb addressable */
+			addr32 = dfu_utils_buffer_parse_uint16 (in_buffer + offset + 9) * 16;
+			break;
+		case DFU_INHX32_RECORD_TYPE_START_SEGMENT:
+			/* initial content of the CS:IP registers */
 			addr32 = dfu_utils_buffer_parse_uint32 (in_buffer + offset + 9);
 			break;
 		case DFU_INHX32_RECORD_TYPE_SIGNATURE:
@@ -321,10 +327,11 @@ dfu_firmware_to_ihex_bytes (GString *str, guint8 record_type,
 
 		/* need to offset */
 		if (address_offset != address_offset_last) {
-			guint16 tmp = GUINT16_TO_BE (address_offset);
+			guint8 buf[2];
+			fu_common_write_uint16 (buf, address_offset, G_BIG_ENDIAN);
 			dfu_firmware_ihex_emit_chunk (str, 0x0,
 						      DFU_INHX32_RECORD_TYPE_EXTENDED,
-						      (guint8 *) &tmp, 2);
+						      buf, 2);
 			address_offset_last = address_offset;
 		}
 		address_tmp &= 0xffff;

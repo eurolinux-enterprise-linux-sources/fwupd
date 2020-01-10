@@ -2,21 +2,7 @@
  *
  * Copyright (C) 2015-2017 Richard Hughes <richard@hughsie.com>
  *
- * Licensed under the GNU Lesser General Public License Version 2.1
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #ifndef __FWUPD_RELEASE_H
@@ -56,6 +42,15 @@ void		 fwupd_release_set_uri			(FwupdRelease	*release,
 GPtrArray	*fwupd_release_get_checksums		(FwupdRelease	*release);
 void		 fwupd_release_add_checksum		(FwupdRelease	*release,
 							 const gchar	*checksum);
+
+GHashTable	*fwupd_release_get_metadata		(FwupdRelease	*release);
+void		 fwupd_release_add_metadata		(FwupdRelease	*release,
+							 GHashTable	*hash);
+void		 fwupd_release_add_metadata_item	(FwupdRelease	*release,
+							 const gchar	*key,
+							 const gchar	*value);
+const gchar	*fwupd_release_get_metadata_item	(FwupdRelease	*release,
+							 const gchar	*key);
 
 const gchar	*fwupd_release_get_filename		(FwupdRelease	*release);
 void		 fwupd_release_set_filename		(FwupdRelease	*release,

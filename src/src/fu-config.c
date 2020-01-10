@@ -2,30 +2,20 @@
  *
  * Copyright (C) 2017 Richard Hughes <richard@hughsie.com>
  *
- * Licensed under the GNU Lesser General Public License Version 2.1
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #include "config.h"
 
+#include <appstream-glib.h>
 #include <glib-object.h>
 #include <gio/gio.h>
+#include <glib/gi18n.h>
 
+#include "fu-common.h"
 #include "fu-config.h"
 
+#include "fwupd-common.h"
 #include "fwupd-error.h"
 #include "fwupd-remote-private.h"
 
@@ -39,6 +29,9 @@ struct _FuConfig
 	GPtrArray		*monitors;
 	GPtrArray		*blacklist_devices;
 	GPtrArray		*blacklist_plugins;
+	guint64			 archive_size_max;
+	AsStore			*store_remotes;
+	GHashTable		*os_release;
 };
 
 G_DEFINE_TYPE (FuConfig, fu_config, G_TYPE_OBJECT)
@@ -49,7 +42,7 @@ fu_config_get_config_paths (void)
 	GPtrArray *paths = g_ptr_array_new_with_free_func (g_free);
 	const gchar *remotes_dir;
 	const gchar *system_prefixlibdir = "/usr/lib/fwupd";
-	g_autofree gchar *sysconfdir = NULL;
+	g_autofree gchar *configdir = NULL;
 
 	/* only set by the self test program */
 	remotes_dir = g_getenv ("FU_SELF_TEST_REMOTES_DIR");
@@ -59,9 +52,9 @@ fu_config_get_config_paths (void)
 	}
 
 	/* use sysconfig, and then fall back to /etc */
-	sysconfdir = g_build_filename (FWUPDCONFIGDIR, NULL);
-	if (g_file_test (sysconfdir, G_FILE_TEST_EXISTS))
-		g_ptr_array_add (paths, g_steal_pointer (&sysconfdir));
+	configdir = fu_common_get_path (FU_PATH_KIND_SYSCONFDIR_PKG);
+	if (g_file_test (configdir, G_FILE_TEST_EXISTS))
+		g_ptr_array_add (paths, g_steal_pointer (&configdir));
 
 	/* add in system-wide locations */
 	if (g_file_test (system_prefixlibdir, G_FILE_TEST_EXISTS))
@@ -119,6 +112,98 @@ fu_config_add_inotify (FuConfig *self, const gchar *filename, GError **error)
 	return TRUE;
 }
 
+static GString *
+fu_config_get_remote_agreement_default (FwupdRemote *self, GError **error)
+{
+	GString *str = g_string_new (NULL);
+
+	/* this is designed as a fallback; the actual warning should ideally
+	 * come from the LVFS instance that is serving the remote */
+	g_string_append_printf (str, "%s\n",
+				/* TRANSLATORS: show the user a warning */
+				_("Your distributor may not have verified any of "
+				  "the firmware updates for compatibility with your "
+				  "system or connected devices."));
+	g_string_append_printf (str, "%s\n",
+				/* TRANSLATORS: show the user a warning */
+				_("Enabling this remote is done at your own risk."));
+	return str;
+}
+
+static GString *
+fu_config_get_remote_agreement_for_app (FwupdRemote *self, AsApp *app, GError **error)
+{
+#if AS_CHECK_VERSION(0,7,8)
+	const gchar *tmp = NULL;
+	AsAgreement *agreement;
+	AsAgreementSection *section;
+
+	/* get the default agreement section */
+	agreement = as_app_get_agreement_default (app);
+	if (agreement == NULL) {
+		g_set_error_literal (error,
+				     FWUPD_ERROR,
+				     FWUPD_ERROR_NOT_FOUND,
+				     "No agreement found");
+		return NULL;
+	}
+	section = as_agreement_get_section_default (agreement);
+	if (section == NULL) {
+		g_set_error_literal (error,
+				     FWUPD_ERROR,
+				     FWUPD_ERROR_NOT_FOUND,
+				     "No default section for agreement found");
+		return NULL;
+	}
+	tmp = as_agreement_section_get_description (section, NULL);
+	if (tmp == NULL) {
+		g_set_error_literal (error,
+				     FWUPD_ERROR,
+				     FWUPD_ERROR_NOT_FOUND,
+				     "No description found in agreement section");
+		return NULL;
+	}
+	return g_string_new (tmp);
+#else
+	AsFormat *format;
+	GNode *n;
+	g_autoptr(AsNode) root = NULL;
+	g_autoptr(GFile) file = NULL;
+
+	/* parse the XML file */
+	format = as_app_get_format_default (app);
+	if (format == NULL) {
+		g_set_error_literal (error,
+				     FWUPD_ERROR,
+				     FWUPD_ERROR_NOT_FOUND,
+				     "No format for Metainfo file");
+		return NULL;
+	}
+	file = g_file_new_for_path (as_format_get_filename (format));
+	root = as_node_from_file (file, AS_NODE_FROM_XML_FLAG_NONE, NULL, error);
+	if (root == NULL)
+		return NULL;
+
+	/* manually find the first agreement section */
+	n = as_node_find (root, "component/agreement/agreement_section/description");
+	if (n == NULL) {
+		g_set_error_literal (error,
+				     FWUPD_ERROR,
+				     FWUPD_ERROR_NOT_FOUND,
+				     "No agreement description found");
+		return NULL;
+	}
+	return as_node_to_xml (n->children, AS_NODE_TO_XML_FLAG_INCLUDE_SIBLINGS);
+#endif
+}
+
+static gchar *
+fu_config_build_remote_component_id (FwupdRemote *remote)
+{
+	return g_strdup_printf ("org.freedesktop.fwupd.remotes.%s",
+				fwupd_remote_get_id (remote));
+}
+
 static gboolean
 fu_config_add_remotes_for_path (FuConfig *self, const gchar *path, GError **error)
 {
@@ -129,6 +214,8 @@ fu_config_add_remotes_for_path (FuConfig *self, const gchar *path, GError **erro
 	path_remotes = g_build_filename (path, "remotes.d", NULL);
 	if (!g_file_test (path_remotes, G_FILE_TEST_EXISTS))
 		return TRUE;
+	if (!fu_config_add_inotify (self, path_remotes, error))
+		return FALSE;
 	dir = g_dir_open (path_remotes, 0, error);
 	if (dir == NULL)
 		return FALSE;
@@ -155,6 +242,31 @@ fu_config_add_remotes_for_path (FuConfig *self, const gchar *path, GError **erro
 			return FALSE;
 		if (!fu_config_add_inotify (self, fwupd_remote_get_filename_cache (remote), error))
 			return FALSE;
+
+		/* try to find a custom agreement, falling back to a generic warning */
+		if (fwupd_remote_get_kind (remote) == FWUPD_REMOTE_KIND_DOWNLOAD) {
+			g_autoptr(GString) agreement_markup = NULL;
+			g_autofree gchar *component_id = fu_config_build_remote_component_id (remote);
+			AsApp *app = as_store_get_app_by_id (self->store_remotes, component_id);
+			if (app != NULL) {
+				agreement_markup = fu_config_get_remote_agreement_for_app (remote, app, error);
+			} else {
+				agreement_markup = fu_config_get_remote_agreement_default (remote, error);
+			}
+			if (agreement_markup == NULL)
+				return FALSE;
+
+			/* replace any dynamic values from os-release */
+			tmp = g_hash_table_lookup (self->os_release, "NAME");
+			if (tmp == NULL)
+				tmp = "this distribution";
+			as_utils_string_replace (agreement_markup, "$OS_RELEASE:NAME$", tmp);
+			tmp = g_hash_table_lookup (self->os_release, "BUG_REPORT_URL");
+			if (tmp == NULL)
+				tmp = "https://github.com/hughsie/fwupd/issues";
+			as_utils_string_replace (agreement_markup, "$OS_RELEASE:BUG_REPORT_URL$", tmp);
+			fwupd_remote_set_agreement (remote, agreement_markup->str);
+		}
 
 		/* set mtime */
 		fwupd_remote_set_mtime (remote, fu_config_get_remote_mtime (self, remote));
@@ -274,16 +386,15 @@ fu_config_load_remotes (FuConfig *self, GError **error)
 	return TRUE;
 }
 
-gboolean
-fu_config_load (FuConfig *self, GError **error)
+static gboolean
+fu_config_load_from_file (FuConfig *self, const gchar *config_file,
+			  GError **error)
 {
 	GFileMonitor *monitor;
-	g_autofree gchar *config_file = NULL;
+	guint64 archive_size_max;
 	g_auto(GStrv) devices = NULL;
 	g_auto(GStrv) plugins = NULL;
 	g_autoptr(GFile) file = NULL;
-
-	g_return_val_if_fail (FU_IS_CONFIG (self), FALSE);
 
 	/* ensure empty in case we're called from a monitor change */
 	g_ptr_array_set_size (self->blacklist_devices, 0);
@@ -291,8 +402,6 @@ fu_config_load (FuConfig *self, GError **error)
 	g_ptr_array_set_size (self->monitors, 0);
 	g_ptr_array_set_size (self->remotes, 0);
 
-	/* load the main daemon config file */
-	config_file = g_build_filename (FWUPDCONFIGDIR, "daemon.conf", NULL);
 	g_debug ("loading config values from %s", config_file);
 	if (!g_key_file_load_from_file (self->keyfile, config_file,
 					G_KEY_FILE_NONE, error))
@@ -333,6 +442,51 @@ fu_config_load (FuConfig *self, GError **error)
 		}
 	}
 
+	/* get maximum archive size, defaulting to something sane */
+	archive_size_max = g_key_file_get_uint64 (self->keyfile,
+						  "fwupd",
+						  "ArchiveSizeMax",
+						  NULL);
+	if (archive_size_max > 0)
+		self->archive_size_max = archive_size_max *= 0x100000;
+	return TRUE;
+}
+
+gboolean
+fu_config_load (FuConfig *self, GError **error)
+{
+	g_autofree gchar *datadir = NULL;
+	g_autofree gchar *configdir = NULL;
+	g_autofree gchar *metainfo_path = NULL;
+	g_autofree gchar *config_file = NULL;
+
+	g_return_val_if_fail (FU_IS_CONFIG (self), FALSE);
+
+	/* load the main daemon config file */
+	configdir = fu_common_get_path (FU_PATH_KIND_SYSCONFDIR_PKG);
+	config_file = g_build_filename (configdir, "daemon.conf", NULL);
+	if (g_file_test (config_file, G_FILE_TEST_EXISTS)) {
+		if (!fu_config_load_from_file (self, config_file, error))
+			return FALSE;
+	} else {
+		g_warning ("Daemon configuration %s not found", config_file);
+	}
+
+	/* load AppStream about the remotes */
+	self->os_release = fwupd_get_os_release (error);
+	if (self->os_release == NULL)
+		return FALSE;
+	as_store_add_filter (self->store_remotes, AS_APP_KIND_SOURCE);
+	datadir = fu_common_get_path (FU_PATH_KIND_DATADIR_PKG);
+	metainfo_path = g_build_filename (datadir, "metainfo", NULL);
+	if (g_file_test (metainfo_path, G_FILE_TEST_EXISTS)) {
+		if (!as_store_load_path (self->store_remotes,
+					 metainfo_path,
+					 NULL, /* cancellable */
+					 error))
+			return FALSE;
+	}
+
 	/* load remotes */
 	if (!fu_config_load_remotes (self, error))
 		return FALSE;
@@ -362,6 +516,13 @@ fu_config_get_blacklist_devices (FuConfig *self)
 	return self->blacklist_devices;
 }
 
+guint64
+fu_config_get_archive_size_max (FuConfig *self)
+{
+	g_return_val_if_fail (FU_IS_CONFIG (self), 0);
+	return self->archive_size_max;
+}
+
 GPtrArray *
 fu_config_get_blacklist_plugins (FuConfig *self)
 {
@@ -379,11 +540,13 @@ fu_config_class_init (FuConfigClass *klass)
 static void
 fu_config_init (FuConfig *self)
 {
+	self->archive_size_max = 512 * 0x100000;
 	self->keyfile = g_key_file_new ();
 	self->blacklist_devices = g_ptr_array_new_with_free_func (g_free);
 	self->blacklist_plugins = g_ptr_array_new_with_free_func (g_free);
 	self->remotes = g_ptr_array_new_with_free_func ((GDestroyNotify) g_object_unref);
 	self->monitors = g_ptr_array_new_with_free_func ((GDestroyNotify) g_object_unref);
+	self->store_remotes = as_store_new ();
 }
 
 static void
@@ -391,11 +554,14 @@ fu_config_finalize (GObject *obj)
 {
 	FuConfig *self = FU_CONFIG (obj);
 
+	if (self->os_release != NULL)
+		g_hash_table_unref (self->os_release);
 	g_key_file_unref (self->keyfile);
 	g_ptr_array_unref (self->blacklist_devices);
 	g_ptr_array_unref (self->blacklist_plugins);
 	g_ptr_array_unref (self->remotes);
 	g_ptr_array_unref (self->monitors);
+	g_object_unref (self->store_remotes);
 
 	G_OBJECT_CLASS (fu_config_parent_class)->finalize (obj);
 }

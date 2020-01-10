@@ -2,21 +2,7 @@
  *
  * Copyright (C) 2017 Dell Inc.
  *
- * Licensed under the GNU General Public License Version 2
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #include "config.h"
@@ -32,7 +18,10 @@
 #include "fu-device-metadata.h"
 
 #ifndef HAVE_GUDEV_232
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(GUdevDevice, g_object_unref)
+#pragma clang diagnostic pop
 #endif
 
 /* empirically measured amount of time for the TBT device to come and go */
@@ -159,7 +148,7 @@ udev_uevent_cb (GUdevClient *udev,
 		fu_plugin_thunderbolt_power_get_path (plugin);
 		if (fu_plugin_thunderbolt_power_supported (plugin)) {
 			fu_plugin_set_enabled (plugin, TRUE);
-			fu_plugin_recoldplug (plugin);
+			fu_plugin_request_recoldplug (plugin);
 		} else {
 			fu_plugin_set_enabled (plugin, FALSE);
 		}
@@ -193,8 +182,10 @@ void
 fu_plugin_destroy (FuPlugin *plugin)
 {
 	FuPluginData *data = fu_plugin_get_data (plugin);
-	if (data->timeout_id != 0)
+	if (data->timeout_id != 0) {
 		g_source_remove (data->timeout_id);
+		data->timeout_id = 0;
+	}
 	g_object_unref (data->udev);
 	g_free (data->force_path);
 }
@@ -229,6 +220,12 @@ fu_plugin_update_prepare (FuPlugin *plugin,
 	if (g_strcmp0 (fu_device_get_plugin (device), "thunderbolt") != 0)
 		return TRUE;
 
+	/* reset any timers that might still be running from coldplug */
+	if (data->timeout_id != 0) {
+		g_source_remove (data->timeout_id);
+		data->timeout_id = 0;
+	}
+
 	devpath = fu_device_get_metadata (device, "sysfs-path");
 
 	udevice = g_udev_client_query_by_sysfs_path (data->udev, devpath);
@@ -240,11 +237,23 @@ fu_plugin_update_prepare (FuPlugin *plugin,
 		return FALSE;
 
 	data->needs_forcepower = TRUE;
-	/* wait for the device to come back onto the bus */
-	fu_plugin_set_status (plugin, FWUPD_STATUS_DEVICE_RESTART);
-	g_usleep (TBT_NEW_DEVICE_TIMEOUT * G_USEC_PER_SEC);
 
-	return TRUE;
+	/* wait for the device to come back onto the bus */
+	fu_device_set_status (device, FWUPD_STATUS_DEVICE_RESTART);
+	for (guint i = 0; i < 5; i++) {
+		g_autoptr(GUdevDevice) udevice_tmp = NULL;
+		g_usleep (TBT_NEW_DEVICE_TIMEOUT * G_USEC_PER_SEC);
+		udevice_tmp = g_udev_client_query_by_sysfs_path (data->udev, devpath);
+		if (udevice_tmp != NULL)
+			return TRUE;
+	}
+
+	/* device did not wake up */
+	g_set_error (error,
+		     FWUPD_ERROR,
+		     FWUPD_ERROR_NOT_SUPPORTED,
+		     "device did not wake up when required");
+	return FALSE;
 }
 
 gboolean
@@ -264,8 +273,8 @@ fu_plugin_update_cleanup (FuPlugin *plugin,
 	return TRUE;
 }
 
-gboolean
-fu_plugin_coldplug (FuPlugin *plugin, GError **error)
+static gboolean
+fu_plugin_thunderbolt_power_coldplug (FuPlugin *plugin, GError **error)
 {
 	FuPluginData *data = fu_plugin_get_data (plugin);
 
@@ -293,4 +302,10 @@ fu_plugin_coldplug (FuPlugin *plugin, GError **error)
 	}
 
 	return TRUE;
+}
+
+gboolean
+fu_plugin_coldplug (FuPlugin *plugin, GError **error)
+{
+	return fu_plugin_thunderbolt_power_coldplug (plugin, error);
 }

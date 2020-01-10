@@ -1,7 +1,7 @@
 cargs = ['-DG_LOG_DOMAIN="FuPluginDell"']
 
 install_data(['dell.quirk'],
-  install_dir: join_paths(get_option('datadir'), 'fwupd', 'quirks.d')
+  install_dir: join_paths(datadir, 'fwupd', 'quirks.d')
 )
 
 shared_module('fu_plugin_dell',
@@ -18,7 +18,6 @@ shared_module('fu_plugin_dell',
   install_dir: plugin_dir,
   c_args : [
       cargs,
-      '-DLOCALSTATEDIR="' + localstatedir + '"',
     ],
   dependencies : [
     plugin_deps,
@@ -28,7 +27,7 @@ shared_module('fu_plugin_dell',
   ],
 )
 
-if get_option('enable-tests')
+if get_option('tests')
   cargs += '-DFU_OFFLINE_DESTDIR="/tmp/fwupd-self-test"'
   cargs += '-DPLUGINBUILDDIR="' + meson.current_build_dir() + '"'
   e = executable(
@@ -58,7 +57,6 @@ if get_option('enable-tests')
     ],
     c_args : [
       cargs,
-      '-DLOCALSTATEDIR="/tmp/fwupd-self-test/var"',
     ],
   )
   test('dell-self-test', e)

@@ -2,21 +2,7 @@
  *
  * Copyright (C) 2016-2017 Richard Hughes <richard@hughsie.com>
  *
- * Licensed under the GNU Lesser General Public License Version 2.1
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #include "config.h"
@@ -40,13 +26,7 @@ typedef struct
 	gint			 udev_device_fd;
 	GUsbDevice		*usb_device;
 	FuDeviceLocker		*usb_device_locker;
-	gchar			*platform_id;
-	gchar			*product;
-	gchar			*vendor;
-	gchar			*version_bl;
-	gchar			*version_fw;
 	gchar			*version_hw;
-	GPtrArray		*guids;
 	LuDeviceFlags		 flags;
 	guint8			 hidpp_id;
 	guint8			 battery_level;
@@ -59,14 +39,13 @@ typedef struct {
 	guint16			 feature;
 } LuDeviceHidppMap;
 
-G_DEFINE_TYPE_WITH_PRIVATE (LuDevice, lu_device, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (LuDevice, lu_device, FU_TYPE_DEVICE)
 
 enum {
 	PROP_0,
 	PROP_KIND,
 	PROP_HIDPP_ID,
 	PROP_FLAGS,
-	PROP_PLATFORM_ID,
 	PROP_UDEV_DEVICE,
 	PROP_USB_DEVICE,
 	PROP_LAST
@@ -128,8 +107,6 @@ lu_device_flags_to_string (LuDeviceFlags flags)
 	GString *str = g_string_new (NULL);
 	if (flags & LU_DEVICE_FLAG_REQUIRES_SIGNED_FIRMWARE)
 		g_string_append (str, "signed-firmware,");
-	if (flags & LU_DEVICE_FLAG_CAN_FLASH)
-		g_string_append (str, "can-flash,");
 	if (flags & LU_DEVICE_FLAG_REQUIRES_RESET)
 		g_string_append (str, "requires-reset,");
 	if (flags & LU_DEVICE_FLAG_ACTIVE)
@@ -150,44 +127,30 @@ lu_device_flags_to_string (LuDeviceFlags flags)
 	return g_string_free (str, FALSE);
 }
 
-gchar *
-lu_device_to_string (LuDevice *device)
+static void
+lu_device_to_string (FuDevice *device, GString *str)
 {
-	LuDevicePrivate *priv = GET_PRIVATE (device);
-	GString *str = g_string_new (NULL);
+	LuDevice *self = LU_DEVICE (device);
+	LuDevicePrivate *priv = GET_PRIVATE (self);
 	g_autofree gchar *flags_str = NULL;
 
-	g_string_append_printf (str, "type:\t\t\t%s\n", lu_device_kind_to_string (priv->kind));
+	g_string_append_printf (str, "  Type:\t\t\t%s\n", lu_device_kind_to_string (priv->kind));
 	flags_str = lu_device_flags_to_string (priv->flags);
-	g_string_append_printf (str, "flags:\t\t\t%s\n", flags_str);
-	g_string_append_printf (str, "hidpp-version:\t\t%.2f\n", priv->hidpp_version);
+	g_string_append_printf (str, "  Flags:\t\t%s\n", flags_str);
+	g_string_append_printf (str, "  HidppVersion:\t\t%.2f\n", priv->hidpp_version);
 	if (priv->hidpp_id != HIDPP_DEVICE_ID_UNSET)
-		g_string_append_printf (str, "hidpp-id:\t\t0x%02x\n", (guint) priv->hidpp_id);
+		g_string_append_printf (str, "  HidppId:\t\t0x%02x\n", (guint) priv->hidpp_id);
 	if (priv->udev_device_fd > 0)
-		g_string_append_printf (str, "udev-device:\t\t%i\n", priv->udev_device_fd);
+		g_string_append_printf (str, "  UdevDevice:\t\t%i\n", priv->udev_device_fd);
 	if (priv->usb_device != NULL)
-		g_string_append_printf (str, "usb-device:\t\t%p\n", priv->usb_device);
-	if (priv->platform_id != NULL)
-		g_string_append_printf (str, "platform-id:\t\t%s\n", priv->platform_id);
-	if (priv->vendor != NULL)
-		g_string_append_printf (str, "vendor:\t\t\t%s\n", priv->vendor);
-	if (priv->product != NULL)
-		g_string_append_printf (str, "product:\t\t%s\n", priv->product);
-	if (priv->version_bl != NULL)
-		g_string_append_printf (str, "version-bootloader:\t%s\n", priv->version_bl);
-	if (priv->version_fw != NULL)
-		g_string_append_printf (str, "version-firmware:\t%s\n", priv->version_fw);
+		g_string_append_printf (str, "  UsbDevice:\t\t%p\n", priv->usb_device);
 	if (priv->version_hw != NULL)
-		g_string_append_printf (str, "version-hardware:\t%s\n", priv->version_hw);
-	for (guint i = 0; i < priv->guids->len; i++) {
-		const gchar *guid = g_ptr_array_index (priv->guids, i);
-		g_string_append_printf (str, "guid:\t\t\t%s\n", guid);
-	}
+		g_string_append_printf (str, "  VersionHardware:\t%s\n", priv->version_hw);
 	if (priv->battery_level != 0)
-		g_string_append_printf (str, "battery-level:\t\t%u\n", priv->battery_level);
+		g_string_append_printf (str, "  Battery-level:\t\t%u\n", priv->battery_level);
 	for (guint i = 0; i < priv->feature_index->len; i++) {
 		LuDeviceHidppMap *map = g_ptr_array_index (priv->feature_index, i);
-		g_string_append_printf (str, "feature%02x:\t\t%s [0x%04x]\n",
+		g_string_append_printf (str, "  Feature%02x:\t\t%s [0x%04x]\n",
 					map->idx,
 					lu_hidpp_feature_to_string (map->feature),
 					map->feature);
@@ -195,14 +158,13 @@ lu_device_to_string (LuDevice *device)
 
 	/* fixme: superclass? */
 	if (LU_IS_DEVICE_BOOTLOADER (device)) {
-		g_string_append_printf (str, "flash-addr-high:\t0x%04x\n",
-					lu_device_bootloader_get_addr_hi (device));
-		g_string_append_printf (str, "flash-addr-low:\t0x%04x\n",
-					lu_device_bootloader_get_addr_lo (device));
-		g_string_append_printf (str, "flash-block-size:\t0x%04x\n",
-					lu_device_bootloader_get_blocksize (device));
+		g_string_append_printf (str, "  FlashAddrHigh:\t0x%04x\n",
+					lu_device_bootloader_get_addr_hi (self));
+		g_string_append_printf (str, "  FlashAddrLow:\t0x%04x\n",
+					lu_device_bootloader_get_addr_lo (self));
+		g_string_append_printf (str, "  FlashBlockSize:\t0x%04x\n",
+					lu_device_bootloader_get_blocksize (self));
 	}
-	return g_string_free (str, FALSE);
 }
 
 guint8
@@ -331,8 +293,6 @@ lu_device_hidpp_msg_to_string (LuDevice *device, LuHidppMsg *msg)
 				msg->report_id,
 				lu_hidpp_msg_rpt_id_to_string (msg));
 	tmp = lu_hidpp_msg_dev_id_to_string (msg);
-	if (tmp == NULL && msg->device_id == priv->hidpp_id)
-		tmp = priv->product;
 	g_string_append_printf (str, "device-id:   %02x   [%s]\n",
 				msg->device_id, tmp );
 	if (priv->hidpp_version >= 2.f) {
@@ -379,7 +339,7 @@ lu_device_hidpp_send (LuDevice *device,
 	lu_device_hidpp_dump (device, "host->device", (guint8 *) msg, len);
 
 	/* detailed debugging */
-	if (g_getenv ("UNIFYING_HW_DEBUG") != NULL) {
+	if (g_getenv ("FWUPD_UNIFYING_VERBOSE") != NULL) {
 		g_autofree gchar *str = lu_device_hidpp_msg_to_string (device, msg);
 		g_print ("%s", str);
 	}
@@ -473,7 +433,7 @@ lu_device_hidpp_receive (LuDevice *device,
 	}
 
 	/* detailed debugging */
-	if (g_getenv ("UNIFYING_HW_DEBUG") != NULL) {
+	if (g_getenv ("FWUPD_UNIFYING_VERBOSE") != NULL) {
 		g_autofree gchar *str = lu_device_hidpp_msg_to_string (device, msg);
 		g_print ("%s", str);
 	}
@@ -644,81 +604,6 @@ lu_device_set_hidpp_version (LuDevice *device, gdouble hidpp_version)
 }
 
 const gchar *
-lu_device_get_platform_id (LuDevice *device)
-{
-	LuDevicePrivate *priv = GET_PRIVATE (device);
-	return priv->platform_id;
-}
-
-void
-lu_device_set_platform_id (LuDevice *device, const gchar *platform_id)
-{
-	LuDevicePrivate *priv = GET_PRIVATE (device);
-	g_free (priv->platform_id);
-	priv->platform_id = g_strdup (platform_id);
-}
-
-const gchar *
-lu_device_get_product (LuDevice *device)
-{
-	LuDevicePrivate *priv = GET_PRIVATE (device);
-	return priv->product;
-}
-
-void
-lu_device_set_product (LuDevice *device, const gchar *product)
-{
-	LuDevicePrivate *priv = GET_PRIVATE (device);
-	g_free (priv->product);
-	priv->product = g_strdup (product);
-}
-
-const gchar *
-lu_device_get_vendor (LuDevice *device)
-{
-	LuDevicePrivate *priv = GET_PRIVATE (device);
-	return priv->vendor;
-}
-
-void
-lu_device_set_vendor (LuDevice *device, const gchar *vendor)
-{
-	LuDevicePrivate *priv = GET_PRIVATE (device);
-	g_free (priv->vendor);
-	priv->vendor = g_strdup (vendor);
-}
-
-const gchar *
-lu_device_get_version_bl (LuDevice *device)
-{
-	LuDevicePrivate *priv = GET_PRIVATE (device);
-	return priv->version_bl;
-}
-
-void
-lu_device_set_version_bl (LuDevice *device, const gchar *version_bl)
-{
-	LuDevicePrivate *priv = GET_PRIVATE (device);
-	g_free (priv->version_bl);
-	priv->version_bl = g_strdup (version_bl);
-}
-
-const gchar *
-lu_device_get_version_fw (LuDevice *device)
-{
-	LuDevicePrivate *priv = GET_PRIVATE (device);
-	return priv->version_fw;
-}
-
-void
-lu_device_set_version_fw (LuDevice *device, const gchar *version_fw)
-{
-	LuDevicePrivate *priv = GET_PRIVATE (device);
-	g_free (priv->version_fw);
-	priv->version_fw = g_strdup (version_fw);
-}
-
-const gchar *
 lu_device_get_version_hw (LuDevice *device)
 {
 	LuDevicePrivate *priv = GET_PRIVATE (device);
@@ -731,33 +616,6 @@ lu_device_set_version_hw (LuDevice *device, const gchar *version_hw)
 	LuDevicePrivate *priv = GET_PRIVATE (device);
 	g_free (priv->version_hw);
 	priv->version_hw = g_strdup (version_hw);
-}
-
-const gchar *
-lu_device_get_guid_default (LuDevice *device)
-{
-	LuDevicePrivate *priv = GET_PRIVATE (device);
-	if (priv->guids->len == 0)
-		return NULL;
-	return g_ptr_array_index (priv->guids, 0);
-}
-
-GPtrArray *
-lu_device_get_guids (LuDevice *device)
-{
-	LuDevicePrivate *priv = GET_PRIVATE (device);
-	return priv->guids;
-}
-
-void
-lu_device_add_guid (LuDevice *device, const gchar *guid)
-{
-	LuDevicePrivate *priv = GET_PRIVATE (device);
-	if (!as_utils_guid_is_valid (guid)) {
-		g_ptr_array_add (priv->guids, as_utils_guid_from_string (guid));
-		return;
-	}
-	g_ptr_array_add (priv->guids, g_strdup (guid));
 }
 
 gboolean
@@ -834,7 +692,7 @@ lu_device_open (LuDevice *device, GError **error)
 		return TRUE;
 
 	/* set default vendor */
-	lu_device_set_vendor (device, "Logitech");
+	fu_device_set_vendor (FU_DEVICE (device), "Logitech");
 
 	/* USB */
 	if (priv->usb_device != NULL) {
@@ -866,7 +724,7 @@ lu_device_open (LuDevice *device, GError **error)
 		devid = g_strdup_printf ("USB\\VID_%04X&PID_%04X",
 					 g_usb_device_get_vid (priv->usb_device),
 					 g_usb_device_get_pid (priv->usb_device));
-		lu_device_add_guid (device, devid);
+		fu_device_add_guid (FU_DEVICE (device), devid);
 
 	/* HID */
 	} else if (priv->udev_device != NULL) {
@@ -901,7 +759,7 @@ lu_device_open (LuDevice *device, GError **error)
 	}
 
 	/* show the device */
-	device_str = lu_device_to_string (device);
+	device_str = fu_device_to_string (FU_DEVICE (device));
 	g_debug ("%s", device_str);
 
 	/* success */
@@ -986,9 +844,10 @@ lu_device_close (LuDevice *device, GError **error)
 	lu_device_remove_flag (device, LU_DEVICE_FLAG_IS_OPEN);
 	return TRUE;
 }
-gboolean
-lu_device_detach (LuDevice *device, GError **error)
+static gboolean
+lu_device_detach (FuDevice *device, GError **error)
 {
+	LuDevice *self = LU_DEVICE (device);
 	LuDeviceClass *klass = LU_DEVICE_GET_CLASS (device);
 
 	g_return_val_if_fail (LU_IS_DEVICE (device), FALSE);
@@ -997,7 +856,7 @@ lu_device_detach (LuDevice *device, GError **error)
 	/* subclassed */
 	g_debug ("detaching device");
 	if (klass->detach != NULL)
-		return klass->detach (device, error);
+		return klass->detach (self, error);
 
 	/* nothing to do */
 	g_set_error_literal (error,
@@ -1007,16 +866,17 @@ lu_device_detach (LuDevice *device, GError **error)
 	return FALSE;
 }
 
-gboolean
-lu_device_attach (LuDevice *device, GError **error)
+static gboolean
+lu_device_attach (FuDevice *device, GError **error)
 {
+	LuDevice *self = LU_DEVICE (device);
 	LuDeviceClass *klass = LU_DEVICE_GET_CLASS (device);
 
 	g_return_val_if_fail (LU_IS_DEVICE (device), FALSE);
 	g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
 	/* check kind */
-	if (lu_device_get_kind (device) == LU_DEVICE_KIND_RUNTIME) {
+	if (lu_device_get_kind (self) == LU_DEVICE_KIND_RUNTIME) {
 		g_set_error_literal (error,
 				     G_IO_ERROR,
 				     G_IO_ERROR_FAILED,
@@ -1026,19 +886,16 @@ lu_device_attach (LuDevice *device, GError **error)
 
 	/* subclassed */
 	if (klass->attach != NULL)
-		return klass->attach (device, error);
+		return klass->attach (self, error);
 
 	return TRUE;
 }
 
-gboolean
-lu_device_write_firmware (LuDevice *device,
-			  GBytes *fw,
-			  GFileProgressCallback progress_cb,
-			  gpointer progress_data,
-			  GError **error)
+static gboolean
+lu_device_write_firmware (FuDevice *device, GBytes *fw, GError **error)
 {
-	LuDeviceClass *klass = LU_DEVICE_GET_CLASS (device);
+	LuDevice *self = LU_DEVICE (device);
+	LuDeviceClass *klass = LU_DEVICE_GET_CLASS (self);
 
 	g_return_val_if_fail (LU_IS_DEVICE (device), FALSE);
 	g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
@@ -1058,17 +915,20 @@ lu_device_write_firmware (LuDevice *device,
 			     G_IO_ERROR,
 			     G_IO_ERROR_FAILED,
 			     "not supported in %s",
-			     lu_device_kind_to_string (lu_device_get_kind (device)));
+			     lu_device_kind_to_string (lu_device_get_kind (self)));
 		return FALSE;
 	}
 
 	/* call either nordic or texas vfunc */
-	return klass->write_firmware (device, fw, progress_cb, progress_data, error);
+	return klass->write_firmware (self, fw, error);
 }
 
 #ifndef HAVE_GUDEV_232
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(GUdevDevice, g_object_unref)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(GUdevClient, g_object_unref)
+#pragma clang diagnostic pop
 #endif
 
 static GUdevDevice *
@@ -1105,7 +965,7 @@ lu_device_update_platform_id (LuDevice *device)
 		udev_device = lu_device_find_udev_device (priv->usb_device);
 		if (udev_device != NULL) {
 			const gchar *tmp = g_udev_device_get_sysfs_path (udev_device);
-			lu_device_set_platform_id (device, tmp);
+			fu_device_set_platform_id (FU_DEVICE (device), tmp);
 		}
 	}
 }
@@ -1125,9 +985,6 @@ lu_device_get_property (GObject *object, guint prop_id,
 		break;
 	case PROP_FLAGS:
 		g_value_set_uint64 (value, priv->flags);
-		break;
-	case PROP_PLATFORM_ID:
-		g_value_set_string (value, priv->platform_id);
 		break;
 	case PROP_UDEV_DEVICE:
 		g_value_set_object (value, priv->udev_device);
@@ -1157,10 +1014,6 @@ lu_device_set_property (GObject *object, guint prop_id,
 	case PROP_FLAGS:
 		priv->flags = g_value_get_uint64 (value);
 		break;
-	case PROP_PLATFORM_ID:
-		g_free (priv->platform_id);
-		priv->platform_id = g_value_dup_string (value);
-		break;
 	case PROP_UDEV_DEVICE:
 		priv->udev_device = g_value_dup_object (value);
 		break;
@@ -1186,14 +1039,8 @@ lu_device_finalize (GObject *object)
 		g_object_unref (priv->usb_device_locker);
 	if (priv->udev_device != NULL)
 		g_object_unref (priv->udev_device);
-	g_ptr_array_unref (priv->guids);
 	g_ptr_array_unref (priv->feature_index);
-	g_free (priv->platform_id);
-	g_free (priv->product);
-	g_free (priv->vendor);
-	g_free (priv->version_fw);
 	g_free (priv->version_hw);
-	g_free (priv->version_bl);
 
 	G_OBJECT_CLASS (lu_device_parent_class)->finalize (object);
 }
@@ -1203,8 +1050,8 @@ lu_device_init (LuDevice *device)
 {
 	LuDevicePrivate *priv = GET_PRIVATE (device);
 	priv->hidpp_id = HIDPP_DEVICE_ID_UNSET;
-	priv->guids = g_ptr_array_new_with_free_func (g_free);
 	priv->feature_index = g_ptr_array_new_with_free_func (g_free);
+	fu_device_set_vendor_id (FU_DEVICE (device), "USB:0x046D");
 }
 
 static void
@@ -1212,9 +1059,15 @@ lu_device_class_init (LuDeviceClass *klass)
 {
 	GParamSpec *pspec;
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+	FuDeviceClass *klass_device = FU_DEVICE_CLASS (klass);
+
 	object_class->finalize = lu_device_finalize;
 	object_class->get_property = lu_device_get_property;
 	object_class->set_property = lu_device_set_property;
+	klass_device->to_string = lu_device_to_string;
+	klass_device->write_firmware = lu_device_write_firmware;
+	klass_device->attach = lu_device_attach;
+	klass_device->detach = lu_device_detach;
 
 	pspec = g_param_spec_uint ("kind", NULL, NULL,
 				   LU_DEVICE_KIND_UNKNOWN,
@@ -1236,10 +1089,6 @@ lu_device_class_init (LuDeviceClass *klass)
 				     LU_DEVICE_FLAG_NONE,
 				     G_PARAM_READWRITE | G_PARAM_CONSTRUCT);
 	g_object_class_install_property (object_class, PROP_FLAGS, pspec);
-
-	pspec = g_param_spec_string ("platform-id", NULL, NULL, NULL,
-				     G_PARAM_READWRITE | G_PARAM_CONSTRUCT);
-	g_object_class_install_property (object_class, PROP_PLATFORM_ID, pspec);
 
 	pspec = g_param_spec_object ("udev-device", NULL, NULL,
 				     G_UDEV_TYPE_DEVICE,

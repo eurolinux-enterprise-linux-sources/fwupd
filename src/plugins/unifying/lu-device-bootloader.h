@@ -2,21 +2,7 @@
  *
  * Copyright (C) 2016-2017 Richard Hughes <richard@hughsie.com>
  *
- * Licensed under the GNU Lesser General Public License Version 2.1
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #ifndef __LU_DEVICE_BOOTLOADER_H
@@ -34,10 +20,7 @@ G_DECLARE_DERIVABLE_TYPE (LuDeviceBootloader, lu_device_bootloader, LU, DEVICE_B
 struct _LuDeviceBootloaderClass
 {
 	LuDeviceClass	parent_class;
-	gboolean	 (*write_firmware)		(LuDevice		*device,
-							 GBytes			*fw,
-							 GFileProgressCallback	 progress_cb,
-							 gpointer		 progress_data,
+	gboolean	 (*probe)			(LuDevice		*device,
 							 GError			**error);
 };
 
@@ -82,7 +65,10 @@ typedef struct __attribute__((packed)) {
 
 LuDeviceBootloaderRequest	*lu_device_bootloader_request_new	(void);
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(LuDeviceBootloaderRequest, g_free);
+#pragma clang diagnostic pop
 
 GPtrArray	*lu_device_bootloader_parse_requests	(LuDevice	*device,
 							 GBytes		*fw,

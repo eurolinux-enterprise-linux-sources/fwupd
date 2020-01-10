@@ -2,21 +2,7 @@
  *
  * Copyright (C) 2015 Richard Hughes <richard@hughsie.com>
  *
- * Licensed under the GNU General Public License Version 2
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #include "config.h"
@@ -24,17 +10,17 @@
 #include <glib-object.h>
 #include <stdlib.h>
 #include <string.h>
-#include <fnmatch.h>
 
 #include "dfu-chunked.h"
 #include "dfu-cipher-xtea.h"
 #include "dfu-common.h"
-#include "dfu-context.h"
 #include "dfu-device-private.h"
 #include "dfu-firmware.h"
 #include "dfu-patch.h"
 #include "dfu-sector-private.h"
 #include "dfu-target-private.h"
+
+#include "fu-test.h"
 
 #include "fwupd-error.h"
 
@@ -49,33 +35,6 @@ dfu_test_get_filename (const gchar *filename)
 	if (tmp == NULL)
 		return NULL;
 	return g_strdup (full_tmp);
-}
-
-static gboolean
-dfu_test_compare_lines (const gchar *txt1, const gchar *txt2, GError **error)
-{
-	g_autofree gchar *output = NULL;
-
-	/* exactly the same */
-	if (g_strcmp0 (txt1, txt2) == 0)
-		return TRUE;
-
-	/* matches a pattern */
-	if (fnmatch (txt2, txt1, FNM_NOESCAPE) == 0)
-		return TRUE;
-
-	/* save temp files and diff them */
-	if (!g_file_set_contents ("/tmp/a", txt1, -1, error))
-		return FALSE;
-	if (!g_file_set_contents ("/tmp/b", txt2, -1, error))
-		return FALSE;
-	if (!g_spawn_command_line_sync ("diff -urNp /tmp/b /tmp/a",
-					&output, NULL, NULL, error))
-		return FALSE;
-
-	/* just output the diff */
-	g_set_error_literal (error, 1, 0, output);
-	return FALSE;
 }
 
 static gchar *
@@ -155,7 +114,7 @@ dfu_firmware_xdfu_func (void)
 	file = g_file_new_for_path (fn);
 	ret = dfu_firmware_parse_file (firmware, file,
 				       DFU_FIRMWARE_PARSE_FLAG_NONE,
-				       NULL, &error);
+				       &error);
 	g_assert_no_error (error);
 	g_assert (ret);
 	g_assert_cmpint (dfu_firmware_get_cipher_kind (firmware), ==, DFU_CIPHER_KIND_XTEA);
@@ -281,7 +240,7 @@ dfu_firmware_dfu_func (void)
 	g_ptr_array_set_size (dfu_firmware_get_images (firmware), 0);
 	ret = dfu_firmware_parse_file (firmware, file,
 				       DFU_FIRMWARE_PARSE_FLAG_NONE,
-				       NULL, &error);
+				       &error);
 	g_assert_no_error (error);
 	g_assert (ret);
 	g_assert_cmpint (dfu_firmware_get_vid (firmware), ==, 0x1c11);
@@ -320,7 +279,7 @@ dfu_firmware_dfuse_func (void)
 	firmware = dfu_firmware_new ();
 	ret = dfu_firmware_parse_file (firmware, file,
 				       DFU_FIRMWARE_PARSE_FLAG_NONE,
-				       NULL, &error);
+				       &error);
 	g_assert_no_error (error);
 	g_assert (ret);
 	g_assert_cmpint (dfu_firmware_get_vid (firmware), ==, 0x0483);
@@ -366,7 +325,7 @@ dfu_firmware_metadata_func (void)
 	firmware = dfu_firmware_new ();
 	ret = dfu_firmware_parse_file (firmware, file,
 				       DFU_FIRMWARE_PARSE_FLAG_NONE,
-				       NULL, &error);
+				       &error);
 	g_assert_no_error (error);
 	g_assert (ret);
 	g_assert_cmpint (dfu_firmware_get_size (firmware), ==, 6);
@@ -435,6 +394,45 @@ dfu_firmware_intel_hex_offset_func (void)
 }
 
 static void
+dfu_firmware_srec_func (void)
+{
+	gboolean ret;
+	g_autofree gchar *filename_hex = NULL;
+	g_autofree gchar *filename_ref = NULL;
+	g_autoptr(DfuFirmware) firmware = NULL;
+	g_autoptr(GBytes) data_bin = NULL;
+	g_autoptr(GBytes) data_ref = NULL;
+	g_autoptr(GError) error = NULL;
+	g_autoptr(GFile) file_bin = NULL;
+	g_autoptr(GFile) file_hex = NULL;
+
+	filename_hex = dfu_test_get_filename ("firmware.srec");
+	g_assert (filename_hex != NULL);
+	file_hex = g_file_new_for_path (filename_hex);
+	firmware = dfu_firmware_new ();
+	ret = dfu_firmware_parse_file (firmware, file_hex,
+				       DFU_FIRMWARE_PARSE_FLAG_NONE,
+				       &error);
+	g_assert_no_error (error);
+	g_assert (ret);
+	g_assert_cmpint (dfu_firmware_get_size (firmware), ==, 136);
+
+	dfu_firmware_set_format (firmware, DFU_FIRMWARE_FORMAT_RAW);
+	data_bin = dfu_firmware_write_data (firmware, &error);
+	g_assert_no_error (error);
+	g_assert (data_bin != NULL);
+
+	/* did we match the reference file? */
+	filename_ref = dfu_test_get_filename ("firmware.bin");
+	g_assert (filename_ref != NULL);
+	file_bin = g_file_new_for_path (filename_ref);
+	data_ref = dfu_self_test_get_bytes_for_file (file_bin, &error);
+	g_assert_no_error (error);
+	g_assert (data_ref != NULL);
+	g_assert_cmpstr (_g_bytes_compare_verbose (data_bin, data_ref), ==, NULL);
+}
+
+static void
 dfu_firmware_intel_hex_func (void)
 {
 	const guint8 *data;
@@ -459,7 +457,7 @@ dfu_firmware_intel_hex_func (void)
 	firmware = dfu_firmware_new ();
 	ret = dfu_firmware_parse_file (firmware, file_hex,
 				       DFU_FIRMWARE_PARSE_FLAG_NONE,
-				       NULL, &error);
+				       &error);
 	g_assert_no_error (error);
 	g_assert (ret);
 	g_assert_cmpint (dfu_firmware_get_size (firmware), ==, 136);
@@ -526,7 +524,7 @@ dfu_firmware_intel_hex_signed_func (void)
 	firmware = dfu_firmware_new ();
 	ret = dfu_firmware_parse_file (firmware, file_hex,
 				       DFU_FIRMWARE_PARSE_FLAG_NONE,
-				       NULL, &error);
+				       &error);
 	g_assert_no_error (error);
 	g_assert (ret);
 	g_assert_cmpint (dfu_firmware_get_size (firmware), ==, 144);
@@ -540,316 +538,6 @@ dfu_firmware_intel_hex_signed_func (void)
 	data = g_bytes_get_data (data_sig, &len);
 	g_assert_cmpint (len, ==, 8);
 	g_assert (data != NULL);
-}
-
-static void
-dfu_device_func (void)
-{
-	GPtrArray *targets;
-	gboolean ret;
-	g_autoptr(DfuDevice) device = NULL;
-	g_autoptr(DfuTarget) target1 = NULL;
-	g_autoptr(DfuTarget) target2 = NULL;
-	g_autoptr(GError) error = NULL;
-	g_autoptr(GUsbContext) usb_ctx = NULL;
-	g_autoptr(GUsbDevice) usb_device = NULL;
-
-	/* find any DFU in appIDLE mode */
-	usb_ctx = g_usb_context_new (&error);
-	g_assert_no_error (error);
-	g_assert (usb_ctx != NULL);
-	g_usb_context_enumerate (usb_ctx);
-	usb_device = g_usb_context_find_by_vid_pid (usb_ctx,
-						    0x273f,
-						    0x1005,
-						    &error);
-	if (usb_device == NULL)
-		return;
-	g_assert_no_error (error);
-	g_assert (usb_device != NULL);
-
-	/* check it's DFU-capable */
-	device = dfu_device_new ();
-	ret = dfu_device_set_new_usb_dev (device, usb_device, NULL, &error);
-	g_assert_no_error (error);
-	g_assert (ret);
-
-	/* get targets */
-	targets = dfu_device_get_targets (device);
-	g_assert_cmpint (targets->len, ==, 2);
-
-	/* get by ID */
-	target1 = dfu_device_get_target_by_alt_setting (device, 1, &error);
-	g_assert_no_error (error);
-	g_assert (target1 != NULL);
-
-	/* ensure open */
-	ret = dfu_device_open (device, &error);
-	g_assert_no_error (error);
-	g_assert (ret);
-
-	/* get by name */
-	target2 = dfu_device_get_target_by_alt_name (device, "sram", &error);
-	g_assert_no_error (error);
-	g_assert (target2 != NULL);
-
-	/* close */
-	ret = dfu_device_close (device, &error);
-	g_assert_no_error (error);
-	g_assert (ret);
-}
-
-static void
-dfu_device_dfu_v11 (void)
-{
-	gboolean ret;
-	g_autoptr(DfuContext) context = NULL;
-	g_autoptr(GError) error = NULL;
-	g_autoptr(DfuDevice) device = NULL;
-	g_autoptr(DfuFirmware) firmware = NULL;
-
-	/* create context */
-	context = dfu_context_new ();
-	ret = dfu_context_enumerate (context, &error);
-	g_assert_no_error (error);
-	g_assert (ret);
-
-	/* does device exist */
-	device = dfu_context_get_device_by_vid_pid (context,
-						    0x273f,
-						    0x100a,
-						    &error);
-	if (device == NULL &&
-	    g_error_matches (error, FWUPD_ERROR, FWUPD_ERROR_NOT_FOUND)) {
-		g_test_skip ("no ColorHugDFU, skipping");
-		return;
-	}
-	g_assert_no_error (error);
-	g_assert (device != NULL);
-
-	/* read contents */
-	ret = dfu_device_open (device, &error);
-	if (!ret &&
-	    g_error_matches (error, FWUPD_ERROR, FWUPD_ERROR_PERMISSION_DENIED)) {
-		g_test_skip ("no permissions, skipping");
-		return;
-	}
-	g_assert_no_error (error);
-	g_assert (ret);
-	firmware = dfu_device_upload (device, DFU_TARGET_TRANSFER_FLAG_NONE,
-				      NULL, &error);
-	g_assert_no_error (error);
-	g_assert (device != NULL);
-	g_assert_cmpint (dfu_firmware_get_size (firmware), ==, 16384);
-}
-
-static void
-dfu_device_dfu_avr32 (void)
-{
-	gboolean ret;
-	g_autoptr(DfuContext) context = NULL;
-	g_autoptr(GError) error = NULL;
-	g_autoptr(DfuDevice) device = NULL;
-	g_autoptr(DfuFirmware) firmware = NULL;
-
-	/* create context */
-	context = dfu_context_new ();
-	ret = dfu_context_enumerate (context, &error);
-	g_assert_no_error (error);
-	g_assert (ret);
-
-	/* does device exist */
-	device = dfu_context_get_device_by_vid_pid (context,
-						    0x03eb,
-						    0x2ff1,
-						    &error);
-	if (device == NULL &&
-	    g_error_matches (error, FWUPD_ERROR, FWUPD_ERROR_NOT_FOUND)) {
-		g_test_skip ("no UC3-A3 Xplained, skipping");
-		return;
-	}
-	g_assert_no_error (error);
-	g_assert (device != NULL);
-
-	/* read contents */
-	ret = dfu_device_open (device, &error);
-	if (!ret &&
-	    g_error_matches (error, FWUPD_ERROR, FWUPD_ERROR_PERMISSION_DENIED)) {
-		g_test_skip ("no permissions, skipping");
-		return;
-	}
-	g_assert_no_error (error);
-	g_assert (ret);
-	firmware = dfu_device_upload (device, DFU_TARGET_TRANSFER_FLAG_NONE,
-				      NULL, &error);
-	g_assert_no_error (error);
-	g_assert (device != NULL);
-	g_assert_cmpint (dfu_firmware_get_size (firmware), ==, 11264);
-}
-
-static void
-dfu_device_dfu_xmega (void)
-{
-	gboolean ret;
-	g_autoptr(DfuContext) context = NULL;
-	g_autoptr(GError) error = NULL;
-	g_autoptr(DfuDevice) device = NULL;
-	g_autoptr(DfuFirmware) firmware = NULL;
-
-	/* create context */
-	context = dfu_context_new ();
-	ret = dfu_context_enumerate (context, &error);
-	g_assert_no_error (error);
-	g_assert (ret);
-
-	/* does device exist */
-	device = dfu_context_get_device_by_vid_pid (context,
-						    0x03eb,
-						    0x2fe2,
-						    &error);
-	if (device == NULL &&
-	    g_error_matches (error, FWUPD_ERROR, FWUPD_ERROR_NOT_FOUND)) {
-		g_test_skip ("no XMEGA-A3BU Xplained, skipping");
-		return;
-	}
-	g_assert_no_error (error);
-	g_assert (device != NULL);
-
-	/* read contents */
-	ret = dfu_device_open (device, &error);
-	if (!ret &&
-	    g_error_matches (error, FWUPD_ERROR, FWUPD_ERROR_PERMISSION_DENIED)) {
-		g_test_skip ("no permissions, skipping");
-		return;
-	}
-	g_assert_no_error (error);
-	g_assert (ret);
-	firmware = dfu_device_upload (device, DFU_TARGET_TRANSFER_FLAG_NONE,
-				      NULL, &error);
-	g_assert_no_error (error);
-	g_assert (device != NULL);
-	g_assert_cmpint (dfu_firmware_get_size (firmware), ==, 29696);
-}
-
-static void
-dfu_colorhug_plus_func (void)
-{
-	GPtrArray *elements;
-	gboolean ret;
-	gboolean seen_app_idle = FALSE;
-	g_autoptr(DfuContext) context = NULL;
-	g_autoptr(DfuDevice) device = NULL;
-	g_autoptr(DfuDevice) device2 = NULL;
-	g_autoptr(DfuTarget) target = NULL;
-	g_autoptr(DfuImage) image = NULL;
-	g_autoptr(GError) error = NULL;
-
-	/* create context */
-	context = dfu_context_new ();
-	ret = dfu_context_enumerate (context, &error);
-	g_assert_no_error (error);
-	g_assert (ret);
-
-	/* push appIDLE into dfuIDLE */
-	device2 = dfu_context_get_device_by_vid_pid (context,
-						     0x273f,
-						     0x1002,
-						     NULL);
-	if (device2 != NULL) {
-		ret = dfu_device_open (device2, &error);
-		g_assert_no_error (error);
-		g_assert (ret);
-		ret = dfu_device_detach (device2, NULL, &error);
-		g_assert_no_error (error);
-		g_assert (ret);
-
-		/* wait for it to come back as 273f:1005 */
-		ret = dfu_device_wait_for_replug (device2, 5000, NULL, &error);
-		g_assert_no_error (error);
-		g_assert (ret);
-
-		/* close it */
-		ret = dfu_device_close (device2, &error);
-		g_assert_no_error (error);
-		g_assert (ret);
-	}
-
-	/* find any DFU in dfuIDLE mode */
-	device = dfu_context_get_device_by_vid_pid (context,
-						    0x273f,
-						    0x1003,
-						    NULL);
-	if (device == NULL)
-		return;
-
-	/* we don't know this unless we went from appIDLE -> dfuIDLE */
-	if (device2 == NULL) {
-		g_assert_cmpint (dfu_device_get_runtime_vid (device), ==, 0xffff);
-		g_assert_cmpint (dfu_device_get_runtime_pid (device), ==, 0xffff);
-	}
-
-	/* open it */
-	ret = dfu_device_open (device, &error);
-	g_assert_no_error (error);
-	g_assert (ret);
-
-	/* is in dfuIDLE mode */
-	g_assert_cmpstr (dfu_state_to_string (dfu_device_get_state (device)), ==, "dfuIDLE");
-
-	/* lets try and flash something inappropriate */
-	if (seen_app_idle) {
-		g_autoptr(DfuFirmware) firmware = NULL;
-		g_autoptr(GFile) file = NULL;
-		g_autofree gchar *filename = NULL;
-
-		filename = dfu_test_get_filename ("kiibohd.dfu.bin");
-		g_assert (filename != NULL);
-		file = g_file_new_for_path (filename);
-		firmware = dfu_firmware_new ();
-		ret = dfu_firmware_parse_file (firmware, file,
-					       DFU_FIRMWARE_PARSE_FLAG_NONE,
-					       NULL, &error);
-		g_assert_no_error (error);
-		g_assert (ret);
-		ret = dfu_device_download (device, firmware,
-					   DFU_TARGET_TRANSFER_FLAG_DETACH |
-					   DFU_TARGET_TRANSFER_FLAG_WAIT_RUNTIME,
-					   NULL, &error);
-		g_assert_error (error,
-				FWUPD_ERROR,
-				FWUPD_ERROR_INTERNAL);
-		g_assert (ret);
-		g_clear_error (&error);
-	}
-
-	/* get a dump of the existing firmware */
-	target = dfu_device_get_target_by_alt_setting (device, 0, &error);
-	g_assert_no_error (error);
-	g_assert (target != NULL);
-	image = dfu_target_upload (target, DFU_TARGET_TRANSFER_FLAG_NONE,
-				   NULL, &error);
-	g_assert_no_error (error);
-	g_assert (DFU_IS_IMAGE (image));
-	elements = dfu_image_get_elements (image);
-	g_assert (elements != NULL);
-	g_assert_cmpint (elements->len, ==, 1);
-
-	/* download a new firmware */
-	ret = dfu_target_download (target, image,
-				   DFU_TARGET_TRANSFER_FLAG_VERIFY |
-				   DFU_TARGET_TRANSFER_FLAG_ATTACH,
-				   NULL, &error);
-	g_assert_no_error (error);
-	g_assert (ret);
-
-	/* wait for it to come back as 273f:1004 */
-	ret = dfu_device_wait_for_replug (device, 5000, NULL, &error);
-	g_assert_no_error (error);
-	g_assert (ret);
-
-	/* we should know now */
-	g_assert_cmpint (dfu_device_get_runtime_vid (device), ==, 0x273f);
-	g_assert_cmpint (dfu_device_get_runtime_pid (device), ==, 0x1002);
 }
 
 static gchar *
@@ -900,7 +588,7 @@ dfu_target_dfuse_func (void)
 	g_assert_no_error (error);
 	g_assert (ret);
 	tmp = dfu_target_sectors_to_string (target);
-	ret = dfu_test_compare_lines (tmp,
+	ret = fu_test_compare_lines (tmp,
 				      "Zone:0, Sec#:0, Addr:0x08000000, Size:0x0400, Caps:0x1 [R]\n"
 				      "Zone:0, Sec#:0, Addr:0x08000400, Size:0x0400, Caps:0x1 [R]",
 				      &error);
@@ -913,7 +601,7 @@ dfu_target_dfuse_func (void)
 	g_assert_no_error (error);
 	g_assert (ret);
 	tmp = dfu_target_sectors_to_string (target);
-	ret = dfu_test_compare_lines (tmp,
+	ret = fu_test_compare_lines (tmp,
 				      "Zone:0, Sec#:0, Addr:0x08000000, Size:0x0400, Caps:0x1 [R]\n"
 				      "Zone:0, Sec#:0, Addr:0x08000400, Size:0x0400, Caps:0x1 [R]\n"
 				      "Zone:0, Sec#:1, Addr:0x08000800, Size:0x0400, Caps:0x7 [REW]\n"
@@ -930,7 +618,7 @@ dfu_target_dfuse_func (void)
 	g_assert_no_error (error);
 	g_assert (ret);
 	tmp = dfu_target_sectors_to_string (target);
-	ret = dfu_test_compare_lines (tmp,
+	ret = fu_test_compare_lines (tmp,
 				      "Zone:0, Sec#:0, Addr:0x0000f000, Size:0x0064, Caps:0x1 [R]\n"
 				      "Zone:0, Sec#:0, Addr:0x0000f064, Size:0x0064, Caps:0x1 [R]\n"
 				      "Zone:0, Sec#:0, Addr:0x0000f0c8, Size:0x0064, Caps:0x1 [R]\n"
@@ -1167,6 +855,7 @@ main (int argc, char **argv)
 	g_setenv ("G_MESSAGES_DEBUG", "all", FALSE);
 
 	/* tests go here */
+	g_test_add_func ("/dfu/firmware{srec}", dfu_firmware_srec_func);
 	g_test_add_func ("/dfu/chunked", dfu_chunked_func);
 	g_test_add_func ("/dfu/patch", dfu_patch_func);
 	g_test_add_func ("/dfu/patch{merges}", dfu_patch_merges_func);
@@ -1182,11 +871,6 @@ main (int argc, char **argv)
 	g_test_add_func ("/dfu/firmware{intel-hex-offset}", dfu_firmware_intel_hex_offset_func);
 	g_test_add_func ("/dfu/firmware{intel-hex}", dfu_firmware_intel_hex_func);
 	g_test_add_func ("/dfu/firmware{intel-hex-signed}", dfu_firmware_intel_hex_signed_func);
-	g_test_add_func ("/dfu/device", dfu_device_func);
-	g_test_add_func ("/dfu/device{v1.1}", dfu_device_dfu_v11);
-	g_test_add_func ("/dfu/device{avr32}", dfu_device_dfu_avr32);
-	g_test_add_func ("/dfu/device{xmega}", dfu_device_dfu_xmega);
-	g_test_add_func ("/dfu/colorhug+", dfu_colorhug_plus_func);
 	return g_test_run ();
 }
 

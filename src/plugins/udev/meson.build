@@ -36,11 +36,12 @@ executable(
   ],
   link_with : [
     fwupd,
+    libfwupdprivate,
   ],
   c_args : cargs,
 )
 
-if get_option('enable-tests')
+if get_option('tests')
   cargs += '-DFU_OFFLINE_DESTDIR="/tmp/fwupd-self-test"'
   cargs += '-DPLUGINBUILDDIR="' + meson.current_build_dir() + '"'
   testdatadir = join_paths(meson.current_source_dir(), 'tests')

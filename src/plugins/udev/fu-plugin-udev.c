@@ -2,21 +2,7 @@
  *
  * Copyright (C) 2015-2016 Richard Hughes <richard@hughsie.com>
  *
- * Licensed under the GNU General Public License Version 2
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #include "config.h"
@@ -31,16 +17,6 @@
 struct FuPluginData {
 	GUdevClient		*gudev_client;
 };
-
-//FIXME: this needs to move to the plugin core
-static gchar *
-fu_plugin_udev_get_id (GUdevDevice *device)
-{
-	gchar *id;
-	id = g_strdup_printf ("ro-%s", g_udev_device_get_sysfs_path (device));
-	g_strdelimit (id, "/:.-", '_');
-	return id;
-}
 
 gboolean
 fu_plugin_verify (FuPlugin *plugin,
@@ -71,7 +47,7 @@ fu_plugin_verify (FuPlugin *plugin,
 	if (g_strcmp0 (fu_device_get_version (device),
 		       fu_rom_get_version (rom)) != 0) {
 		g_debug ("changing version of %s from %s to %s",
-			 fu_device_get_id (device),
+			 fu_device_get_platform_id (device),
 			 fu_device_get_version (device),
 			 fu_rom_get_version (rom));
 		fu_device_set_version (device, fu_rom_get_version (rom));
@@ -131,9 +107,9 @@ fu_plugin_udev_add (FuPlugin *plugin, GUdevDevice *device)
 	FuDevice *dev_tmp;
 	const gchar *display_name;
 	const gchar *guid;
+	const gchar *id = NULL;
 	const gchar *product;
 	const gchar *vendor;
-	g_autofree gchar *id = NULL;
 	g_autofree gchar *rom_fn = NULL;
 	g_autofree gchar *vendor_id = NULL;
 	g_autofree gchar *version = NULL;
@@ -146,8 +122,6 @@ fu_plugin_udev_add (FuPlugin *plugin, GUdevDevice *device)
 	guid = g_udev_device_get_property (device, "FWUPD_GUID");
 	if (guid == NULL)
 		return;
-	if (g_strcmp0 (g_udev_device_get_subsystem (device), "usb") == 0)
-		return;
 
 	/* get data */
 	ptask = as_profile_start (profile, "FuPluginUdev:client-add{%s}", guid);
@@ -155,7 +129,7 @@ fu_plugin_udev_add (FuPlugin *plugin, GUdevDevice *device)
 	g_debug ("adding udev device: %s", g_udev_device_get_sysfs_path (device));
 
 	/* is already in database */
-	id = fu_plugin_udev_get_id (device);
+	id = g_udev_device_get_sysfs_path (device);
 	dev_tmp = fu_plugin_cache_lookup (plugin, id);
 	if (dev_tmp != NULL) {
 		g_debug ("ignoring duplicate %s", id);
@@ -176,7 +150,7 @@ fu_plugin_udev_add (FuPlugin *plugin, GUdevDevice *device)
 	/* did we get enough data */
 	dev = fu_device_new ();
 	fu_device_add_flag (dev, FWUPD_DEVICE_FLAG_INTERNAL);
-	fu_device_set_id (dev, id);
+	fu_device_set_platform_id (dev, id);
 	fu_device_add_guid (dev, guid);
 	fu_device_add_icon (dev, "audio-card");
 	display_name = g_udev_device_get_property (device, "FWUPD_MODEL");
@@ -211,14 +185,14 @@ static void
 fu_plugin_udev_remove (FuPlugin *plugin, GUdevDevice *device)
 {
 	FuDevice *dev;
-	g_autofree gchar *id = NULL;
+	const gchar *id;
 
 	/* interesting device? */
 	if (g_udev_device_get_property (device, "FWUPD_GUID") == NULL)
 		return;
 
 	/* already in database */
-	id = fu_plugin_udev_get_id (device);
+	id = g_udev_device_get_sysfs_path (device);
 	dev = fu_plugin_cache_lookup (plugin, id);
 	if (dev == NULL)
 		return;
@@ -245,7 +219,7 @@ void
 fu_plugin_init (FuPlugin *plugin)
 {
 	FuPluginData *data = fu_plugin_alloc_data (plugin, sizeof (FuPluginData));
-	const gchar *subsystems[] = { NULL };
+	const gchar *subsystems[] = { "pci", NULL };
 
 	data->gudev_client = g_udev_client_new (subsystems);
 	g_signal_connect (data->gudev_client, "uevent",
@@ -265,7 +239,7 @@ fu_plugin_coldplug (FuPlugin *plugin, GError **error)
 	FuPluginData *data = fu_plugin_get_data (plugin);
 	GList *devices;
 	GUdevDevice *udev_device;
-	const gchar *devclass[] = { "usb", "pci", NULL };
+	const gchar *devclass[] = { "pci", NULL };
 	g_autoptr(AsProfile) profile = as_profile_new ();
 
 	/* get all devices of class */

@@ -1,3 +1,167 @@
+Version 1.0.8
+~~~~~~~~~~~~~
+Released: 2018-06-07
+
+New Features:
+ - Add an plugin to update some future Wacom tablets (Richard Hughes)
+ - Add 'fwupdmgr get-topology' to show logical device tree (Richard Hughes, Mario Limonciello)
+ - Add support for creating a flatpak (Richard Hughes)
+ - Add support for creating a snap (Mario Limonciello, Richard Hughes)
+ - Add support for Motorola S-record files (Richard Hughes)
+ - Add the Linux Foundation public GPG keys for firmware and metadata (Richard Hughes)
+ - Show a translated warning when the server is limiting downloads (Richard Hughes)
+
+Bugfixes:
+ - Add a firmware diagnostic tool called fwupdtool (Richard Hughes, Mario Limonciello)
+ - Adjust all licensing to LGPL 2.1+ (Mario Limonciello)
+ - Allow installing more than one firmware using 'fwupdmgr install' (Richard Hughes)
+ - Allow specifying hwids with OR relationships (Richard Hughes)
+ - Do not call fu_plugin_init() on blacklisted plugins (Richard Hughes)
+ - Do not require libcolorhug to build (Richard Hughes)
+ - Fix a crash in libfwupd where no device ID is set (Richard Hughes)
+ - Fix a potential DoS in libdfu by limiting holes to 1MiB (Richard Hughes)
+ - Fix Hardware-ID{0,1,2,12} compatibility with Microsoft (Gergely Risko)
+ - Hide devices that aren't updatable by default in fwupdmgr (Mario Limonciello)
+ - Search all UEFI GUIDs when matching hardware (Richard Hughes, Mario Limonciello)
+ - Stop matching Nintendo Switch Pro in the 8bitdo plugin (Mario Limonciello)
+
+Version 1.0.7
+~~~~~~~~~~~~~
+Released: 2018-04-30
+
+New Features:
+ - Add enable-remote and disable-remote commands to fwupdmgr (Richard Hughes)
+ - Add fu_plugin_add_compile_version() for libraries to use (Richard Hughes)
+ - Allow requiring specific versions of libraries for firmware updates (Richard Hughes)
+ - If no remotes are enabled try to enable the LVFS (Mario Limonciello)
+ - Show a warning with interactive prompt when enabling a remote (Richard Hughes)
+
+Bugfixes:
+ - Check that EFI system partition is mounted before update (Mario Limonciello)
+ - Disable synapticsmst remote control on failure (Sjoerd Simons)
+ - Don't recoldplug thunderbolt to fix a flashing failure (Mario Limonciello)
+ - Fix SQL error when running 'fwupdmgr clear-offline' (Richard Hughes)
+ - Improve the update report message (Mario Limonciello)
+ - Only enumerate Dell Docks if the type is known (Sjoerd Simons)
+ - Only run certtool if a new enough gnutls is present (Mario Limonciello)
+ - Prevent a client crash if the daemon somehow sends invalid data (Richard Hughes)
+ - Reboot after scheduling using logind not systemd (Richard Hughes)
+ - Use the right encoding for the label in make-images (Niels Ole Salscheider)
+
+Version 1.0.6
+~~~~~~~~~~~~~
+Released: 2018-03-12
+
+New Features:
+ - Add bash completion for fwupdmgr (Mario Limonciello)
+ - Add support for newest Thunderbolt chips (Andrei Emeltchenko)
+ - Allow all functions that take device arguments to be prompted (Mario Limonciello)
+ - Allow devices to use the runtime version when in bootloader mode (Richard Hughes)
+ - Allow overriding ESP mount point via conf file (Mario Limonciello)
+ - Delete any old fwupdate capsules and efivars when launching fwupd (Richard Hughes)
+ - Generate Vala bindings (Robert Ancell)
+
+Bugfixes:
+ - Allow ctrl-d out of the prompt for devices (Mario Limonciello)
+ - Allow to create package out of provided binary (Andrei Emeltchenko)
+ - Correct handling of unknown Thunderbolt devices (Yehezkel Bernat)
+ - Correctly detect new remotes that are manually copied (Richard Hughes)
+ - Fix a crash related to when passing device to downgrade in CLI (Mario Limonciello)
+ - Fix running the self tests when no fwupd is installed (Richard Hughes)
+ - Fix Unifying signature writing and parsing for Texas bootloader (Ogier Bouvier)
+ - Only send success and failure reports to the server (Richard Hughes)
+ - Use a CNAME to redirect to the correct CDN for metadata (Richard Hughes)
+ - Use a longer timeout when powering back the Thunderbolt device (Richard Hughes)
+
+Version 1.0.5
+~~~~~~~~~~~~~
+Released: 2018-02-14
+
+New Features:
+ - Offer to reboot when processing an offline update (Richard Hughes)
+ - Report the efivar, libsmbios and fwupdate library versions (Mario Limonciello)
+ - Report Thunderbolt safe mode and SecureBoot status (Mario Limonciello)
+ - Show the user a URL when they report a known problem (Richard Hughes)
+ - Support split cabinet archives as produced by Windows Update (Richard Hughes)
+
+Bugfixes:
+ - Be more careful deleting and modifying device history (Richard Hughes)
+ - Clarify which devices don't have upgrades (Mario Limonciello)
+ - Ensure the Thunderbolt version is xx.yy (Richard Hughes)
+ - Fix a daemon warning when using fwupdmgr get-results (Richard Hughes)
+ - Fix crasher with MST flashing (Mario Limonciello)
+ - Fix DFU detach with newer releases of libusb (Richard Hughes)
+ - Include the device VID and PID when generating the device-id (Richard Hughes)
+ - Set the RemoteId when using GetDetails (Richard Hughes)
+ - Stop matching 8bitdo DS4 controller VID/PID (Mario Limonciello)
+ - Use help2man for dfu-tool and drop docbook dependencies (Mario Limonciello)
+ - Use ngettext for any strings with plurals (Piotr Drąg)
+ - Use the default value if ArchiveSizeMax is unspecified (Richard Hughes)
+
+Version 1.0.4
+~~~~~~~~~~~~~
+Released: 2018-01-25
+
+New Features:
+ - Add D-Bus methods to get and modify the history information (Richard Hughes)
+ - Allow the user to share firmware update success or failure (Richard Hughes)
+ - Ask the user to refresh metadata when it is very old (Richard Hughes)
+ - Store firmware update success and failure to a local database (Richard Hughes)
+
+Bugfixes:
+ - Add a device name for locked UEFI devices (Mario Limonciello)
+ - Allow each plugin to opt-in to the recoldplug action (Richard Hughes)
+ - Fix firmware downloading using gnome-software (Richard Hughes)
+ - Fix UX capsule reference to the one specified in efivar (Mario Limonciello)
+ - Never add two devices to the daemon with the same ID (Richard Hughes)
+ - Rescan supported flags when refreshing metadata (Richard Hughes)
+
+Version 1.0.3
+~~~~~~~~~~~~~
+Released: 2018-01-09
+
+New Features:
+ - Add a new plugin to add support for CSR "Driverless DFU" (Richard Hughes)
+ - Add initial SF30/SN30 Pro support (Mario Limonciello)
+ - Support AppStream metadata with relative <location> URLs (Richard Hughes)
+
+Bugfixes:
+ - Add more metadata to the user-agent string (Richard Hughes)
+ - Block owned Dell TPM updates (Mario Limonciello)
+ - Choose the correct component from provides matches using requirements (Richard Hughes)
+ - Do not try to parse huge compressed archive files (Richard Hughes)
+ - Fix a double-free bug in the Udev code (Philip Withnall)
+ - Handle Thunderbolt "native" mode (Yehezkel Bernat)
+ - Use the new functionality in libgcab >= 1.0 to avoid writing temp files (Richard Hughes)
+
+Version 1.0.2
+~~~~~~~~~~~~~
+Released: 2017-11-28
+
+New Features:
+ - Add a plugin for the Nitrokey Storage device (Richard Hughes)
+ - Add support for the original AVR DFU protocol (Richard Hughes)
+ - Allow different plugins to claim the same device (Richard Hughes)
+ - Allow quirks to set common USB properties (Richard Hughes)
+ - Move a common plugin functionality out to a new shared object (Richard Hughes)
+ - Optionally delay the device removal for better replugging (Richard Hughes)
+ - Set environment variables to allow easy per-plugin debugging (Richard Hughes)
+ - Use a SHA1 hash for the internal DeviceID (Richard Hughes)
+
+Bugfixes:
+ - Add quirk for AT32UC3B1256 as used in the RubberDucky (Richard Hughes)
+ - Disable the dell plugin if libsmbios fails (Mario Limonciello)
+ - Don't register for USB UDev events to later ignore them (Richard Hughes)
+ - Fix a possible buffer overflow when debugging ebitdo devices (Richard Hughes)
+ - Fix critical warning when more than one remote fails to load (Richard Hughes)
+ - Fix DFU attaching AVR32 devices like the XMEGA (Richard Hughes)
+ - Ignore useless Thunderbolt device types (Mario Limonciello)
+ - Refactor ColorHug into a much more modern plugin (Richard Hughes)
+ - Release the Steelseries interface if getting the version failed (Richard Hughes)
+ - Remove autoconf-isms from the meson configure options (Richard Hughes)
+ - Show a nicer error message if the requirement fails (Richard Hughes)
+ - Sort the output of GetUpgrades correctly (Richard Hughes)
+
 Version 1.0.1
 ~~~~~~~~~~~~~
 Released: 2017-11-09

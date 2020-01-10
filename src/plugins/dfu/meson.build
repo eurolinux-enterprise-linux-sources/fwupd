@@ -1,7 +1,7 @@
 cargs = ['-DG_LOG_DOMAIN="FuPluginDfu"']
 
 install_data(['dfu.quirk'],
-  install_dir: join_paths(get_option('datadir'), 'fwupd', 'quirks.d')
+  install_dir: join_paths(datadir, 'fwupd', 'quirks.d')
 )
 
 dfu = static_library(
@@ -10,13 +10,13 @@ dfu = static_library(
     'dfu-chunked.c',
     'dfu-cipher-xtea.c',
     'dfu-common.c',
-    'dfu-context.c',
     'dfu-device.c',
     'dfu-element.c',
     'dfu-firmware.c',
     'dfu-format-dfu.c',
     'dfu-format-dfuse.c',
     'dfu-format-ihex.c',
+    'dfu-format-srec.c',
     'dfu-format-metadata.c',
     'dfu-format-raw.c',
     'dfu-image.c',
@@ -60,7 +60,7 @@ shared_module('fu_plugin_dfu',
   ],
 )
 
-executable(
+dfu_tool = executable(
   'dfu-tool',
   sources : [
     'dfu-tool.c',
@@ -84,24 +84,30 @@ executable(
   ],
   c_args : cargs,
   install : true,
-  install_dir : get_option('bindir')
+  install_dir : bindir
 )
 
-if get_option('enable-man')
-  docbook2man = find_program('docbook2man')
+if get_option('man')
+  help2man = find_program('help2man')
+  extra = join_paths(meson.current_source_dir(), 'dfu-tool.h2m')
   custom_target('dfu-tool-man',
-    input : 'dfu-tool.sgml',
+    input : dfu_tool,
     output : 'dfu-tool.1',
     command : [
-      docbook2man, '@INPUT@',
-      '--output', meson.current_build_dir(),
+      help2man, '@INPUT@',
+      '--no-info',
+      '--output', '@OUTPUT@',
+      '--name', 'dfu-tool',
+      '--manual', 'User Commands',
+      '--version-string', fwupd_version,
+      '--include', extra,
     ],
     install : true,
-    install_dir : join_paths(get_option('mandir'), 'man1'),
+    install_dir : join_paths(mandir, 'man1'),
   )
 endif
 
-if get_option('enable-tests')
+if get_option('tests')
   testdatadir = join_paths(meson.current_source_dir(), 'tests')
   cargs += '-DTESTDATADIR="' + testdatadir + '"'
   e = executable(

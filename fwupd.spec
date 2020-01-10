@@ -1,10 +1,17 @@
+# Enable hardening in RHEL 7
+%global _hardened_build 1
+
 %global glib2_version 2.45.8
-%global libappstream_version 0.6.10
+%global libappstream_version 0.7.4
 %global libgusb_version 0.2.9
 %global libsoup_version 2.51.92
-%global colord_version 1.0.0
 %global systemd_version 219
+%global json_glib_version 1.1.1
 
+%global enable_tests 0
+%global enable_dummy 0
+
+# fwupdate is only available on these arches
 %ifarch x86_64 aarch64
 %global have_uefi 1
 %endif
@@ -21,29 +28,25 @@
 
 Summary:   Firmware update daemon
 Name:      fwupd
-Version:   1.0.1
+Version:   1.0.8
 Release:   4%{?dist}
-License:   GPLv2+
+License:   LGPLv2+
 URL:       https://github.com/hughsie/fwupd
 Source0:   http://people.freedesktop.org/~hughsient/releases/%{name}-%{version}.tar.xz
 
 # neuter the LVFS
 Patch2:    0001-Do-not-use-the-LVFS.patch
+Patch3:    0002-Do-not-use-Python-version-3.patch
 
-# don't depend on such a new appstream-glib
-Patch3:    fwupd-build-with-old-deps.patch
+# backport
+Patch6:    0001-Allow-running-on-an-older-systemd.patch
 
-# don't use meson, urgh
-Patch4:    fwupd-no-meson.patch
-
-BuildRequires: docbook-utils
 BuildRequires: gettext
 BuildRequires: glib2-devel >= %{glib2_version}
 BuildRequires: libappstream-glib-devel >= %{libappstream_version}
 BuildRequires: libgudev1-devel
 BuildRequires: libgusb-devel >= %{libgusb_version}
 BuildRequires: libsoup-devel >= %{libsoup_version}
-BuildRequires: colord-devel >= %{colord_version}
 BuildRequires: polkit-devel >= 0.103
 BuildRequires: sqlite-devel
 BuildRequires: gpgme-devel
@@ -51,22 +54,17 @@ BuildRequires: systemd >= %{systemd_version}
 BuildRequires: libarchive-devel
 BuildRequires: gobject-introspection-devel
 BuildRequires: gcab
-BuildRequires: elfutils-libelf-devel
-BuildRequires: gtk-doc
-BuildRequires: libuuid-devel
-BuildRequires: gnutls-devel
-BuildRequires: gnutls-utils
-
-# because we're creating the build files
-BuildRequires: autoconf
-BuildRequires: autoconf-archive
-BuildRequires: automake
-BuildRequires: gettext-devel
-
 %if 0%{?have_valgrind}
 BuildRequires: valgrind
 BuildRequires: valgrind-devel
 %endif
+BuildRequires: elfutils-libelf-devel
+BuildRequires: gtk-doc
+BuildRequires: libuuid-devel
+BuildRequires: meson
+BuildRequires: help2man
+BuildRequires: json-glib-devel >= %{json_glib_version}
+BuildRequires: vala
 
 %if 0%{?have_dell}
 BuildRequires: efivar-devel
@@ -74,7 +72,7 @@ BuildRequires: libsmbios-devel >= 2.3.0
 %endif
 
 %if 0%{?have_uefi}
-BuildRequires: fwupdate-devel >= 7
+BuildRequires: fwupdate-devel >= 10
 %endif
 
 Requires(post): systemd
@@ -96,6 +94,7 @@ fwupd is a daemon to allow session software to update device firmware.
 Summary: Development package for %{name}
 Requires: %{name}%{?_isa} = %{version}-%{release}
 Obsoletes: libebitdo-devel < 0.7.5-3
+Obsoletes: libdfu-devel < 1.0.0
 
 %description devel
 Files for development with %{name}.
@@ -103,49 +102,54 @@ Files for development with %{name}.
 %prep
 %setup -q
 %patch2 -p1 -b .no-lvfs
-%patch3 -p1 -b .old-appstream-glib
-%patch4 -p1 -b .automake
+%patch3 -p1 -b .no-python3
+%patch6 -p1 -b .old-systemd
 
 %build
-gtkdocize
-autoreconf -f -i
-%configure \
-        --disable-static        \
-        --disable-pkcs7         \
-        --enable-gpg            \
-        --enable-thunderbolt    \
-        --enable-gtk-doc        \
-        --enable-colorhug       \
-        --enable-synaptics      \
-%if 0%{?have_uefi}
-        --enable-uefi           \
+
+%meson \
+    -Dpkcs7=false \
+    -Dgtkdoc=true \
+%if 0%{?enable_tests}
+    -Dtests=true \
 %else
-        --disable-uefi          \
+    -Dtests=false \
+%endif
+%if 0%{?enable_dummy}
+    -Dplugin_dummy=true \
+%else
+    -Dplugin_dummy=false \
+%endif
+    -Dplugin_thunderbolt=true \
+%if 0%{?have_uefi}
+    -Dplugin_uefi=true \
+    -Dplugin_uefi_labels=false \
+%else
+    -Dplugin_uefi=false \
+    -Dplugin_uefi_labels=false \
 %endif
 %if 0%{?have_dell}
-        --enable-dell           \
+    -Dplugin_dell=true \
+    -Dplugin_synaptics=true \
 %else
-        --disable-dell          \
+    -Dplugin_dell=false \
+    -Dplugin_synaptics=false \
 %endif
-        --disable-rpath         \
-        --disable-silent-rules  \
-        --disable-dependency-tracking
+    -Dman=true
 
-make %{?_smp_mflags}
+%meson_build
+
+%if 0%{?enable_tests}
+%check
+%meson_test
+%endif
 
 %install
-make install DESTDIR=$RPM_BUILD_ROOT
-find %{buildroot} -name '*.la' -exec rm -f {} ';'
-mkdir --mode=0700 $RPM_BUILD_ROOT%{_localstatedir}/lib/fwupd/gnupg
+%meson_install
 
-# not ready yet
-rm -f %{buildroot}%{_libdir}/fwupd-plugins-3/libfu_plugin_altos.so
-rm -f %{buildroot}%{_libdir}/fwupd-plugins-3/libfu_plugin_raspberrypi.so
+mkdir -p --mode=0700 $RPM_BUILD_ROOT%{_localstatedir}/lib/fwupd/gnupg
 
 %find_lang %{name}
-
-%check
-# make check VERBOSE=1
 
 %post
 /sbin/ldconfig
@@ -162,19 +166,24 @@ rm -f %{buildroot}%{_libdir}/fwupd-plugins-3/libfu_plugin_raspberrypi.so
 %doc README.md AUTHORS NEWS
 %license COPYING
 %config(noreplace)%{_sysconfdir}/fwupd/daemon.conf
+%if 0%{?have_uefi}
+%config(noreplace)%{_sysconfdir}/fwupd/uefi.conf
+%endif
 %dir %{_libexecdir}/fwupd
 %{_libexecdir}/fwupd/fwupd
+%{_libexecdir}/fwupd/fwupdtool
 %{_bindir}/dfu-tool
 %{_bindir}/fwupdmgr
 %dir %{_sysconfdir}/fwupd
 %dir %{_sysconfdir}/fwupd/remotes.d
-%{_sysconfdir}/fwupd/remotes.d/fwupd.conf
-%{_sysconfdir}/fwupd/remotes.d/lvfs.conf
-%{_sysconfdir}/fwupd/remotes.d/lvfs-testing.conf
-%{_sysconfdir}/fwupd/remotes.d/vendor.conf
-%{_sysconfdir}/pki/fwupd
+%config(noreplace)%{_sysconfdir}/fwupd/remotes.d/fwupd.conf
+%config(noreplace)%{_sysconfdir}/fwupd/remotes.d/lvfs.conf
+%config(noreplace)%{_sysconfdir}/fwupd/remotes.d/lvfs-testing.conf
+%config(noreplace)%{_sysconfdir}/fwupd/remotes.d/vendor.conf
+%config(noreplace)%{_sysconfdir}/pki/fwupd
 %{_sysconfdir}/pki/fwupd-metadata
 %{_sysconfdir}/dbus-1/system.d/org.freedesktop.fwupd.conf
+%{_datadir}/fwupd/metainfo/org.freedesktop.fwupd*.metainfo.xml
 %{_datadir}/fwupd/remotes.d/fwupd/metadata.xml
 %{_datadir}/fwupd/remotes.d/vendor/firmware/README.md
 %{_datadir}/dbus-1/interfaces/org.freedesktop.fwupd.xml
@@ -184,6 +193,7 @@ rm -f %{buildroot}%{_libdir}/fwupd-plugins-3/libfu_plugin_raspberrypi.so
 %{_datadir}/man/man1/dfu-tool.1.gz
 %{_datadir}/man/man1/fwupdmgr.1.gz
 %{_datadir}/metainfo/org.freedesktop.fwupd.metainfo.xml
+%{_datadir}/fwupd/firmware-packager
 %{_unitdir}/fwupd-offline-update.service
 %{_unitdir}/fwupd.service
 %{_unitdir}/system-update.target.wants/
@@ -195,34 +205,59 @@ rm -f %{buildroot}%{_libdir}/fwupd-plugins-3/libfu_plugin_raspberrypi.so
 %{_libdir}/girepository-1.0/Fwupd-2.0.typelib
 /usr/lib/udev/rules.d/*.rules
 %dir %{_libdir}/fwupd-plugins-3
+%{_libdir}/fwupd-plugins-3/libfu_plugin_altos.so
 %{_libdir}/fwupd-plugins-3/libfu_plugin_amt.so
 %{_libdir}/fwupd-plugins-3/libfu_plugin_colorhug.so
+%{_libdir}/fwupd-plugins-3/libfu_plugin_csr.so
 %if 0%{?have_dell}
 %{_libdir}/fwupd-plugins-3/libfu_plugin_dell.so
 %endif
 %{_libdir}/fwupd-plugins-3/libfu_plugin_dfu.so
 %{_libdir}/fwupd-plugins-3/libfu_plugin_ebitdo.so
+%{_libdir}/fwupd-plugins-3/libfu_plugin_nitrokey.so
 %{_libdir}/fwupd-plugins-3/libfu_plugin_steelseries.so
+%if 0%{?have_dell}
 %{_libdir}/fwupd-plugins-3/libfu_plugin_synapticsmst.so
+%endif
+%if 0%{?enable_dummy}
 %{_libdir}/fwupd-plugins-3/libfu_plugin_test.so
-%{_libdir}/fwupd-plugins-3/libfu_plugin_thunderbolt_power.so
+%endif
 %{_libdir}/fwupd-plugins-3/libfu_plugin_thunderbolt.so
+%{_libdir}/fwupd-plugins-3/libfu_plugin_thunderbolt_power.so
 %{_libdir}/fwupd-plugins-3/libfu_plugin_udev.so
 %if 0%{?have_uefi}
 %{_libdir}/fwupd-plugins-3/libfu_plugin_uefi.so
 %endif
 %{_libdir}/fwupd-plugins-3/libfu_plugin_unifying.so
 %{_libdir}/fwupd-plugins-3/libfu_plugin_upower.so
+%{_libdir}/fwupd-plugins-3/libfu_plugin_wacomhid.so
 %ghost %{_localstatedir}/lib/fwupd/gnupg
 
 %files devel
 %{_datadir}/gir-1.0/Fwupd-2.0.gir
 %{_datadir}/gtk-doc/html/libfwupd
+%{_datadir}/vala/vapi
 %{_includedir}/fwupd-1
 %{_libdir}/libfwupd*.so
 %{_libdir}/pkgconfig/fwupd.pc
 
 %changelog
+* Wed Sep 05 2018 Kalev Lember <klember@redhat.com> 1.0.8-4
+- Build with full hardening enabled
+- Resolves: #1616185
+
+* Mon Jul 16 2018 Richard Hughes <rhughes@redhat.com> 1.0.8-3
+- Backport a fix to allow properly running on older systemd versions.
+- Resolves: #1601550
+
+* Thu Jun 14 2018 Richard Hughes <rhughes@redhat.com> 1.0.8-2
+- Build against the new libfwupdate
+- Resolves: #1570028
+
+* Fri Jun 08 2018 Richard Hughes <rhughes@redhat.com> 1.0.8-1
+- New upstream release
+- Resolves: #1570028
+
 * Mon Jan 08 2018 Richard Hughes <richard@hughsie.com> 1.0.1-4
 - Enable the libsmbios dependency to get the Dell plugin
 - Resolves: #1420913

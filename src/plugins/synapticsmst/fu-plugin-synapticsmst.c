@@ -4,21 +4,7 @@
  * Copyright (C) 2017 Peichen Huang <peichenhuang@tw.synaptics.com>
  * Copyright (C) 2017 Richard Hughes <richard@hughsie.com>
  *
- * Licensed under the GNU General Public License Version 2
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #include "config.h"
@@ -31,10 +17,11 @@
 #define SYNAPTICS_FLASH_MODE_DELAY 3
 
 #define HWID_DELL_INC	"85d38fda-fc0e-5c6f-808f-076984ae7978"
+#define DELL_DOCK_FLASH_GUID	"e7ca1f36-bf73-4574-afe6-a4ccacabf479"
 
 struct FuPluginData {
-	const gchar	*dock_type;
-	const gchar	*system_type;
+	gchar		*dock_type;
+	gchar		*system_type;
 };
 
 static gboolean
@@ -79,6 +66,8 @@ fu_plugin_synaptics_add_device (FuPlugin *plugin,
 	const gchar *guid_str = NULL;
 	g_autofree gchar *name = NULL;
 	g_autofree gchar *dev_id_str = NULL;
+	g_autofree gchar *layer_str = NULL;
+	g_autofree gchar *rad_str = NULL;
 	const gchar *aux_node;
 	guint8 layer;
 	guint16 rad;
@@ -111,6 +100,8 @@ fu_plugin_synaptics_add_device (FuPlugin *plugin,
 	kind_str = synapticsmst_device_kind_to_string (synapticsmst_device_get_kind (device));
 	dev_id_str = g_strdup_printf ("MST-%s-%s-%u-%u",
 				      kind_str, aux_node, layer, rad);
+	layer_str = g_strdup_printf ("%u", layer);
+	rad_str = g_strdup_printf ("%u", rad);
 
 	if (board_str == NULL) {
 		g_debug ("invalid board ID (%x)", synapticsmst_device_get_board_id (device));
@@ -124,6 +115,10 @@ fu_plugin_synaptics_add_device (FuPlugin *plugin,
 	/* create the device */
 	dev = fu_device_new ();
 	fu_device_set_id (dev, dev_id_str);
+	fu_device_set_metadata (dev, "SynapticsMSTKind", kind_str);
+	fu_device_set_metadata (dev, "SynapticsMSTAuxNode", aux_node);
+	fu_device_set_metadata (dev, "SynapticsMSTLayer", layer_str);
+	fu_device_set_metadata (dev, "SynapticsMSTRad", rad_str);
 	fu_device_add_flag (dev, FWUPD_DEVICE_FLAG_UPDATABLE);
 	fu_device_set_name (dev, name);
 	fu_device_set_vendor (dev, "Synaptics");
@@ -131,6 +126,12 @@ fu_plugin_synaptics_add_device (FuPlugin *plugin,
 	fu_device_add_icon (dev, "computer");
 	fu_device_set_version (dev, synapticsmst_device_get_version (device));
 	fu_device_add_guid (dev, guid_str);
+
+	/* Currently recognizes TB16/WD15 */
+	if (g_strcmp0 (data->dock_type, "TB16") == 0 ||
+	    g_strcmp0 (data->dock_type, "WD15") == 0) {
+		fu_device_add_parent_guid (dev, DELL_DOCK_FLASH_GUID);
+	}
 
 	fu_plugin_device_add (plugin, dev);
 	fu_plugin_cache_add (plugin, dev_id_str, dev);
@@ -251,7 +252,7 @@ fu_plugin_synapticsmst_enumerate (FuPlugin *plugin,
 
 		/* If we open succesfully a device exists here */
 		device = synapticsmst_device_new (SYNAPTICSMST_DEVICE_KIND_DIRECT, aux_node, 0, 0);
-		if (!synapticsmst_device_open (device, NULL)) {
+		if (!synapticsmst_device_open (device, &error_local)) {
 			/* No device exists here, but was there - remove from DB */
 			if (fu_dev != NULL) {
 				g_debug ("Removing devices on %s", aux_node);
@@ -261,7 +262,8 @@ fu_plugin_synapticsmst_enumerate (FuPlugin *plugin,
 									aux_node);
 			} else {
 				/* Nothing to see here - move on*/
-				g_debug ("No device found on %s", aux_node);
+				g_debug ("No device found on %s: %s", aux_node, error_local->message);
+				g_clear_error (&error_local);
 			}
 			continue;
 		}
@@ -270,7 +272,7 @@ fu_plugin_synapticsmst_enumerate (FuPlugin *plugin,
 		if (fu_dev == NULL) {
 			g_debug ("Adding direct device %s", dev_id_str);
 			if (!fu_plugin_synaptics_add_device (plugin, device, &error_local))
-				g_warning ("failed to add device: %s", error_local->message);
+				g_debug ("failed to add device: %s", error_local->message);
 		} else {
 			g_debug ("Skipping previously added device %s", dev_id_str);
 		}
@@ -285,13 +287,8 @@ fu_plugin_synapticsmst_enumerate (FuPlugin *plugin,
 static void
 fu_synapticsmst_write_progress_cb (goffset current, goffset total, gpointer user_data)
 {
-	FuPlugin *plugin = FU_PLUGIN (user_data);
-	gdouble percentage = -1.f;
-	if (total > 0)
-		percentage = (100.f * (gdouble) current) / (gdouble) total;
-	g_debug ("written %" G_GOFFSET_FORMAT "/%" G_GOFFSET_FORMAT "[%.1f%%]",
-		 current, total, percentage);
-	fu_plugin_set_percentage (plugin, (guint) percentage);
+	FuDevice *device = FU_DEVICE (user_data);
+	fu_device_set_progress_full (device, current, total);
 }
 
 gboolean
@@ -303,26 +300,22 @@ fu_plugin_update (FuPlugin *plugin,
 {
 	FuPluginData *data = fu_plugin_get_data (plugin);
 	g_autoptr(SynapticsMSTDevice) device = NULL;
-	const gchar *device_id;
 	SynapticsMSTDeviceKind kind;
 	const gchar *aux_node;
 	guint8 layer;
 	guint8 rad;
-	g_auto (GStrv) split = NULL;
 
 	/* extract details to build a new device */
-	device_id = fu_device_get_id (dev);
-	split = g_strsplit (device_id, "-", -1);
-	kind = synapticsmst_device_kind_from_string(split[1]);
-	aux_node = split[2];
-	layer = g_ascii_strtoull (split[3], NULL, 0);
-	rad = g_ascii_strtoull (split[4], NULL, 0);
+	kind = synapticsmst_device_kind_from_string (fu_device_get_metadata (dev, "SynapticsMSTKind"));
+	aux_node = fu_device_get_metadata (dev, "SynapticsMSTAuxNode");
+	layer = g_ascii_strtoull (fu_device_get_metadata (dev, "SynapticsMSTLayer"), NULL, 0);
+	rad = g_ascii_strtoull (fu_device_get_metadata (dev, "SynapticsMSTRad"), NULL, 0);
 
 
 	/* sleep to allow device wakeup to complete */
 	g_debug ("waiting %d seconds for MST hub wakeup",
 		 SYNAPTICS_FLASH_MODE_DELAY);
-	fu_plugin_set_status (plugin, FWUPD_STATUS_DEVICE_BUSY);
+	fu_device_set_status (dev, FWUPD_STATUS_DEVICE_BUSY);
 	g_usleep (SYNAPTICS_FLASH_MODE_DELAY * 1000000);
 
 	device = synapticsmst_device_new (kind, aux_node, layer, rad);
@@ -331,10 +324,10 @@ fu_plugin_update (FuPlugin *plugin,
 						   data->system_type, error))
 		return FALSE;
 	if (synapticsmst_device_board_id_to_string (synapticsmst_device_get_board_id (device)) != NULL) {
-		fu_plugin_set_status (plugin, FWUPD_STATUS_DEVICE_WRITE);
+		fu_device_set_status (dev, FWUPD_STATUS_DEVICE_WRITE);
 		if (!synapticsmst_device_write_firmware (device, blob_fw,
 							 fu_synapticsmst_write_progress_cb,
-							 plugin,
+							 dev,
 							 error)) {
 			g_prefix_error (error, "failed to flash firmware: ");
 			return FALSE;
@@ -348,7 +341,7 @@ fu_plugin_update (FuPlugin *plugin,
 	}
 
 	/* Re-run device enumeration to find the new device version */
-	fu_plugin_set_status (plugin, FWUPD_STATUS_DEVICE_RESTART);
+	fu_device_set_status (dev, FWUPD_STATUS_DEVICE_RESTART);
 	if (!synapticsmst_device_enumerate_device (device, data->dock_type,
 						   data->system_type, error)) {
 		return FALSE;
@@ -378,8 +371,8 @@ fu_plugin_device_registered (FuPlugin *plugin, FuDevice *device)
 	}
 }
 
-gboolean
-fu_plugin_coldplug (FuPlugin *plugin, GError **error)
+static gboolean
+fu_plugin_synapticsmst_coldplug (FuPlugin *plugin, GError **error)
 {
 	/* verify that this is a supported system */
 	if (!synapticsmst_common_check_supported_system (plugin, error))
@@ -389,6 +382,18 @@ fu_plugin_coldplug (FuPlugin *plugin, GError **error)
 	if (!fu_plugin_synapticsmst_enumerate (plugin, error))
 		g_debug ("error enumerating");
 	return TRUE;
+}
+
+gboolean
+fu_plugin_coldplug (FuPlugin *plugin, GError **error)
+{
+	return fu_plugin_synapticsmst_coldplug (plugin, error);
+}
+
+gboolean
+fu_plugin_recoldplug (FuPlugin *plugin, GError **error)
+{
+	return fu_plugin_synapticsmst_coldplug (plugin, error);
 }
 
 void

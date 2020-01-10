@@ -2,21 +2,7 @@
  *
  * Copyright (C) 2015 Richard Hughes <richard@hughsie.com>
  *
- * Licensed under the GNU General Public License Version 2
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #ifndef __FU_PLUGIN_H
@@ -32,6 +18,7 @@
 #include "fu-device-locker.h"
 #include "fu-quirks.h"
 #include "fu-hwids.h"
+#include "fu-usb-device.h"
 
 G_BEGIN_DECLS
 
@@ -112,7 +99,7 @@ void		 fu_plugin_set_status			(FuPlugin	*plugin,
 							 FwupdStatus	 status);
 void		 fu_plugin_set_percentage		(FuPlugin	*plugin,
 							 guint		 percentage);
-void		 fu_plugin_recoldplug			(FuPlugin	*plugin);
+void		 fu_plugin_request_recoldplug		(FuPlugin	*plugin);
 void		 fu_plugin_set_coldplug_delay		(FuPlugin	*plugin,
 							 guint		 duration);
 gpointer	 fu_plugin_cache_lookup			(FuPlugin	*plugin,
@@ -143,6 +130,17 @@ const gchar	*fu_plugin_lookup_quirk_by_id		(FuPlugin	*plugin,
 const gchar	*fu_plugin_lookup_quirk_by_usb_device	(FuPlugin	*plugin,
 							 const gchar	*prefix,
 							 GUsbDevice	*dev);
+void		 fu_plugin_add_report_metadata		(FuPlugin	*plugin,
+							 const gchar	*key,
+							 const gchar	*value);
+gchar		*fu_plugin_get_config_value		(FuPlugin	*plugin,
+							 const gchar	*key);
+void		 fu_plugin_add_runtime_version		(FuPlugin	*plugin,
+							 const gchar	*component_id,
+							 const gchar	*version);
+void		 fu_plugin_add_compile_version		(FuPlugin	*plugin,
+							 const gchar	*component_id,
+							 const gchar	*version);
 
 G_END_DECLS
 

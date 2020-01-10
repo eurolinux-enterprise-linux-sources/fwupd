@@ -2,21 +2,7 @@
  *
  * Copyright (C) 2016-2017 Richard Hughes <richard@hughsie.com>
  *
- * Licensed under the GNU Lesser General Public License Version 2.1
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #include "config.h"
@@ -123,11 +109,7 @@ lu_device_bootloader_texas_clear_ram_buffer (LuDevice *device, guint16 addr, GEr
 }
 
 static gboolean
-lu_device_bootloader_texas_write_firmware (LuDevice *device,
-					   GBytes *fw,
-					   GFileProgressCallback progress_cb,
-					   gpointer progress_data,
-					   GError **error)
+lu_device_bootloader_texas_write_firmware (LuDevice *device, GBytes *fw, GError **error)
 {
 	const LuDeviceBootloaderRequest *payload;
 	g_autoptr(GPtrArray) reqs = NULL;
@@ -161,8 +143,14 @@ lu_device_bootloader_texas_write_firmware (LuDevice *device,
 		}
 
 		/* build packet */
-		req->cmd = LU_DEVICE_BOOTLOADER_CMD_WRITE_RAM_BUFFER;
-		req->addr = payload->addr % 0x80;
+		req->cmd = payload->cmd;
+
+		/* signature addresses do not need to fit inside 128 bytes */
+		if (req->cmd == LU_DEVICE_BOOTLOADER_CMD_WRITE_SIGNATURE)
+			req->addr = payload->addr;
+		else
+			req->addr =  payload->addr % 0x80;
+
 		req->len = payload->len;
 		memcpy (req->data, payload->data, payload->len);
 		if (!lu_device_bootloader_request (device, req, error)) {
@@ -189,7 +177,8 @@ lu_device_bootloader_texas_write_firmware (LuDevice *device,
 		}
 
 		/* flush RAM buffer to EEPROM */
-		if ((payload->addr + 0x10) % 0x80 == 0) {
+		if ((payload->addr + 0x10) % 0x80 == 0 &&
+		    req->cmd != LU_DEVICE_BOOTLOADER_CMD_WRITE_SIGNATURE) {
 			guint16 addr_start = payload->addr - (7 * 0x10);
 			g_debug ("addr flush @ 0x%04x for 0x%04x",
 				 payload->addr, addr_start);
@@ -204,11 +193,7 @@ lu_device_bootloader_texas_write_firmware (LuDevice *device,
 		}
 
 		/* update progress */
-		if (progress_cb != NULL) {
-			progress_cb ((goffset) i * 32,
-				     (goffset) reqs->len * 32,
-				     progress_data);
-		}
+		fu_device_set_progress_full (FU_DEVICE (device), i * 32, reqs->len * 32);
 	}
 
 	/* check CRC */
@@ -216,47 +201,9 @@ lu_device_bootloader_texas_write_firmware (LuDevice *device,
 		return FALSE;
 
 	/* mark as complete */
-	if (progress_cb != NULL) {
-		progress_cb ((goffset) reqs->len * 32,
-			     (goffset) reqs->len * 32,
-			     progress_data);
-	}
+	fu_device_set_progress_full (FU_DEVICE (device), reqs->len * 32, reqs->len * 32);
 
 	/* success! */
-	return TRUE;
-}
-
-static gchar *
-lu_device_bootloader_texas_get_bl_version (LuDevice *device, GError **error)
-{
-	guint16 build;
-
-	g_autoptr(LuDeviceBootloaderRequest) req = lu_device_bootloader_request_new ();
-	req->cmd = LU_DEVICE_BOOTLOADER_CMD_GET_BL_VERSION;
-	if (!lu_device_bootloader_request (device, req, error)) {
-		g_prefix_error (error, "failed to get firmware version: ");
-		return NULL;
-	}
-
-	/* BOTxx.yy_Bzzzz
-	 * 012345678901234 */
-	build = (guint16) lu_buffer_read_uint8 ((const gchar *) req->data + 10) << 8;
-	build += lu_buffer_read_uint8 ((const gchar *) req->data + 12);
-	return lu_format_version ("BOT",
-				  lu_buffer_read_uint8 ((const gchar *) req->data + 3),
-				  lu_buffer_read_uint8 ((const gchar *) req->data + 6),
-				  build);
-}
-
-static gboolean
-lu_device_bootloader_texas_probe (LuDevice *device, GError **error)
-{
-	g_autofree gchar *version_bl = NULL;
-	version_bl = lu_device_bootloader_texas_get_bl_version (device, error);
-	if (version_bl == NULL)
-		return FALSE;
-	lu_device_set_version_bl (device, version_bl);
-	lu_device_set_version_fw (device, "RQR24.xx_Bxxxx");
 	return TRUE;
 }
 
@@ -265,10 +212,10 @@ lu_device_bootloader_texas_class_init (LuDeviceBootloaderTexasClass *klass)
 {
 	LuDeviceClass *klass_device = LU_DEVICE_CLASS (klass);
 	klass_device->write_firmware = lu_device_bootloader_texas_write_firmware;
-	klass_device->probe = lu_device_bootloader_texas_probe;
 }
 
 static void
 lu_device_bootloader_texas_init (LuDeviceBootloaderTexas *device)
 {
+	fu_device_set_version (FU_DEVICE (device), "RQR24.xx_Bxxxx");
 }

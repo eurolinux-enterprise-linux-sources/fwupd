@@ -2,21 +2,7 @@
  *
  * Copyright (C) 2017 Richard Hughes <richard@hughsie.com>
  *
- * Licensed under the GNU Lesser General Public License Version 2.1
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #include "config.h"
@@ -25,6 +11,7 @@
 #include <gusb.h>
 
 #include "fu-device-locker.h"
+#include "fu-usb-device.h"
 
 /**
  * SECTION:fu-device-locker
@@ -86,8 +73,10 @@ fu_device_locker_init (FuDeviceLocker *self)
  * manually closed using g_clear_object().
  *
  * The functions used for opening and closing the device are set automatically.
- * If the @device is not a type or supertype of @GUsbDevice then this function
- * will not work. For custom objects please use fu_device_locker_new_full().
+ * If the @device is not a type or supertype of #GUsbDevice or #FuUsbDevice
+ * then this function will not work.
+ *
+ * For custom objects please use fu_device_locker_new_full().
  *
  * NOTE: If the @open_func failed then the @close_func will not be called.
  *
@@ -106,6 +95,14 @@ fu_device_locker_new (gpointer device, GError **error)
 		return fu_device_locker_new_full (device,
 						  (FuDeviceLockerFunc) g_usb_device_open,
 						  (FuDeviceLockerFunc) g_usb_device_close,
+						  error);
+	}
+
+	/* FuUsbDevice */
+	if (FU_IS_USB_DEVICE (device)) {
+		return fu_device_locker_new_full (device,
+						  (FuDeviceLockerFunc) fu_usb_device_open,
+						  (FuDeviceLockerFunc) fu_usb_device_close,
 						  error);
 	}
 	g_set_error_literal (error,

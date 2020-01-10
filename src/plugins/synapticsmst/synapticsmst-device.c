@@ -4,25 +4,12 @@
  * Copyright (C) 2016 Mario Limonciello <mario.limonciello@dell.com>
  * Copyright (C) 2017 Peichen Huang <peichenhuang@tw.synaptics.com>
  *
- * Licensed under the GNU Lesser General Public License Version 2.1
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #include "config.h"
 #include <string.h>
+#include <errno.h>
 #include <glib-object.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -84,6 +71,8 @@ synapticsmst_device_board_id_to_string (SynapticsMSTDeviceBoardID board_id)
 		return "Dell WLD15 Wireless Dock";
 	if (board_id == SYNAPTICSMST_DEVICE_BOARDID_DELL_X7_RUGGED)
 		return "Dell Rugged Platform";
+	if ((board_id >> 8) == CUSTOMERID_DELL)
+		return "Dell Generic SynapticsMST Device";
 	if ((board_id & 0xFF00) == SYNAPTICSMST_DEVICE_BOARDID_EVB)
 		return "SYNA evb board";
 	return "Unknown Platform";
@@ -174,9 +163,9 @@ synapticsmst_device_enable_remote_control (SynapticsMSTDevice *device, GError **
 		if (priv->fd == -1) {
 			g_set_error (error,
 				     G_IO_ERROR,
-				     G_IO_ERROR_PERMISSION_DENIED,
-				     "cannot open device %s",
-				     filename);
+				     g_io_error_from_errno (errno),
+				     "cannot open device %s: %s",
+				     filename, g_strerror (errno));
 			return FALSE;
 		}
 		return TRUE;
@@ -374,13 +363,13 @@ synapticsmst_device_enumerate_device (SynapticsMSTDevice *device,
 				     G_IO_ERROR,
 				     G_IO_ERROR_INVALID_DATA,
 				     "Failed to read dpcd from device");
-		return FALSE;
+		goto error_disable_remote;
 	}
 	priv->version = g_strdup_printf ("%1d.%02d.%03d", byte[0], byte[1], byte[2]);
 
 	/* read board ID */
 	if (!synapticsmst_device_read_board_id (device, connection, byte, error))
-		return FALSE;
+		goto error_disable_remote;
 	priv->board_id = (byte[0] << 8) | (byte[1]);
 
 	/* read board chip_id */
@@ -392,7 +381,7 @@ synapticsmst_device_enumerate_device (SynapticsMSTDevice *device,
 				     G_IO_ERROR,
 				     G_IO_ERROR_INVALID_DATA,
 				     "Failed to read dpcd from device");
-		return FALSE;
+		goto error_disable_remote;
 	}
 	priv->chip_id = g_strdup_printf ("VMM%02x%02x", byte[0], byte[1]);
 
@@ -402,7 +391,15 @@ synapticsmst_device_enumerate_device (SynapticsMSTDevice *device,
 		/* If this is a dock, use dock ID*/
 		if (priv->test_mode)
 			system = g_strdup_printf ("test-%s", priv->chip_id);
-		else if (priv->board_id == SYNAPTICSMST_DEVICE_BOARDID_DELL_WD15_TB16_WIRE) {
+		else if (priv->board_id == SYNAPTICSMST_DEVICE_BOARDID_DELL_WD15_TB16_WIRE ||
+			 priv->board_id == SYNAPTICSMST_DEVICE_BOARDID_DELL_FUTURE) {
+			if (dock_type == NULL) {
+				g_set_error_literal (error,
+						     G_IO_ERROR,
+						     G_IO_ERROR_INVALID_DATA,
+						     "Unknown Dell dock type");
+				goto error_disable_remote;
+			}
 			system = g_strdup_printf ("%s-%s", dock_type, priv->chip_id);
 			system = g_ascii_strdown (system, -1);
 		}
@@ -435,6 +432,10 @@ synapticsmst_device_enumerate_device (SynapticsMSTDevice *device,
 		return FALSE;
 
 	return TRUE;
+
+error_disable_remote:
+	synapticsmst_device_disable_remote_control (device, NULL);
+	return FALSE;
 }
 
 const gchar *
@@ -775,9 +776,9 @@ synapticsmst_device_open (SynapticsMSTDevice *device, GError **error)
 	if (priv->fd == -1) {
 		g_set_error (error,
 			     G_IO_ERROR,
-			     G_IO_ERROR_PERMISSION_DENIED,
-			     "cannot open device %s",
-			     filename);
+			     g_io_error_from_errno (errno),
+			     "cannot open device %s: %s",
+			     filename, g_strerror (errno));
 		return FALSE;
 	}
 

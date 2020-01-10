@@ -1,0 +1,59 @@
+#!/bin/bash
+set -e
+set -x
+
+#generate a tarball
+git config tar.tar.xz.command "xz -c"
+mkdir -p build && pushd build
+rm -rf *
+meson .. \
+    -Dgtkdoc=true \
+    -Dman=true \
+    -Dtests=true \
+    -Dplugin_dummy=true \
+    -Dplugin_thunderbolt=true \
+    -Dplugin_uefi=true \
+    -Dplugin_dell=true \
+    -Dplugin_synaptics=true $@
+ninja-build dist
+popd
+VERSION=`meson introspect build --projectinfo | jq -r .version`
+mkdir -p $HOME/rpmbuild/SOURCES/
+mv build/meson-dist/fwupd-$VERSION.tar.xz $HOME/rpmbuild/SOURCES/
+
+#generate a spec file
+sed "s,#VERSION#,$VERSION,;
+     s,#BUILD#,1,;
+     s,#LONGDATE#,`date '+%a %b %d %Y'`,;
+     s,#ALPHATAG#,alpha,;
+     s,enable_dummy 0,enable_dummy 1,;
+     s,Source0.*,Source0:\tfwupd-$VERSION.tar.xz," \
+	contrib/fwupd.spec.in > build/fwupd.spec
+
+if [ -n "$CI" ]; then
+	sed -i "s,enable_ci 0,enable_ci 1,;" build/fwupd.spec
+fi
+
+#build RPM packages
+rpmbuild -ba build/fwupd.spec
+
+#if invoked outside of CI
+if [ ! -f /.dockerenv ]; then
+        echo "Not running in a container, please manually install packages"
+        exit 0
+fi
+
+#install RPM packages
+dnf install -y $HOME/rpmbuild/RPMS/*/*.rpm
+
+cp $HOME/rpmbuild/RPMS/*/*.rpm dist
+
+# run the installed tests
+if [ "$CI" = "true" ]; then
+	sed "s,^BlacklistPlugins=test,BlacklistPlugins=," -i /etc/fwupd/daemon.conf
+	mkdir -p /run/dbus
+	mkdir -p /var
+	ln -s /var/run /run
+	dbus-daemon --system --fork
+	gnome-desktop-testing-runner fwupd
+fi

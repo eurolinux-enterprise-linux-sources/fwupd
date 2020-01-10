@@ -1,5 +1,6 @@
 #!/bin/bash
 
+exec 2>&1
 dirname=`dirname $0`
 
 # ---
@@ -29,7 +30,7 @@ rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 # ---
 echo "Getting updates (should be one)..."
-fwupdmgr get-updates
+fwupdmgr --no-unreported-check --no-metadata-check get-updates
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 # ---
@@ -39,7 +40,7 @@ rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 # ---
 echo "Getting updates (should be none)..."
-fwupdmgr get-updates
+fwupdmgr --no-unreported-check --no-metadata-check get-updates
 rc=$?; if [[ $rc != 2 ]]; then exit $rc; fi
 
 # ---
@@ -59,12 +60,12 @@ rc=$?; if [[ $rc != 2 ]]; then exit $rc; fi
 
 # ---
 echo "Updating all devices to latest release (requires network access)"
-fwupdmgr update
+fwupdmgr --no-unreported-check --no-metadata-check --no-reboot-check update
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 # ---
 echo "Getting updates (should be none)..."
-fwupdmgr get-updates
+fwupdmgr --no-unreported-check --no-metadata-check get-updates
 rc=$?; if [[ $rc != 2 ]]; then exit $rc; fi
 
 # ---

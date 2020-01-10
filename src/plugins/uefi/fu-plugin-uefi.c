@@ -2,21 +2,7 @@
  *
  * Copyright (C) 2016-2017 Richard Hughes <richard@hughsie.com>
  *
- * Licensed under the GNU General Public License Version 2
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #include "config.h"
@@ -24,19 +10,54 @@
 #include <appstream-glib.h>
 #include <fwup.h>
 #include <fcntl.h>
+#include <fnmatch.h>
 #include <glib/gi18n.h>
 
 #include "fu-plugin.h"
 #include "fu-plugin-vfuncs.h"
 
-#ifndef UX_CAPSULE_GUID
-#define UX_CAPSULE_GUID EFI_GUID(0x3b8c8162,0x188c,0x46a4,0xaec9,0xbe,0x43,0xf1,0xd6,0x56,0x97)
+#ifndef HAVE_FWUP_GET_ESP_MOUNTPOINT
+#define FWUP_SUPPORTED_STATUS_UNSUPPORTED			0
+#define FWUP_SUPPORTED_STATUS_UNLOCKED				1
+#define FWUP_SUPPORTED_STATUS_LOCKED_CAN_UNLOCK			2
+#define FWUP_SUPPORTED_STATUS_LOCKED_CAN_UNLOCK_NEXT_BOOT	3
+#define FWUPDATE_GUID EFI_GUID(0x0abba7dc,0xe516,0x4167,0xbbf5,0x4d,0x9d,0x1c,0x73,0x94,0x16)
+#endif
+
+struct FuPluginData {
+	gboolean		 ux_capsule;
+	gchar			*esp_path;
+	gint			 esrt_status;
+};
+
+/* drop when upgrading minimum required version of efivar to 33 */
+#if !defined (efi_guid_ux_capsule)
+#define efi_guid_ux_capsule EFI_GUID(0x3b8c8162,0x188c,0x46a4,0xaec9,0xbe,0x43,0xf1,0xd6,0x56,0x97)
 #endif
 
 void
 fu_plugin_init (FuPlugin *plugin)
 {
+	FuPluginData *data = fu_plugin_alloc_data (plugin, sizeof (FuPluginData));
+#ifdef HAVE_FWUP_VERSION
+	g_autofree gchar *version_str = NULL;
+#endif
+	data->ux_capsule = FALSE;
+	data->esp_path = NULL;
 	fu_plugin_add_rule (plugin, FU_PLUGIN_RULE_RUN_AFTER, "upower");
+	fu_plugin_add_compile_version (plugin, "com.redhat.fwupdate", LIBFWUP_LIBRARY_VERSION);
+	fu_plugin_add_compile_version (plugin, "com.redhat.efivar", EFIVAR_LIBRARY_VERSION);
+#ifdef HAVE_FWUP_VERSION
+	version_str = g_strdup_printf ("%i", fwup_version ());
+	fu_plugin_add_runtime_version (plugin, "com.redhat.fwupdate", version_str);
+#endif
+}
+
+void
+fu_plugin_destroy (FuPlugin *plugin)
+{
+	FuPluginData *data = fu_plugin_get_data (plugin);
+	g_free (data->esp_path);
 }
 
 static gchar *
@@ -49,11 +70,11 @@ fu_plugin_uefi_guid_to_string (efi_guid_t *guid_raw)
 }
 
 static fwup_resource *
-fu_plugin_uefi_find (fwup_resource_iter *iter, const gchar *guid_str, GError **error)
+fu_plugin_uefi_find_resource (fwup_resource_iter *iter, FuDevice *device, GError **error)
 {
 	efi_guid_t *guid_raw;
-	fwup_resource *re_matched = NULL;
 	fwup_resource *re = NULL;
+	g_autofree gchar *guids_str = NULL;
 
 	/* get the hardware we're referencing */
 	while (fwup_resource_iter_next (iter, &re) > 0) {
@@ -68,38 +89,18 @@ fu_plugin_uefi_find (fwup_resource_iter *iter, const gchar *guid_str, GError **e
 		}
 
 		/* FIXME: also match hardware_instance too */
-		if (g_strcmp0 (guid_str, guid_tmp) == 0) {
-			re_matched = re;
-			break;
-		}
+		if (fu_device_has_guid (device, guid_tmp))
+			return re;
 	}
 
 	/* paradoxically, no hardware matched */
-	if (re_matched == NULL) {
-		g_set_error (error,
-			     FWUPD_ERROR,
-			     FWUPD_ERROR_NOT_SUPPORTED,
-			     "No UEFI firmware matched %s",
-			     guid_str);
-	}
-
-	return re_matched;
-}
-
-static fwup_resource *
-fu_plugin_uefi_find_raw (fwup_resource_iter *iter, efi_guid_t *guid)
-{
-	fwup_resource *re_matched = NULL;
-	fwup_resource *re = NULL;
-	while (fwup_resource_iter_next (iter, &re) > 0) {
-		efi_guid_t *guid_tmp;
-		fwup_get_guid (re, &guid_tmp);
-		if (efi_guid_cmp (guid_tmp, guid) == 0) {
-			re_matched = re;
-			break;
-		}
-	}
-	return re_matched;
+	guids_str = fu_device_get_guids_as_str (device);
+	g_set_error (error,
+		     FWUPD_ERROR,
+		     FWUPD_ERROR_NOT_SUPPORTED,
+		     "No UEFI firmware matched '%s'",
+		     guids_str);
+	return NULL;
 }
 
 static void
@@ -108,7 +109,10 @@ _fwup_resource_iter_free (fwup_resource_iter *iter)
 	fwup_resource_iter_destroy (&iter);
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(fwup_resource_iter, _fwup_resource_iter_free);
+#pragma clang diagnostic pop
 
 gboolean
 fu_plugin_clear_results (FuPlugin *plugin, FuDevice *device, GError **error)
@@ -118,7 +122,7 @@ fu_plugin_clear_results (FuPlugin *plugin, FuDevice *device, GError **error)
 
 	/* get the hardware we're referencing */
 	fwup_resource_iter_create (&iter);
-	re = fu_plugin_uefi_find (iter, fu_device_get_guid_default (device), error);
+	re = fu_plugin_uefi_find_resource (iter, device, error);
 	if (re == NULL)
 		return FALSE;
 	if (fwup_clear_status (re) < 0) {
@@ -144,7 +148,7 @@ fu_plugin_get_results (FuPlugin *plugin, FuDevice *device, GError **error)
 
 	/* get the hardware we're referencing */
 	fwup_resource_iter_create (&iter);
-	re = fu_plugin_uefi_find (iter, fu_device_get_guid_default (device), error);
+	re = fu_plugin_uefi_find_resource (iter, device, error);
 	if (re == NULL)
 		return FALSE;
 	if (fwup_get_last_attempt_info (re, &version, &status, &when) < 0) {
@@ -291,13 +295,11 @@ fu_plugin_uefi_update_splash (GError **error)
 	fwup_resource *re = NULL;
 	guint best_idx = G_MAXUINT;
 	guint32 lowest_border_pixels = G_MAXUINT;
-#ifdef HAVE_FWUP_GET_BGRT_INFO
 	int rc;
-#endif
 	guint32 screen_height = 768;
 	guint32 screen_width = 1024;
-	g_autoptr(fwup_resource_iter) iter = NULL;
 	g_autoptr(GBytes) image_bmp = NULL;
+
 	struct {
 		guint32	 width;
 		guint32	 height;
@@ -313,14 +315,7 @@ fu_plugin_uefi_update_splash (GError **error)
 		{ 0, 0 }
 	};
 
-	/* is this supported? */
-	fwup_resource_iter_create (&iter);
-	re = fu_plugin_uefi_find_raw (iter, &UX_CAPSULE_GUID);
-	if (re == NULL)
-		return TRUE;
-
 	/* get the boot graphics resource table data */
-#ifdef HAVE_FWUP_GET_BGRT_INFO
 	rc = fwup_get_ux_capsule_info (&screen_width, &screen_height);
 	if (rc < 0) {
 		g_set_error_literal (error,
@@ -331,7 +326,6 @@ fu_plugin_uefi_update_splash (GError **error)
 	}
 	g_debug ("BGRT screen size %" G_GUINT32_FORMAT " x%" G_GUINT32_FORMAT,
 		 screen_width, screen_height);
-#endif
 
 	/* find the 'best sized' pre-generated image */
 	for (guint i = 0; sizes[i].width != 0; i++) {
@@ -370,6 +364,30 @@ fu_plugin_uefi_update_splash (GError **error)
 	return fu_plugin_uefi_update_resource (re, 0, image_bmp, error);
 }
 
+static gboolean
+fu_plugin_uefi_esp_mounted (FuPlugin *plugin, GError **error)
+{
+	FuPluginData *data = fu_plugin_get_data (plugin);
+	g_autofree gchar *contents = NULL;
+	g_auto(GStrv) lines = NULL;
+	gsize length;
+
+	if (!g_file_get_contents ("/proc/mounts", &contents, &length, error))
+		return FALSE;
+	lines = g_strsplit (contents, "\n", 0);
+
+	for (guint i = 0; lines[i] != NULL; i++) {
+		if (lines[i] != NULL && g_strrstr (lines[i], data->esp_path))
+			return TRUE;
+	}
+	g_set_error (error,
+		     FWUPD_ERROR,
+		     FWUPD_ERROR_NOT_SUPPORTED,
+		     "EFI System partition %s is not mounted",
+		     data->esp_path);
+	return FALSE;
+}
+
 gboolean
 fu_plugin_update (FuPlugin *plugin,
 		  FuDevice *device,
@@ -377,6 +395,7 @@ fu_plugin_update (FuPlugin *plugin,
 		  FwupdInstallFlags flags,
 		  GError **error)
 {
+	FuPluginData *data = fu_plugin_get_data (plugin);
 	fwup_resource *re = NULL;
 	guint64 hardware_instance = 0;	/* FIXME */
 	g_autoptr(fwup_resource_iter) iter = NULL;
@@ -387,7 +406,7 @@ fu_plugin_update (FuPlugin *plugin,
 
 	/* get the hardware we're referencing */
 	fwup_resource_iter_create (&iter);
-	re = fu_plugin_uefi_find (iter, fu_device_get_guid_default (device), error);
+	re = fu_plugin_uefi_find_resource (iter, device, error);
 	if (re == NULL)
 		return FALSE;
 
@@ -395,12 +414,19 @@ fu_plugin_update (FuPlugin *plugin,
 	str = _("Installing firmware update…");
 	g_assert (str != NULL);
 
+	/* make sure that the ESP is mounted */
+	if (!fu_plugin_uefi_esp_mounted (plugin, error))
+		return FALSE;
+
 	/* perform the update */
 	g_debug ("Performing UEFI capsule update");
-	fu_plugin_set_status (plugin, FWUPD_STATUS_SCHEDULING);
-	if (!fu_plugin_uefi_update_splash (&error_splash)) {
-		g_warning ("failed to upload BGRT splash text: %s",
-			   error_splash->message);
+	fu_device_set_status (device, FWUPD_STATUS_SCHEDULING);
+
+	if (data->ux_capsule) {
+		if (!fu_plugin_uefi_update_splash (&error_splash)) {
+			g_warning ("failed to upload UEFI UX capsule text: %s",
+				   error_splash->message);
+		}
 	}
 	if (!fu_plugin_uefi_update_resource (re, hardware_instance, blob_fw, error))
 		return FALSE;
@@ -504,6 +530,7 @@ fu_plugin_uefi_get_name_for_type (FuPlugin *plugin, guint32 uefi_type)
 static void
 fu_plugin_uefi_coldplug_resource (FuPlugin *plugin, fwup_resource *re)
 {
+	FuPluginData *data = fu_plugin_get_data (plugin);
 	AsVersionParseFlag parse_flags;
 	efi_guid_t *guid_raw;
 	guint32 uefi_type;
@@ -518,8 +545,8 @@ fu_plugin_uefi_coldplug_resource (FuPlugin *plugin, fwup_resource *re)
 
 	/* detect the fake GUID used for uploading the image */
 	fwup_get_guid (re, &guid_raw);
-	if (efi_guid_cmp (guid_raw, &UX_CAPSULE_GUID) == 0) {
-		g_debug ("skipping entry, detected fake BGRT");
+	if (efi_guid_cmp (guid_raw, &efi_guid_ux_capsule) == 0) {
+		data->ux_capsule = TRUE;
 		return;
 	}
 
@@ -538,13 +565,6 @@ fu_plugin_uefi_coldplug_resource (FuPlugin *plugin, fwup_resource *re)
 			      guid, hardware_instance);
 
 	dev = fu_device_new ();
-	if (uefi_type == FWUP_RESOURCE_TYPE_DEVICE_FIRMWARE) {
-		/* nothing better in the icon naming spec */
-		fu_device_add_icon (dev, "audio-card");
-	} else {
-		/* this is probably system firmware */
-		fu_device_add_icon (dev, "computer");
-	}
 	fu_device_set_id (dev, id);
 	fu_device_add_guid (dev, guid);
 	fu_device_set_version (dev, version);
@@ -566,24 +586,136 @@ fu_plugin_uefi_coldplug_resource (FuPlugin *plugin, fwup_resource *re)
 		g_warning ("Kernel support for EFI variables missing");
 	}
 	fu_device_add_flag (dev, FWUPD_DEVICE_FLAG_REQUIRE_AC);
+	if (uefi_type == FWUP_RESOURCE_TYPE_DEVICE_FIRMWARE) {
+		/* nothing better in the icon naming spec */
+		fu_device_add_icon (dev, "audio-card");
+	} else {
+		/* this is probably system firmware */
+		fu_device_add_icon (dev, "computer");
+		fu_device_add_guid (dev, "main-system-firmware");
+	}
 	fu_plugin_device_add (plugin, dev);
 }
 
-gboolean
-fu_plugin_coldplug (FuPlugin *plugin, GError **error)
+static void
+fu_plugin_uefi_test_secure_boot (FuPlugin *plugin)
 {
-	fwup_resource *re;
-	gint supported;
-	g_autoptr(fwup_resource_iter) iter = NULL;
+	const efi_guid_t guid = EFI_GLOBAL_GUID;
+	const gchar *result_str = "Disabled";
+	g_autofree guint8 *data = NULL;
+	gsize data_size = 0;
+	guint32 attributes = 0;
+	gint rc;
 
-	/* supported = 0 : ESRT unspported
-	   supported = 1 : unlocked, ESRT supported
-	   supported = 2 : it is locked but can be unlocked to support ESRT
-	   supported = 3 : it is locked, has been marked to be unlocked on next boot
-			   calling unlock again is OK.
-	 */
-	supported = fwup_supported ();
-	if (supported == 0) {
+	rc = efi_get_variable (guid, "SecureBoot", &data, &data_size, &attributes);
+	if (rc < 0)
+		return;
+	if (data_size >= 1 && data[0] & 1)
+		result_str = "Enabled";
+
+	g_debug ("SecureBoot is: %s", result_str);
+	fu_plugin_add_report_metadata (plugin, "SecureBoot", result_str);
+}
+
+static gboolean
+fu_plugin_uefi_set_custom_mountpoint (FuPlugin *plugin, GError **error)
+{
+	FuPluginData *data = fu_plugin_get_data (plugin);
+	const gchar *key = "OverrideESPMountPoint";
+
+	/* load from file and keep @key ref'd for the lifetime of the plugin as
+	 * libfwupdate does not strdup the value in fwup_set_esp_mountpoint() */
+	data->esp_path = fu_plugin_get_config_value (plugin, key);
+	if (data->esp_path != NULL) {
+		if (!g_file_test (data->esp_path, G_FILE_TEST_IS_DIR)) {
+			g_set_error (error,
+				     FWUPD_ERROR,
+				     FWUPD_ERROR_INVALID_FILE,
+				     "Invalid %s specified in %s config: %s",
+				     fu_plugin_get_name (plugin), key,
+				     data->esp_path);
+
+			return FALSE;
+		}
+		fwup_set_esp_mountpoint (data->esp_path);
+	}
+	return TRUE;
+}
+
+static gboolean
+fu_plugin_uefi_delete_old_capsules (FuPlugin *plugin, GError **error)
+{
+	FuPluginData *data = fu_plugin_get_data (plugin);
+	g_autofree gchar *pattern = NULL;
+	g_autoptr(GPtrArray) files = NULL;
+
+	/* delete any files matching the glob in the ESP */
+	files = fu_common_get_files_recursive (data->esp_path, error);
+	if (files == NULL)
+		return FALSE;
+	pattern = g_build_filename (data->esp_path, "EFI/*/fw/fwupdate-*.cap", NULL);
+	for (guint i = 0; i < files->len; i++) {
+		const gchar *fn = g_ptr_array_index (files, i);
+		if (fnmatch (pattern, fn, 0) == 0) {
+			g_autoptr(GFile) file = g_file_new_for_path (fn);
+			g_debug ("deleting %s", fn);
+			if (!g_file_delete (file, NULL, error))
+				return FALSE;
+		}
+	}
+	return TRUE;
+}
+
+static gboolean
+fu_plugin_uefi_delete_old_efivars (FuPlugin *plugin, GError **error)
+{
+	char *name = NULL;
+	efi_guid_t fwupdate_guid = FWUPDATE_GUID;
+	efi_guid_t *guid = NULL;
+	int rc;
+	while ((rc = efi_get_next_variable_name (&guid, &name)) > 0) {
+		if (efi_guid_cmp (guid, &fwupdate_guid) != 0)
+			continue;
+		if (g_str_has_prefix (name, "fwupdate-")) {
+			g_debug ("deleting %s", name);
+			rc = efi_del_variable (fwupdate_guid, name);
+			if (rc < 0) {
+				g_set_error (error,
+					     FWUPD_ERROR,
+					     FWUPD_ERROR_NOT_SUPPORTED,
+					     "failed to delete efi var %s: %s",
+					     name, strerror (errno));
+				return FALSE;
+			}
+		}
+	}
+	if (rc < 0) {
+		g_set_error (error,
+			     FWUPD_ERROR,
+			     FWUPD_ERROR_NOT_SUPPORTED,
+			     "error listing variables: %s",
+			     strerror (errno));
+		return FALSE;
+	}
+	return TRUE;
+}
+
+/* remove when https://github.com/rhboot/efivar/pull/100 merged */
+static int
+_efi_get_variable_exists (efi_guid_t guid, const char *name)
+{
+	uint32_t unused_attrs = 0;
+	return efi_get_variable_attributes (guid, name, &unused_attrs);
+}
+
+gboolean
+fu_plugin_startup (FuPlugin *plugin, GError **error)
+{
+	FuPluginData *data = fu_plugin_get_data (plugin);
+
+	/* get the supported status */
+	data->esrt_status = fwup_supported ();
+	if (data->esrt_status == FWUP_SUPPORTED_STATUS_UNSUPPORTED) {
 		g_set_error_literal (error,
 				     FWUPD_ERROR,
 				     FWUPD_ERROR_NOT_SUPPORTED,
@@ -591,8 +723,54 @@ fu_plugin_coldplug (FuPlugin *plugin, GError **error)
 		return FALSE;
 	}
 
-	if (supported == 2) {
+	/* load any overriden options */
+	if (!fu_plugin_uefi_set_custom_mountpoint (plugin, error))
+		return FALSE;
+
+	/* get the default compiled-in value for the ESP mountpoint */
+#ifdef HAVE_FWUP_GET_ESP_MOUNTPOINT
+	if (data->esp_path == NULL)
+		data->esp_path = g_strdup (fwup_get_esp_mountpoint ());
+#endif
+
+	/* fall back to a sane default */
+	if (data->esp_path == NULL)
+		data->esp_path = g_strdup ("/boot/efi");
+
+	/* delete any existing .cap files to avoid the small ESP partition
+	 * from running out of space when we've done lots of firmware updates
+	 * -- also if the distro has changed the ESP may be different anyway */
+	if (_efi_get_variable_exists (EFI_GLOBAL_GUID, "BootNext") == 0) {
+		g_debug ("detected BootNext, not cleaning up");
+	} else {
+		if (!fu_plugin_uefi_delete_old_capsules (plugin, error))
+			return FALSE;
+		if (!fu_plugin_uefi_delete_old_efivars (plugin, error))
+			return FALSE;
+	}
+
+	/* save in report metadata */
+	g_debug ("ESP mountpoint set as %s", data->esp_path);
+	fu_plugin_add_report_metadata (plugin, "ESPMountPoint", data->esp_path);
+	return TRUE;
+}
+
+gboolean
+fu_plugin_coldplug (FuPlugin *plugin, GError **error)
+{
+	FuPluginData *data = fu_plugin_get_data (plugin);
+	fwup_resource *re;
+	g_autoptr(fwup_resource_iter) iter = NULL;
+	g_autofree gchar *name = NULL;
+	const gchar *ux_capsule_str = "Disabled";
+
+	/* create a dummy device so we can unlock the feature */
+	if (data->esrt_status == FWUP_SUPPORTED_STATUS_LOCKED_CAN_UNLOCK) {
 		g_autoptr(FuDevice) dev = fu_device_new ();
+		name = fu_plugin_uefi_get_name_for_type (plugin,
+							 FWUP_RESOURCE_TYPE_SYSTEM_FIRMWARE);
+		if (name != NULL)
+			fu_device_set_name (dev, name);
 		fu_device_set_id (dev, "UEFI-dummy-dev0");
 		fu_device_add_guid (dev, "2d47f29b-83a2-4f31-a2e8-63474f4d4c2e");
 		fu_device_set_version (dev, "0");
@@ -613,5 +791,13 @@ fu_plugin_coldplug (FuPlugin *plugin, GError **error)
 	}
 	while (fwup_resource_iter_next (iter, &re) > 0)
 		fu_plugin_uefi_coldplug_resource (plugin, re);
+
+	/* for debugging problems later */
+	fu_plugin_uefi_test_secure_boot (plugin);
+	if (data->ux_capsule)
+		ux_capsule_str = "Enabled";
+	g_debug ("UX Capsule support : %s", ux_capsule_str);
+	fu_plugin_add_report_metadata (plugin, "UEFIUXCapsule", ux_capsule_str);
+
 	return TRUE;
 }

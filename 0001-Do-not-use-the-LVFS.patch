@@ -1,6 +1,16 @@
-diff -urNp fwupd-1.0.1.old/data/remotes.d/lvfs.conf fwupd-1.0.1/data/remotes.d/lvfs.conf
---- fwupd-1.0.1.old/data/remotes.d/lvfs.conf	2017-11-09 16:07:29.596004147 +0000
-+++ fwupd-1.0.1/data/remotes.d/lvfs.conf	2017-11-09 16:07:46.905897123 +0000
+From de735a8c23b96e91cc70dec8228fc5617d35ed65 Mon Sep 17 00:00:00 2001
+From: Richard Hughes <richard@hughsie.com>
+Date: Wed, 6 Jun 2018 12:10:25 +0100
+Subject: [PATCH 1/4] Do not use the LVFS
+
+---
+ data/remotes.d/lvfs.conf | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/data/remotes.d/lvfs.conf b/data/remotes.d/lvfs.conf
+index 4e971be6..1cbbfaeb 100644
+--- a/data/remotes.d/lvfs.conf
++++ b/data/remotes.d/lvfs.conf
 @@ -1,7 +1,7 @@
  [fwupd Remote]
  
@@ -9,4 +19,7 @@ diff -urNp fwupd-1.0.1.old/data/remotes.d/lvfs.conf fwupd-1.0.1/data/remotes.d/l
 +Enabled=false
  Title=Linux Vendor Firmware Service
  Keyring=gpg
- MetadataURI=https://s3.amazonaws.com/lvfsbucket/downloads/firmware.xml.gz
+ MetadataURI=https://cdn.fwupd.org/downloads/firmware.xml.gz
+-- 
+2.17.1
+

@@ -2,26 +2,14 @@
  *
  * Copyright (C) 2016 Richard Hughes <richard@hughsie.com>
  *
- * Licensed under the GNU Lesser General Public License Version 2.1
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #include "config.h"
 
 #include <string.h>
+
+#include "fu-common.h"
 
 #include "dfu-cipher-xtea.h"
 
@@ -33,21 +21,15 @@
 static void
 dfu_cipher_buf_to_uint32 (const guint8 *buf, guint buflen, guint32 *array)
 {
-	guint32 tmp_le;
-	for (guint i = 0; i < buflen / 4; i++) {
-		memcpy (&tmp_le, &buf[i * 4], 4);
-		array[i] = GUINT32_FROM_LE (tmp_le);
-	}
+	for (guint i = 0; i < buflen / 4; i++)
+		array[i] = fu_common_read_uint32 (&buf[i * 4], G_LITTLE_ENDIAN);
 }
 
 static void
 dfu_cipher_uint32_to_buf (guint8 *buf, guint buflen, const guint32 *array)
 {
-	guint32 tmp_le;
-	for (guint i = 0; i < buflen / 4; i++) {
-		tmp_le = GUINT32_TO_LE (array[i]);
-		memcpy (&buf[i * 4], &tmp_le, 4);
-	}
+	for (guint i = 0; i < buflen / 4; i++)
+		fu_common_write_uint32 (&buf[i * 4], array[i], G_LITTLE_ENDIAN);
 }
 
 static gboolean

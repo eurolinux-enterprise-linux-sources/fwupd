@@ -2,21 +2,7 @@
  *
  * Copyright (C) 2016-2017 Richard Hughes <richard@hughsie.com>
  *
- * Licensed under the GNU Lesser General Public License Version 2.1
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #include "config.h"
@@ -68,7 +54,7 @@ lu_device_runtime_open (LuDevice *device, GError **error)
 	devid1 = g_strdup_printf ("USB\\VID_%04X&PID_%04X",
 				  (guint) LU_DEVICE_VID,
 				  (guint) LU_DEVICE_PID_RUNTIME);
-	lu_device_add_guid (device, devid1);
+	fu_device_add_guid (FU_DEVICE (device), devid1);
 
 	/* generate bootloadder-specific GUID */
 	if (usb_device != NULL) {
@@ -92,7 +78,7 @@ lu_device_runtime_open (LuDevice *device, GError **error)
 			devid2 = g_strdup_printf ("USB\\VID_%04X&PID_%04X",
 						  (guint) LU_DEVICE_VID,
 						  (guint) LU_DEVICE_PID_BOOTLOADER_NORDIC);
-			lu_device_add_guid (device, devid2);
+			fu_device_add_guid (FU_DEVICE (device), devid2);
 			version_bl_major = 0x01;
 			break;
 		case 0x2400:
@@ -100,7 +86,7 @@ lu_device_runtime_open (LuDevice *device, GError **error)
 			devid2 = g_strdup_printf ("USB\\VID_%04X&PID_%04X",
 						  (guint) LU_DEVICE_VID,
 						  (guint) LU_DEVICE_PID_BOOTLOADER_TEXAS);
-			lu_device_add_guid (device, devid2);
+			fu_device_add_guid (FU_DEVICE (device), devid2);
 			version_bl_major = 0x03;
 			break;
 		default:
@@ -137,7 +123,7 @@ lu_device_runtime_open (LuDevice *device, GError **error)
 					config[3],
 					(guint16) config[4] << 8 |
 					config[5]);
-	lu_device_set_version_fw (device, version_fw);
+	fu_device_set_version (FU_DEVICE (device), version_fw);
 
 	/* get bootloader version */
 	if (version_bl_major > 0) {
@@ -145,7 +131,7 @@ lu_device_runtime_open (LuDevice *device, GError **error)
 						version_bl_major,
 						config[8],
 						config[9]);
-		lu_device_set_version_bl (device, version_bl);
+		fu_device_set_version_bootloader (FU_DEVICE (device), version_bl);
 
 		/* is the dongle expecting signed firmware */
 		if ((version_bl_major == 0x01 && config[8] >= 0x04) ||
@@ -164,10 +150,10 @@ lu_device_runtime_open (LuDevice *device, GError **error)
 	lu_device_set_hidpp_version (device, 1.f);
 
 	/* we can flash this */
-	lu_device_add_flag (device, LU_DEVICE_FLAG_CAN_FLASH);
+	fu_device_add_flag (FU_DEVICE (device), FWUPD_DEVICE_FLAG_UPDATABLE);
 
 	/* only the bootloader can do the update */
-	lu_device_set_product (device, "Unifying Receiver");
+	fu_device_set_name (FU_DEVICE (device), "Unifying Receiver");
 
 	return TRUE;
 }
@@ -251,4 +237,7 @@ lu_device_runtime_class_init (LuDeviceRuntimeClass *klass)
 static void
 lu_device_runtime_init (LuDeviceRuntime *device)
 {
+	/* FIXME: we need something better */
+	fu_device_add_icon (FU_DEVICE (device), "preferences-desktop-keyboard");
+	fu_device_set_summary (FU_DEVICE (device), "A miniaturised USB wireless receiver");
 }

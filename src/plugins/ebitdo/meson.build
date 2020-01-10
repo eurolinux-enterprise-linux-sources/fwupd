@@ -1,10 +1,14 @@
 cargs = ['-DG_LOG_DOMAIN="FuPluginEbitdo"']
 
+install_data(['ebitdo.quirk'],
+  install_dir: join_paths(datadir, 'fwupd', 'quirks.d')
+)
+
 shared_module('fu_plugin_ebitdo',
   sources : [
     'fu-plugin-ebitdo.c',
     'fu-ebitdo-common.c',
-    'fu-device-ebitdo.c',
+    'fu-ebitdo-device.c',
   ],
   include_directories : [
     include_directories('../..'),
@@ -17,26 +21,4 @@ shared_module('fu_plugin_ebitdo',
   dependencies : [
     plugin_deps,
   ],
-)
-
-executable(
-  'fu-ebitdo-tool',
-  sources : [
-    'fu-ebitdo-tool.c',
-    'fu-ebitdo-common.c',
-    'fu-device-ebitdo.c',
-  ],
-  include_directories : [
-    include_directories('../..'),
-    include_directories('../../libfwupd'),
-    include_directories('../../src'),
-  ],
-  dependencies : [
-    plugin_deps,
-  ],
-  link_with : [
-    fwupd,
-    libfwupdprivate,
-  ],
-  c_args : cargs,
 )

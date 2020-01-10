@@ -2,21 +2,7 @@
  *
  * Copyright (C) 2017 Christian J. Kellner <christian@kellner.me>
  *
- * Licensed under the GNU General Public License Version 2
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: LGPL-2.1+
  */
 
 #include "config.h"
@@ -36,9 +22,13 @@
 #include "fu-plugin-vfuncs.h"
 #include "fu-device-metadata.h"
 #include "fu-thunderbolt-image.h"
+#include "fu-thunderbolt-known-devices.h"
 
 #ifndef HAVE_GUDEV_232
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(GUdevDevice, g_object_unref)
+#pragma clang diagnostic pop
 #endif
 
 typedef void (*UEventNotify) (FuPlugin	  *plugin,
@@ -146,6 +136,95 @@ fu_plugin_thunderbolt_is_host (GUdevDevice *device)
 	return g_str_has_prefix (name, "domain");
 }
 
+static GFile *
+fu_plugin_thunderbolt_find_nvmem (GUdevDevice  *udevice,
+				  gboolean      active,
+				  GError      **error)
+{
+	const gchar *nvmem_dir = active ? "nvm_active" : "nvm_non_active";
+	const gchar *devpath;
+	const gchar *name;
+	g_autoptr(GDir) d = NULL;
+
+	devpath = g_udev_device_get_sysfs_path (udevice);
+	if (G_UNLIKELY (devpath == NULL)) {
+		g_set_error_literal (error,
+			     FWUPD_ERROR, FWUPD_ERROR_INTERNAL,
+			     "Could not determine sysfs path for device");
+		return NULL;
+	}
+
+	d = g_dir_open (devpath, 0, error);
+	if (d == NULL)
+		return NULL;
+
+	while ((name = g_dir_read_name (d)) != NULL) {
+		if (g_str_has_prefix (name, nvmem_dir)) {
+			g_autoptr(GFile) parent = g_file_new_for_path (devpath);
+			g_autoptr(GFile) nvm_dir = g_file_get_child (parent, name);
+			return g_file_get_child (nvm_dir, "nvmem");
+		}
+	}
+
+	g_set_error_literal (error,
+			     FWUPD_ERROR, FWUPD_ERROR_NOT_SUPPORTED,
+			     "Could not find non-volatile memory location");
+	return NULL;
+}
+
+static gboolean
+fu_plugin_thunderbolt_is_native (GUdevDevice *udevice, gboolean *is_native, GError **error)
+{
+	g_autoptr(GFile) nvmem = NULL;
+	g_autoptr(GBytes) controller_fw = NULL;
+	gchar *content;
+	gsize length;
+
+	nvmem = fu_plugin_thunderbolt_find_nvmem (udevice, TRUE, error);
+	if (nvmem == NULL)
+		return FALSE;
+
+	if (!g_file_load_contents (nvmem, NULL, &content, &length, NULL, error))
+		return FALSE;
+
+	controller_fw = g_bytes_new_take (content, length);
+
+	return fu_plugin_thunderbolt_controller_is_native (controller_fw,
+							   is_native,
+							   error);
+}
+
+static gchar *
+fu_plugin_thunderbolt_parse_version (const gchar *version_raw)
+{
+	g_auto(GStrv) split = NULL;
+	if (version_raw == NULL)
+		return NULL;
+	split = g_strsplit (version_raw, ".", -1);
+	if (g_strv_length (split) != 2)
+		return NULL;
+	return g_strdup_printf ("%02x.%02x",
+				(guint) g_ascii_strtoull (split[0], NULL, 16),
+				(guint) g_ascii_strtoull (split[1], NULL, 16));
+}
+
+static void
+fu_plugin_thunderbolt_add_known_parents (FuDevice *device, guint16 vid, guint16 did)
+{
+	const gchar *parent = NULL;
+
+	if (vid == THUNDERBOLT_VENDOR_DELL) {
+		if (did == THUNDERBOLT_DEVICE_DELL_TB16_CABLE ||
+		    did == THUNDERBOLT_DEVICE_DELL_TB16_DOCK)
+			parent = PARENT_GUID_DELL_TB16;
+	}
+
+	if (parent != NULL ) {
+		fu_device_add_parent_guid (device, parent);
+		g_debug ("Add known parent %s to %u:%u", parent, vid, did);
+	}
+}
+
 static void
 fu_plugin_thunderbolt_add (FuPlugin *plugin, GUdevDevice *device)
 {
@@ -153,13 +232,16 @@ fu_plugin_thunderbolt_add (FuPlugin *plugin, GUdevDevice *device)
 	const gchar *name;
 	const gchar *uuid;
 	const gchar *vendor;
-	const gchar *version;
+	const gchar *version_raw;
 	const gchar *devpath;
+	const gchar *devtype;
 	gboolean is_host;
 	gboolean is_safemode = FALSE;
+	gboolean is_native = FALSE;
 	guint16 did;
 	guint16 vid;
 	g_autofree gchar *id = NULL;
+	g_autofree gchar *version = NULL;
 	g_autofree gchar *vendor_id = NULL;
 	g_autofree gchar *device_id = NULL;
 	g_autoptr(FuDevice) dev = NULL;
@@ -172,6 +254,12 @@ fu_plugin_thunderbolt_add (FuPlugin *plugin, GUdevDevice *device)
 	}
 
 	devpath = g_udev_device_get_sysfs_path (device);
+
+	devtype = g_udev_device_get_devtype (device);
+	if (g_strcmp0 (devtype, "thunderbolt_device") != 0) {
+		g_debug ("ignoring %s device at %s", devtype, devpath);
+		return;
+	}
 
 	g_debug ("adding udev device: %s at %s", uuid, devpath);
 
@@ -195,7 +283,8 @@ fu_plugin_thunderbolt_add (FuPlugin *plugin, GUdevDevice *device)
 
 	/* test for safe mode */
 	is_host = fu_plugin_thunderbolt_is_host (device);
-	version = g_udev_device_get_sysfs_attr (device, "nvm_version");
+	version_raw = g_udev_device_get_sysfs_attr (device, "nvm_version");
+	version = fu_plugin_thunderbolt_parse_version (version_raw);
 	if (is_host && version == NULL) {
 		g_autofree gchar *test_safe = NULL;
 		g_autofree gchar *safe_path = NULL;
@@ -207,19 +296,34 @@ fu_plugin_thunderbolt_add (FuPlugin *plugin, GUdevDevice *device)
 			g_warning ("%s is in safe mode --  VID/DID will "
 				   "need to be set by another plugin",
 				   devpath);
-			version = "0.0";
+			version = g_strdup ("00.00");
 			is_safemode = TRUE;
 			device_id = g_strdup ("TBT-safemode");
 			fu_device_set_metadata_boolean (dev, FU_DEVICE_METADATA_TBT_IS_SAFE_MODE, TRUE);
 		}
+		fu_plugin_add_report_metadata (plugin, "ThunderboltSafeMode",
+					       is_safemode ? "True" : "False");
 	}
 	if (!is_safemode) {
+		if (is_host) {
+			if (!fu_plugin_thunderbolt_is_native (device, &is_native, &error)) {
+				g_warning ("failed to get native mode status: %s", error->message);
+				return;
+			}
+			fu_plugin_add_report_metadata (plugin,
+						       "ThunderboltNative",
+						       is_native ? "True" : "False");
+		}
 		vendor_id = g_strdup_printf ("TBT:0x%04X", (guint) vid);
-		device_id = g_strdup_printf ("TBT-%04x%04x", (guint) vid, (guint) did);
+		device_id = g_strdup_printf ("TBT-%04x%04x%s",
+					     (guint) vid,
+					     (guint) did,
+					     is_native ? "-native" : "");
 		fu_device_add_flag (dev, FWUPD_DEVICE_FLAG_UPDATABLE);
+		fu_plugin_thunderbolt_add_known_parents (dev, vid, did);
 	}
 
-	fu_device_set_id (dev, uuid);
+	fu_device_set_platform_id (dev, uuid);
 
 	fu_device_set_metadata (dev, "sysfs-path", devpath);
 	name = g_udev_device_get_sysfs_attr (device, "device_name");
@@ -330,42 +434,6 @@ udev_uevent_cb (GUdevClient *udev,
 	return TRUE;
 }
 
-static GFile *
-fu_plugin_thunderbolt_find_nvmem (GUdevDevice  *udevice,
-				  gboolean      active,
-				  GError      **error)
-{
-	const gchar *nvmem_dir = active ? "nvm_active" : "nvm_non_active";
-	const gchar *devpath;
-	const gchar *name;
-	g_autoptr(GDir) d = NULL;
-
-	devpath = g_udev_device_get_sysfs_path (udevice);
-	if (G_UNLIKELY (devpath == NULL)) {
-		g_set_error_literal (error,
-			     FWUPD_ERROR, FWUPD_ERROR_INTERNAL,
-			     "Could not determine sysfs path for device");
-		return NULL;
-	}
-
-	d = g_dir_open (devpath, 0, error);
-	if (d == NULL)
-		return NULL;
-
-	while ((name = g_dir_read_name (d)) != NULL) {
-		if (g_str_has_prefix (name, nvmem_dir)) {
-			g_autoptr(GFile) parent = g_file_new_for_path (devpath);
-			g_autoptr(GFile) nvm_dir = g_file_get_child (parent, name);
-			return g_file_get_child (nvm_dir, "nvmem");
-		}
-	}
-
-	g_set_error_literal (error,
-			     FWUPD_ERROR, FWUPD_ERROR_NOT_SUPPORTED,
-			     "Could not find non-volatile memory location");
-	return NULL;
-}
-
 static FuPluginValidation
 fu_plugin_thunderbolt_validate_firmware (GUdevDevice  *udevice,
 					 GBytes       *blob_fw,
@@ -437,22 +505,8 @@ fu_plugin_thunderbolt_trigger_update (GUdevDevice  *udevice,
 	return TRUE;
 }
 
-static void
-fu_plugin_thunderbolt_report_progress (FuPlugin *plugin,
-				       gsize     nwritten,
-				       gsize     total)
-{
-	gdouble percentage;
-	percentage = (100.0 * (gdouble) nwritten) / (gdouble) total;
-
-	g_debug ("written %" G_GSIZE_FORMAT "/%" G_GSIZE_FORMAT " bytes [%.1f%%]",
-		 nwritten, total, percentage);
-
-	fu_plugin_set_percentage (plugin, (guint) percentage);
-}
-
 static gboolean
-fu_plugin_thunderbolt_write_firmware (FuPlugin     *plugin,
+fu_plugin_thunderbolt_write_firmware (FuDevice     *device,
 				      GUdevDevice  *udevice,
 				      GBytes       *blob_fw,
 				      GError      **error)
@@ -477,7 +531,7 @@ fu_plugin_thunderbolt_write_firmware (FuPlugin     *plugin,
 
 	nwritten = 0;
 	fw_size = g_bytes_get_size (blob_fw);
-	fu_plugin_thunderbolt_report_progress (plugin, nwritten, fw_size);
+	fu_device_set_progress_full (device, nwritten, fw_size);
 
 	do {
 		g_autoptr(GBytes) fw_data = NULL;
@@ -494,7 +548,7 @@ fu_plugin_thunderbolt_write_firmware (FuPlugin     *plugin,
 			return FALSE;
 
 		nwritten += n;
-		fu_plugin_thunderbolt_report_progress (plugin, nwritten, fw_size);
+		fu_device_set_progress_full (device, nwritten, fw_size);
 
 	} while (nwritten < fw_size);
 
@@ -589,7 +643,7 @@ on_wait_for_device_removed (FuPlugin    *plugin,
 		return;
 
 	fu_plugin_cache_remove (plugin, id);
-	uuid = fu_device_get_id (dev);
+	uuid = fu_device_get_platform_id (dev);
 	g_hash_table_insert (up_data->changes,
 			     (gpointer) uuid,
 			     g_object_ref (dev));
@@ -647,7 +701,7 @@ fu_plugin_thunderbolt_wait_for_device (FuPlugin  *plugin,
 	g_autoptr(GHashTable) changes = NULL;
 
 	up_data.mainloop = mainloop = g_main_loop_new (NULL, FALSE);
-	up_data.target_uuid = fu_device_get_id (dev);
+	up_data.target_uuid = fu_device_get_platform_id (dev);
 
 	/* this will limit the maximum amount of time we wait for
 	 * the device (i.e. 'dev') to re-appear. */
@@ -717,8 +771,8 @@ fu_plugin_destroy (FuPlugin *plugin)
 	g_object_unref (data->udev);
 }
 
-gboolean
-fu_plugin_coldplug (FuPlugin *plugin, GError **error)
+static gboolean
+fu_plugin_thunderbolt_coldplug (FuPlugin *plugin, GError **error)
 {
 	FuPluginData *data = fu_plugin_get_data (plugin);
 	GList *devices;
@@ -735,6 +789,17 @@ fu_plugin_coldplug (FuPlugin *plugin, GError **error)
 	return TRUE;
 }
 
+gboolean
+fu_plugin_coldplug (FuPlugin *plugin, GError **error)
+{
+	return fu_plugin_thunderbolt_coldplug (plugin, error);
+}
+
+gboolean
+fu_plugin_recoldplug (FuPlugin *plugin, GError **error)
+{
+	return fu_plugin_thunderbolt_coldplug (plugin, error);
+}
 
 gboolean
 fu_plugin_update (FuPlugin *plugin,
@@ -792,8 +857,8 @@ fu_plugin_update (FuPlugin *plugin,
 		g_warning ("%s", msg);
 	}
 
-	fu_plugin_set_status (plugin, FWUPD_STATUS_DEVICE_WRITE);
-	if (!fu_plugin_thunderbolt_write_firmware (plugin, udevice, blob_fw, &error_local)) {
+	fu_device_set_status (dev, FWUPD_STATUS_DEVICE_WRITE);
+	if (!fu_plugin_thunderbolt_write_firmware (dev, udevice, blob_fw, &error_local)) {
 		g_set_error (error,
 			     FWUPD_ERROR,
 			     FWUPD_ERROR_WRITE,
@@ -811,7 +876,7 @@ fu_plugin_update (FuPlugin *plugin,
 		return FALSE;
 	}
 
-	fu_plugin_set_status (plugin, FWUPD_STATUS_DEVICE_RESTART);
+	fu_device_set_status (dev, FWUPD_STATUS_DEVICE_RESTART);
 
 	/* the device will disappear and we need to wait until it reappears,
 	 * and then check if we find an error */

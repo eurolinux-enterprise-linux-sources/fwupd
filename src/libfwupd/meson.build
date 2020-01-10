@@ -45,6 +45,7 @@ fwupd = shared_library(
   dependencies : [
     giounix,
     soup,
+    libjsonglib,
   ],
   c_args : [
       cargs,
@@ -67,7 +68,7 @@ pkgg.generate(
   description : 'fwupd is a system daemon for installing device firmware',
 )
 
-if get_option('enable-introspection')
+if get_option('introspection')
   gir = gnome.generate_gir(fwupd,
     sources : [
       'fwupd-client.c',
@@ -95,6 +96,7 @@ if get_option('enable-introspection')
     symbol_prefix : 'fwupd',
     identifier_prefix : 'Fwupd',
     export_packages : 'fwupd',
+    extra_args : '--c-include=fwupd.h', # This can be replaced with header : 'fwupd.h' once can depend on Meson 0.43.0
     dependencies : [
       giounix,
       soup,
@@ -105,6 +107,12 @@ if get_option('enable-introspection')
       'Soup-2.4',
     ],
     install : true
+  )
+
+  gnome.generate_vapi('fwupd',
+    sources : gir[0],
+    packages : ['gio-2.0', 'libsoup-2.4'],
+    install : true,
   )
 
   # Verify the map file is correct -- note we can't actually use the generated
@@ -135,7 +143,7 @@ if get_option('enable-introspection')
       )
 endif
 
-if get_option('enable-tests')
+if get_option('tests')
   testdatadir = join_paths(meson.source_root(), 'data')
   e = executable(
     'fwupd-self-test',
